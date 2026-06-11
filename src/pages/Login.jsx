@@ -37,7 +37,7 @@ export default function Login() {
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
             <img
-              src="${logoPraiana}"
+              src={logoPraiana}
               alt="Praiana Pole Dance"
               className="w-20 h-20 object-contain"
             />

@@ -38,7 +38,7 @@ export default function MobileHeader() {
           <>
             <Link to="/" className="flex items-center gap-2">
               <img
-                src="${logoPraiana}"
+                src={logoPraiana}
                 alt="Praiana"
                 className="w-6 h-6 object-contain dark:bg-white dark:rounded dark:p-0.5 opacity-80 dark:opacity-100"
               />

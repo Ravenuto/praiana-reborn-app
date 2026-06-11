@@ -90,7 +90,7 @@ export default function Register() {
         <div className="w-full max-w-md text-center">
           <div className="flex justify-center mb-6">
             <img
-              src="${logoPraiana}"
+              src={logoPraiana}
               alt="Praiana Pole Dance"
               className="w-20 h-20 object-contain"
             />
@@ -160,7 +160,7 @@ export default function Register() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <img
-              src="${logoPraiana}"
+              src={logoPraiana}
               alt="Praiana Pole Dance"
               className="w-20 h-20 object-contain"
             />

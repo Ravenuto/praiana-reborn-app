@@ -23,7 +23,7 @@ export default function Home() {
 
           {/* Logo */}
           <motion.img
-            src="${logoPraiana}"
+            src={logoPraiana}
             alt="Praiana Pole Dance"
             className="w-44 h-44 object-contain"
             initial={{ opacity: 0, scale: 0.9 }}
