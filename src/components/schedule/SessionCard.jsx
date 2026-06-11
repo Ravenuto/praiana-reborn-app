@@ -4,12 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Users, Check, Loader2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-function isWithin4Hours(sessionDate, sessionTime) {
+function isWithinMinHours(sessionDate, sessionTime, minHours = 4) {
   if (!sessionDate || !sessionTime) return false;
   const [h, m] = sessionTime.split(":").map(Number);
   const classDateTime = new Date(`${sessionDate}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`);
   const diffMs = classDateTime - new Date();
-  return diffMs <= 4 * 60 * 60 * 1000 && diffMs > 0;
+  return diffMs <= minHours * 60 * 60 * 1000 && diffMs > 0;
 }
 
 function isPast(sessionDate, sessionTime) {
@@ -22,12 +22,13 @@ function isPast(sessionDate, sessionTime) {
 export default function SessionCard({
   session, sessionDate, bookingCount, sessionBookings = [], sessionWaitlist = [],
   isBooked, waitlistPosition, onBook, onCancel, onJoinWaitlist, onLeaveWaitlist, isLoading,
-  hasCredits = true,
+  hasCredits = true, bookingMinHours = 4, cancelMinHours = 4,
 }) {
   const [expanded, setExpanded] = useState(false);
   const spotsLeft = (session.max_students || 8) - bookingCount;
   const isFull = spotsLeft <= 0;
-  const locked = isWithin4Hours(sessionDate, session.time);
+  const locked = isWithinMinHours(sessionDate, session.time, bookingMinHours);
+  const cancelLocked = isWithinMinHours(sessionDate, session.time, cancelMinHours);
   const past = isPast(sessionDate, session.time);
   const inWaitlist = waitlistPosition != null;
   const hasParticipants = sessionBookings.length > 0 || sessionWaitlist.length > 0;
@@ -63,7 +64,7 @@ export default function SessionCard({
               </div>
               {locked && !past && (
                 <span className="flex items-center gap-1 text-amber-600">
-                  <AlertCircle className="h-3 w-3" /> Reservas encerradas
+                  <AlertCircle className="h-3 w-3" /> Fora do horário de marcação
                 </span>
               )}
             </div>
@@ -81,9 +82,9 @@ export default function SessionCard({
                   variant="outline"
                   size="sm"
                   onClick={onCancel}
-                  disabled={isLoading || locked}
+                  disabled={isLoading || cancelLocked}
                   className="rounded-full text-xs h-8"
-                  title={locked ? "Cancelamento não permitido com menos de 4h" : ""}
+                  title={cancelLocked ? `Cancelamento não permitido com menos de ${cancelMinHours}h` : ""}
                 >
                   {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Cancelar"}
                 </Button>
@@ -121,7 +122,7 @@ export default function SessionCard({
                 onClick={onBook}
                 disabled={isLoading || locked}
                 className="rounded-full px-5 text-sm h-8"
-                title={locked ? "Reservas encerradas (menos de 4h)" : ""}
+                title={locked ? `Fora do horário de marcação (menos de ${bookingMinHours}h)` : ""}
               >
                 {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Reservar"}
               </Button>
