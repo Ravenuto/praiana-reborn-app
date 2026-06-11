@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
+import { useUnreadCount } from "@/hooks/useNotifications";
 import {
   LogOut, Calendar, Bookmark, CreditCard, User, ShieldCheck, Settings, Info, Bell,
 } from "lucide-react";
