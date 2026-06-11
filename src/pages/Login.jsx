@@ -31,20 +31,26 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen flex items-center justify-center bg-background px-4 overflow-hidden">
+      {/* Decorative blobs */}
+      <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 w-80 h-80 bg-primary/15 organic-blob animate-blob-morph" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-20 w-96 h-96 bg-accent/15 organic-blob-2 animate-float-slow" />
+
+      <div className="relative w-full max-w-md animate-fade-up">
         {/* Branding Praiana */}
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
             <img
               src={logoPraiana}
               alt="Praiana Pole Dance"
-              className="w-20 h-20 object-contain"
+              className="w-24 h-24 object-contain animate-float-y"
             />
           </div>
-          <h1 className="font-heading text-3xl font-bold tracking-tight text-foreground">Praiana Pole Dance</h1>
-          <p className="text-muted-foreground mt-2">Entre na sua conta</p>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Praiana Pole Dance</h1>
+          <p className="font-script text-2xl text-primary mt-1">bem-vinda de volta</p>
+          <p className="text-muted-foreground mt-2 text-sm">Entre na sua conta</p>
         </div>
+
 
         <div className="bg-card rounded-2xl shadow-sm border border-border p-8">
           {error && (
