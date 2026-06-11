@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Images, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 export default function Feed() {
   const { user } = useAuth();
@@ -35,47 +37,52 @@ export default function Feed() {
   const { containerRef, isPulling } = usePullToRefresh(handleRefresh);
 
   return (
-    <div
-      ref={containerRef}
-      className="max-w-xl mx-auto px-4 py-8 font-body overflow-y-auto transition-transform"
-      style={{
-        transform: isPulling ? "translateY(20px)" : "translateY(0)",
-      }}
-    >
-      {isPulling && (
-        <div className="flex justify-center mb-4">
-          <RefreshCw className={`h-5 w-5 text-primary transition-transform ${isRefreshing ? "animate-spin" : ""}`} />
-        </div>
-      )}
-
-      <div className="mb-6">
-         <h1 className="font-heading text-xl font-semibold">Feed</h1>
-         <p className="mt-1 text-muted-foreground text-xs">Compartilhe seus momentos no pole</p>
-       </div>
-
-      <NewPostForm currentUser={user} />
-
-      <div className="mt-6 space-y-5">
-        {isLoading ? (
-          Array(3).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-80 rounded-2xl" />
-          ))
-        ) : posts.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <Images className="h-12 w-12 mx-auto mb-4 opacity-30" />
-            <p className="text-lg font-medium">Nenhum post ainda</p>
-            <p className="text-sm mt-1">Seja a primeira a compartilhar!</p>
+    <div className="relative min-h-screen overflow-hidden">
+      <PraianaBlobs variant="minimal" />
+      <div
+        ref={containerRef}
+        className="relative max-w-xl mx-auto px-4 overflow-y-auto transition-transform"
+        style={{
+          transform: isPulling ? "translateY(20px)" : "translateY(0)",
+        }}
+      >
+        {isPulling && (
+          <div className="flex justify-center mb-4">
+            <RefreshCw className={`h-5 w-5 text-primary transition-transform ${isRefreshing ? "animate-spin" : ""}`} />
           </div>
-        ) : (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              currentUser={user}
-              onDelete={() => handleDelete(post.id)}
-            />
-          ))
         )}
+
+        <SectionHeader
+          eyebrow="Comunidade"
+          title="Feed Praiana"
+          goldWord="Praiana"
+          subtitle="Compartilhe seus momentos no pole."
+        />
+
+        <NewPostForm currentUser={user} />
+
+        <div className="mt-6 space-y-5">
+          {isLoading ? (
+            Array(3).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-80 rounded-3xl" />
+            ))
+          ) : posts.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground surface-glass">
+              <Images className="h-12 w-12 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium font-heading italic text-primary">Nenhum post ainda</p>
+              <p className="text-sm mt-1">Seja a primeira a compartilhar!</p>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUser={user}
+                onDelete={() => handleDelete(post.id)}
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
