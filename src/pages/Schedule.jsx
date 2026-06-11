@@ -75,6 +75,15 @@ export default function Schedule() {
   const userCredits = getCredits(userData);
   const hasCredits = user?.role === "admin" || userCredits > 0;
 
+  const { data: studioSettings } = useQuery({
+    queryKey: ["studioSettings"],
+    queryFn: () => getStudioSettings(),
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+  });
+  const bookingMinHours = parseInt(studioSettings?.booking_min_hours || "4", 10);
+  const cancelMinHours = parseInt(studioSettings?.cancel_min_hours || "4", 10);
+
   const { data: holidayData = [] } = useQuery({
     queryKey: ["holidays", selectedDate],
     queryFn: () => base44.entities.Holiday.filter({ date: selectedDate }),
@@ -537,7 +546,9 @@ export default function Schedule() {
           onJoinWaitlist={() => handleJoinWaitlist(session)}
           onLeaveWaitlist={() => handleLeaveWaitlist(session)}
           isLoading={loadingSession === session.id}
-          hasCredits={hasCredits} />
+          hasCredits={hasCredits}
+          bookingMinHours={bookingMinHours}
+          cancelMinHours={cancelMinHours} />
 
           )
         }
