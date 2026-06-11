@@ -218,6 +218,7 @@ export default function Notices() {
           </div>
         </AnimatePresence>
       )}
+      </div>
     </div>
   );
 }
