@@ -40,7 +40,7 @@ const statusOptions = [
   { value: "confirmada", label: "Confirmada", cls: "bg-primary/10 text-primary" },
   { value: "presente", label: "Presente", cls: "bg-green-100 text-green-700" },
   { value: "faltou", label: "Faltou", cls: "bg-destructive/10 text-destructive" },
-  { value: "cancelada", label: "Cancelada", cls: "bg-muted text-muted-foreground" },
+  { value: "cancelada", label: "Cancelada", cls: "bg-red-100 text-red-700 border border-red-200" },
 ];
 
 export default function AttendanceBySchedule({ initialDate = "" }) {
