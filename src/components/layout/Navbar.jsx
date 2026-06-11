@@ -46,12 +46,9 @@ export default function Navbar() {
         }`}
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+        <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="Praiana Pole Dance e Artes">
           <span className="shrink-0 relative flex h-11 w-11 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white shadow-sm ring-1 ring-primary/10">
             <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
-          </span>
-          <span className="font-heading italic text-primary text-lg whitespace-nowrap">
-            Praiana Pole Dance
           </span>
         </Link>
 
