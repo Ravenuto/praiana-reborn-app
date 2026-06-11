@@ -303,9 +303,6 @@ export default function ManageStudents() {
         <Button onClick={() => setManualDialog(true)} className="gap-2 w-full sm:w-auto">
           <UserPlus className="h-4 w-4" /> Cadastro completo
         </Button>
-        <p className="text-xs text-muted-foreground mt-2">
-          A aluna receberá um email convidando-a a entrar no app. Enquanto não aceita, aparece como <strong>"Email enviado"</strong>. Quando ativar a conta, vira <strong>"Ativa"</strong>.
-        </p>
       </div>
 
       {/* Filtros */}
