@@ -24,6 +24,7 @@ export default function Navbar() {
   const { user } = useAuth();
   const location = useLocation();
   const isAdmin = user?.role === "admin";
+  const unreadCount = useUnreadCount(user?.email);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
