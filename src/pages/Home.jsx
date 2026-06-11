@@ -38,8 +38,8 @@ export default function Home() {
 
             {/* Brand tagline */}
             <div className="text-center -mt-2">
-              <p className="font-heading italic text-primary text-xl tracking-wide">
-                Praiana <span className="gold-word">Pole Dance</span> e Artes
+              <p className="font-heading not-italic font-extrabold text-primary text-2xl md:text-3xl uppercase tracking-[0.18em] drop-shadow-[0_2px_10px_hsl(var(--primary)/0.25)]">
+                Praiana <span className="gold-word font-extrabold">Pole Dance</span> e Artes
               </p>
             </div>
 
