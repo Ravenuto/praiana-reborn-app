@@ -300,26 +300,11 @@ export default function ManageStudents() {
             <UserPlus className="h-4 w-4 text-primary" /> Cadastrar nova aluna
           </h3>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button onClick={() => setManualDialog(true)} className="gap-2 flex-1">
-            <UserPlus className="h-4 w-4" /> Cadastro completo
-          </Button>
-          <div className="flex gap-2 flex-1">
-            <Input
-              type="email"
-              placeholder="email@exemplo.com (rápido)"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-              className="flex-1"
-            />
-            <Button onClick={handleInvite} disabled={inviting} variant="outline" className="gap-2 shrink-0">
-              {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-            </Button>
-          </div>
-        </div>
+        <Button onClick={() => setManualDialog(true)} className="gap-2 w-full sm:w-auto">
+          <UserPlus className="h-4 w-4" /> Cadastro completo
+        </Button>
         <p className="text-xs text-muted-foreground mt-2">
-          "Cadastro completo" preenche todos os dados e já define o plano.
+          A aluna receberá um email convidando-a a entrar no app. Enquanto não aceita, aparece como <strong>"Email enviado"</strong>. Quando ativar a conta, vira <strong>"Ativa"</strong>.
         </p>
       </div>
 
@@ -375,7 +360,7 @@ export default function ManageStudents() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-base truncate leading-tight">{student.full_name || <span className="text-muted-foreground italic text-sm">Sem nome</span>}</p>
-                        {student.is_invited && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Convite pendente</Badge>}
+                        {student.is_invited && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1"><Mail className="h-3 w-3" /> Email enviado</Badge>}
                         {isActive && !student.is_invited && <Badge className="bg-green-100 text-green-700 border-0 text-xs">Ativa</Badge>}
                         {!isActive && !student.is_invited && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Inativa</Badge>}
                       </div>

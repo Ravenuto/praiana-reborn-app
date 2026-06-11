@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
+import { useUnreadCount } from "@/hooks/useNotifications";
 import {
   LogOut, Calendar, Bookmark, CreditCard, User, ShieldCheck, Settings, Info, Bell,
 } from "lucide-react";
@@ -23,6 +24,7 @@ export default function Navbar() {
   const { user } = useAuth();
   const location = useLocation();
   const isAdmin = user?.role === "admin";
+  const unreadCount = useUnreadCount(user?.email);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -44,12 +46,9 @@ export default function Navbar() {
         }`}
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+        <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="Praiana Pole Dance e Artes">
           <span className="shrink-0 relative flex h-11 w-11 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white shadow-sm ring-1 ring-primary/10">
             <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
-          </span>
-          <span className="font-heading italic text-primary text-lg whitespace-nowrap">
-            Praiana Pole Dance
           </span>
         </Link>
 
@@ -101,9 +100,14 @@ export default function Navbar() {
           <Link
             to="/notificacoes"
             aria-label="Notificações"
-            className="h-9 w-9 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
+            className="relative h-9 w-9 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
           >
             <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-[10px] font-bold text-accent-foreground grid place-items-center ring-2 ring-background animate-pulse">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </Link>
           <button
             onClick={() => base44.auth.logout()}

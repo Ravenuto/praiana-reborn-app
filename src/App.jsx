@@ -17,8 +17,6 @@ import Home from '@/pages/Home';
 import Schedule from '@/pages/Schedule';
 import MyBookings from '@/pages/MyBookings';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
-import Feed from '@/pages/Feed';
-import Notices from '@/pages/Notices';
 import Profile from '@/pages/Profile';
 import Plans from '@/pages/Plans';
 import Notifications from '@/pages/Notifications';
@@ -74,8 +72,6 @@ const AuthenticatedApp = () => {
               <Route path="/" element={<AnimatedRoute><Home /></AnimatedRoute>} />
               <Route path="/aulas" element={<AnimatedRoute><Schedule /></AnimatedRoute>} />
               <Route path="/minhas-reservas" element={<AnimatedRoute><MyBookings /></AnimatedRoute>} />
-              <Route path="/feed" element={<AnimatedRoute><Feed /></AnimatedRoute>} />
-              <Route path="/recados" element={<AnimatedRoute><Notices /></AnimatedRoute>} />
               <Route path="/admin" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
               <Route path="/perfil" element={<AnimatedRoute><Profile /></AnimatedRoute>} />
               <Route path="/planos" element={<AnimatedRoute><Plans /></AnimatedRoute>} />

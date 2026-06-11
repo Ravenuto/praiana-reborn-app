@@ -40,7 +40,7 @@ const statusOptions = [
   { value: "confirmada", label: "Confirmada", cls: "bg-primary/10 text-primary" },
   { value: "presente", label: "Presente", cls: "bg-green-100 text-green-700" },
   { value: "faltou", label: "Faltou", cls: "bg-destructive/10 text-destructive" },
-  { value: "cancelada", label: "Cancelada", cls: "bg-muted text-muted-foreground" },
+  { value: "cancelada", label: "Cancelada", cls: "bg-red-100 text-red-700 border border-red-200" },
 ];
 
 export default function AttendanceBySchedule({ initialDate = "" }) {
@@ -262,18 +262,27 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
                     ) : (
                       <div className="divide-y divide-border">
                         {(() => {
-                          const seen = new Set();
-                          const unique = sessionBookings.filter((b) => {
-                            if (seen.has(b.student_email)) return false;
-                            seen.add(b.student_email);
-                            return true;
+                          // Dedup por email mantendo o registro mais "informativo"
+                          // (prioridade: presente > faltou > confirmada > cancelada)
+                          const priority = { presente: 4, faltou: 3, confirmada: 2, cancelada: 1 };
+                          const byEmail = new Map();
+                          sessionBookings.forEach((b) => {
+                            const k = b.student_email || b.id;
+                            const prev = byEmail.get(k);
+                            if (!prev || (priority[b.status] || 0) > (priority[prev.status] || 0)) {
+                              byEmail.set(k, b);
+                            }
                           });
+                          const unique = Array.from(byEmail.values());
                           return unique.map((booking) => {
                             const statusOpt = statusOptions.find((s) => s.value === booking.status) || statusOptions[0];
+                            const isCancelled = booking.status === "cancelada";
                             return (
                               <div key={booking.id} className="flex items-center justify-between gap-1 px-2 py-1.5">
                                <div className="min-w-0">
-                                  <p className="font-medium text-[10px] truncate">{booking.student_name || "—"}</p>
+                                  <p className={`font-medium text-[10px] truncate ${isCancelled ? "line-through text-muted-foreground" : ""}`}>
+                                    {booking.student_name || "—"}
+                                  </p>
                                 </div>
                                  <Select value={booking.status} onValueChange={(v) => handleStatus(booking.id, v)}>
                                    <SelectTrigger className="w-24 h-6 text-[9px]">
