@@ -13,6 +13,8 @@ import { AnimatePresence } from "framer-motion";
 import NoticeCard from "@/components/notices/NoticeCard";
 import PollCard from "@/components/notices/PollCard";
 import NewPollForm from "@/components/notices/NewPollForm";
+import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 const emptyForm = { title: "", content: "", pinned: false, color: "blue", media_url: "", media_type: "image" };
 
@@ -89,12 +91,17 @@ export default function Notices() {
   const isEmpty = !loadingNotices && !loadingPolls && sortedNotices.length === 0 && polls.length === 0;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 font-body">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-heading text-xl font-semibold">Recados</h1>
-          <p className="mt-1 text-muted-foreground text-xs">Avisos e informações do estúdio</p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden">
+      <PraianaBlobs variant="minimal" />
+      <div className="relative max-w-3xl mx-auto px-4">
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <SectionHeader
+            eyebrow="Mural"
+            title="Recados"
+            goldWord="Recados"
+            subtitle="Avisos e informações do studio."
+          />
+
         {isAdmin && (
           <div className="flex gap-2">
             <Dialog open={openPoll} onOpenChange={setOpenPoll}>
