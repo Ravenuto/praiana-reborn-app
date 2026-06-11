@@ -17,8 +17,6 @@ import Home from '@/pages/Home';
 import Schedule from '@/pages/Schedule';
 import MyBookings from '@/pages/MyBookings';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
-import Feed from '@/pages/Feed';
-import Notices from '@/pages/Notices';
 import Profile from '@/pages/Profile';
 import Plans from '@/pages/Plans';
 import Notifications from '@/pages/Notifications';
