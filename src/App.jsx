@@ -72,8 +72,6 @@ const AuthenticatedApp = () => {
               <Route path="/" element={<AnimatedRoute><Home /></AnimatedRoute>} />
               <Route path="/aulas" element={<AnimatedRoute><Schedule /></AnimatedRoute>} />
               <Route path="/minhas-reservas" element={<AnimatedRoute><MyBookings /></AnimatedRoute>} />
-              <Route path="/feed" element={<AnimatedRoute><Feed /></AnimatedRoute>} />
-              <Route path="/recados" element={<AnimatedRoute><Notices /></AnimatedRoute>} />
               <Route path="/admin" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
               <Route path="/perfil" element={<AnimatedRoute><Profile /></AnimatedRoute>} />
               <Route path="/planos" element={<AnimatedRoute><Plans /></AnimatedRoute>} />
