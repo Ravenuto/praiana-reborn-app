@@ -103,9 +103,14 @@ export default function Navbar() {
           <Link
             to="/notificacoes"
             aria-label="Notificações"
-            className="h-9 w-9 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
+            className="relative h-9 w-9 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
           >
             <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-[10px] font-bold text-accent-foreground grid place-items-center ring-2 ring-background animate-pulse">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </Link>
           <button
             onClick={() => base44.auth.logout()}
