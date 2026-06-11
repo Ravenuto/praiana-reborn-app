@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, User, MoreVertical, Bookmark, CreditCard, Settings, Info, ShieldCheck } from "lucide-react";
+import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -23,68 +23,65 @@ export default function BottomTabs() {
   ];
 
   const isActive = (path) => location.pathname === path;
-  const isMoreActive = moreTabs.some(tab => isActive(tab.path));
-
-  const handleTabClick = () => {
-    setMoreOpen(false);
-  };
+  const isMoreActive = moreTabs.some((tab) => isActive(tab.path));
 
   return (
     <>
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border z-40 pb-[max(0rem,env(safe-area-inset-bottom))]">
-        <div className="flex items-center justify-around h-16">
+      <div className="md:hidden fixed bottom-3 inset-x-3 z-40 pb-[max(0rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto max-w-md flex items-center justify-between gap-1 px-2 py-2 rounded-full bg-background/90 backdrop-blur-xl ring-1 ring-primary/10 shadow-[0_8px_30px_-12px_hsl(var(--primary)/0.4)]">
           {primaryTabs.map((tab) => {
-            const IconComponent = tab.icon;
+            const Icon = tab.icon;
+            const active = isActive(tab.path);
             return (
               <Link
                 key={tab.path}
                 to={tab.path}
-                className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
-                  isActive(tab.path)
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-full transition-all ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-[0_8px_20px_-8px_hsl(var(--primary)/0.6)]"
+                    : "text-foreground/60 hover:text-primary"
                 }`}
               >
-                <IconComponent className="h-5 w-5" />
-                <span className="text-xs font-medium">{tab.label}</span>
+                <Icon className="h-4 w-4" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider">{tab.label}</span>
               </Link>
             );
           })}
 
           <button
             onClick={() => setMoreOpen(true)}
-            className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-full transition-all ${
               isMoreActive
-                ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-primary text-primary-foreground shadow-[0_8px_20px_-8px_hsl(var(--primary)/0.6)]"
+                : "text-foreground/60 hover:text-primary"
             }`}
           >
-            <MoreVertical className="h-5 w-5" />
-            <span className="text-xs font-medium">Mais</span>
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Mais</span>
           </button>
         </div>
       </div>
 
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-        <SheetContent side="bottom" className="h-auto">
+        <SheetContent side="bottom" className="h-auto rounded-t-3xl border-t border-primary/10">
           <SheetHeader className="mb-4">
-            <SheetTitle>Mais opções</SheetTitle>
+            <SheetTitle className="font-heading italic text-primary text-2xl">Mais opções</SheetTitle>
           </SheetHeader>
           <div className="space-y-2 pb-6">
             {moreTabs.map((tab) => {
-              const IconComponent = tab.icon;
+              const Icon = tab.icon;
               return (
                 <Link
                   key={tab.path}
                   to={tab.path}
-                  onClick={handleTabClick}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  onClick={() => setMoreOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${
                     isActive(tab.path)
                       ? "bg-primary/10 text-primary"
-                      : "text-foreground hover:bg-muted"
+                      : "text-foreground hover:bg-primary/5"
                   }`}
                 >
-                  <IconComponent className="h-5 w-5" />
+                  <Icon className="h-5 w-5" />
                   <span className="font-medium">{tab.label}</span>
                 </Link>
               );

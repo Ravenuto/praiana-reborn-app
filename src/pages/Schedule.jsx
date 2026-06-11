@@ -15,6 +15,8 @@ import { createNotification } from "@/hooks/useNotifications";
 import { getCredits } from "@/utils";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { getStudioSettings } from "@/lib/studioSettings";
+import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 function getTodayDayKey() {
   const days = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
@@ -450,23 +452,28 @@ export default function Schedule() {
   const { containerRef, isPulling } = usePullToRefresh(handleRefresh);
 
   return (
-    <div
-      ref={containerRef}
-      className="max-w-4xl mx-auto px-4 sm:px-6 py-6 font-body overflow-y-auto transition-transform"
-      style={{
-        transform: isPulling ? "translateY(20px)" : "translateY(0)",
-      }}
-    >
-      {isPulling && (
-        <div className="flex justify-center mb-4">
-          <RefreshCw className={`h-5 w-5 text-primary transition-transform ${isRefreshing ? "animate-spin" : ""}`} />
-        </div>
-      )}
+    <div className="relative min-h-screen overflow-hidden">
+      <PraianaBlobs variant="minimal" />
+      <div
+        ref={containerRef}
+        className="relative max-w-4xl mx-auto px-4 sm:px-6 overflow-y-auto transition-transform"
+        style={{
+          transform: isPulling ? "translateY(20px)" : "translateY(0)",
+        }}
+      >
+        {isPulling && (
+          <div className="flex justify-center mb-4">
+            <RefreshCw className={`h-5 w-5 text-primary transition-transform ${isRefreshing ? "animate-spin" : ""}`} />
+          </div>
+        )}
 
-      <div className="mb-6">
-         <h1 className="font-heading text-2xl sm:text-3xl font-bold">Agendar Aula</h1>
-         <p className="mt-1 text-muted-foreground text-sm">Selecione o dia e reserve sua vaga</p>
-       </div>
+        <SectionHeader
+          eyebrow="Sua semana"
+          title="Agendar Aulas"
+          goldWord="Aulas"
+          subtitle="Selecione o dia e reserve sua vaga."
+        />
+
 
       <CreditBanner />
 
@@ -532,9 +539,11 @@ export default function Schedule() {
           isLoading={loadingSession === session.id}
           hasCredits={hasCredits} />
 
-        )
+          )
         }
+        </div>
       </div>
     </div>);
+
 
 }

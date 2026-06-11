@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays, Clock, X, Check, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 const STATUS_FILTERS = [
 { key: "all", label: "Todas" },
@@ -81,11 +83,16 @@ export default function MyBookings() {
   const filtered = filterStatus === "all" ? bookings : bookings.filter((b) => b.status === filterStatus);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 font-body">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl font-bold">Minhas Reservas</h1>
-        <p className="mt-1 text-muted-foreground text-sm">Acompanhe suas aulas agendadas</p>
-      </div>
+    <div className="relative min-h-screen overflow-hidden">
+      <PraianaBlobs variant="minimal" />
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6">
+        <SectionHeader
+          eyebrow="Sua jornada"
+          title="Minhas Reservas"
+          goldWord="Reservas"
+          subtitle="Acompanhe suas aulas agendadas."
+        />
+
 
       {/* Filtros de status */}
       <div className="flex flex-wrap gap-2 mb-5">
@@ -171,6 +178,7 @@ export default function MyBookings() {
             })}
           </AnimatePresence>
         )}
+        </div>
       </div>
     </div>
   );

@@ -112,16 +112,19 @@ export default function Login() {
                 Manter conectado
               </label>
             </div>
-            <Button type="submit" className="w-full h-12 font-medium rounded-full" disabled={loading}>
+            <Button type="submit" size="lg" className="w-full" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Entrando...
                 </>
               ) : (
-                "Entrar"
+                <>
+                  Entrar <span className="text-base">→</span>
+                </>
               )}
             </Button>
+
           </form>
         </div>
 
