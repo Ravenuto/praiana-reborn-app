@@ -217,14 +217,6 @@ const auth = {
     writeAuth(user);
     return { user, token: 'mock-token' };
   },
-  async register(a, b) {
-    const { email, full_name } = pickArgs(a, b);
-    if (!email) throw new Error('Email obrigatório');
-    const user = { id: uid('u'), full_name: full_name || email.split('@')[0], email, role: 'user', is_admin: false, plan_status: 'inactive', credits_remaining: 0 };
-    store.User.push(user); persist();
-    writeAuth(user);
-    return { user, token: 'mock-token' };
-  },
   async updateMe(data) {
     const cached = readAuth();
     if (!cached) throw new Error('not authenticated');
