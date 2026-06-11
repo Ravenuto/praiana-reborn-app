@@ -203,12 +203,17 @@ const auth = {
   async loginViaEmailPassword(a, b) {
     const { email } = pickArgs(a, b);
     if (!email) throw new Error('Email obrigatório');
-    let user = store.User.find((u) => u.email === email);
-    if (!user) {
-      user = { id: uid('u'), full_name: email.split('@')[0], email, role: 'user', is_admin: false, plan_status: 'active', credits_remaining: 4 };
-      store.User.push(user);
-      persist();
-    }
+    // Mock: qualquer login entra como admin (sem backend real ainda)
+    const admin = store.User.find((u) => u.email === 'admin@praiana.app');
+    const user = admin || store.User[0];
+    writeAuth(user);
+    return { user, token: 'mock-token' };
+  },
+  async register(a, b) {
+    const { email, full_name } = pickArgs(a, b);
+    if (!email) throw new Error('Email obrigatório');
+    const admin = store.User.find((u) => u.email === 'admin@praiana.app');
+    const user = admin ? { ...admin, full_name: full_name || admin.full_name } : store.User[0];
     writeAuth(user);
     return { user, token: 'mock-token' };
   },
