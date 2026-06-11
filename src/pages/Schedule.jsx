@@ -539,9 +539,11 @@ export default function Schedule() {
           isLoading={loadingSession === session.id}
           hasCredits={hasCredits} />
 
-        )
+          )
         }
+        </div>
       </div>
     </div>);
+
 
 }
