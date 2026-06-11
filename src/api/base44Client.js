@@ -177,6 +177,18 @@ const writeAuth = (u) => {
   else window.localStorage.removeItem(AUTH_KEY);
 };
 
+// Normalize args: accept either (email, password) or ({ email, password, full_name })
+const pickArgs = (a, b) => {
+  if (a && typeof a === 'object') return a;
+  return { email: a, password: b };
+};
+
+// Seed an admin session on first load so all screens are visible without manual login.
+if (isBrowser && !window.localStorage.getItem(AUTH_KEY)) {
+  const admin = store.User.find((u) => u.email === 'admin@praiana.app');
+  if (admin) writeAuth(admin);
+}
+
 const auth = {
   async me() {
     const cached = readAuth();
@@ -188,7 +200,9 @@ const auth = {
     const fresh = store.User.find((u) => u.id === cached.id);
     return fresh || cached;
   },
-  async loginViaEmailPassword({ email }) {
+  async loginViaEmailPassword(a, b) {
+    const { email } = pickArgs(a, b);
+    if (!email) throw new Error('Email obrigatório');
     let user = store.User.find((u) => u.email === email);
     if (!user) {
       user = { id: uid('u'), full_name: email.split('@')[0], email, role: 'user', is_admin: false, plan_status: 'active', credits_remaining: 4 };
@@ -198,7 +212,9 @@ const auth = {
     writeAuth(user);
     return { user, token: 'mock-token' };
   },
-  async register({ email, full_name }) {
+  async register(a, b) {
+    const { email, full_name } = pickArgs(a, b);
+    if (!email) throw new Error('Email obrigatório');
     const user = { id: uid('u'), full_name: full_name || email.split('@')[0], email, role: 'user', is_admin: false, plan_status: 'inactive', credits_remaining: 0 };
     store.User.push(user); persist();
     writeAuth(user);
