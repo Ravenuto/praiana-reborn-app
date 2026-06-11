@@ -1,3 +1,4 @@
+import logoPraiana from "@/assets/logo-praiana.png";
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ export default function Home() {
 
           {/* Logo */}
           <motion.img
-            src="https://media.base44.com/images/public/6a0b29752977eaee21c7da55/c2269a69d_Logo_PRAIANA.png"
+            src="${logoPraiana}"
             alt="Praiana Pole Dance"
             className="w-44 h-44 object-contain"
             initial={{ opacity: 0, scale: 0.9 }}

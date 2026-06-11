@@ -1,3 +1,4 @@
+import logoPraiana from "@/assets/logo-praiana.png";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, LogOut } from "lucide-react";
@@ -37,7 +38,7 @@ export default function MobileHeader() {
           <>
             <Link to="/" className="flex items-center gap-2">
               <img
-                src="https://media.base44.com/images/public/6a0b29752977eaee21c7da55/c2269a69d_Logo_PRAIANA.png"
+                src="${logoPraiana}"
                 alt="Praiana"
                 className="w-6 h-6 object-contain dark:bg-white dark:rounded dark:p-0.5 opacity-80 dark:opacity-100"
               />
