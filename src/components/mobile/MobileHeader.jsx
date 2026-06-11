@@ -1,8 +1,9 @@
 import logoPraiana from "@/assets/logo-praiana.png";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Bell } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { ArrowLeft, Bell } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { useUnreadCount } from "@/hooks/useNotifications";
 
 const SUB_TITLES = {
   "/perfil": "Perfil",
@@ -16,6 +17,25 @@ const SUB_TITLES = {
 function titleFor(pathname) {
   const key = Object.keys(SUB_TITLES).find((k) => pathname.startsWith(k));
   return key ? SUB_TITLES[key] : null;
+}
+
+function BellLink() {
+  const { user } = useAuth();
+  const count = useUnreadCount(user?.email);
+  return (
+    <Link
+      to="/notificacoes"
+      aria-label="Notificações"
+      className="relative h-10 w-10 shrink-0 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
+    >
+      <Bell className="h-4 w-4" />
+      {count > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-[10px] font-bold text-accent-foreground grid place-items-center ring-2 ring-background animate-pulse">
+          {count > 9 ? "9+" : count}
+        </span>
+      )}
+    </Link>
+  );
 }
 
 export default function MobileHeader() {
@@ -32,9 +52,7 @@ export default function MobileHeader() {
   }, []);
 
   return (
-    <div
-      className="md:hidden fixed top-0 inset-x-0 z-50 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2"
-    >
+    <div className="md:hidden fixed top-0 inset-x-0 z-50 px-3 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2">
       <div
         className={`mx-auto max-w-3xl flex items-center justify-between gap-2 rounded-[1.75rem] pl-2 pr-3 py-2 transition-all duration-500 ${
           scrolled
@@ -54,31 +72,16 @@ export default function MobileHeader() {
             <span className="font-heading italic text-primary text-lg truncate">
               {subTitle}
             </span>
-            <Link
-              to="/notificacoes"
-              aria-label="Notificações"
-              className="h-10 w-10 shrink-0 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
-            >
-              <Bell className="h-4 w-4" />
-            </Link>
+            <BellLink />
           </>
         ) : (
           <>
-            <Link to="/" className="flex items-center gap-2.5 group min-w-0">
+            <Link to="/" className="flex items-center gap-2 group min-w-0" aria-label="Praiana Pole Dance e Artes">
               <span className="shrink-0 relative flex h-10 w-10 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white dark:bg-white shadow-sm ring-1 ring-primary/10">
                 <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
               </span>
-              <span className="font-heading italic text-primary text-[15px] truncate">
-                Praiana Pole Dance
-              </span>
             </Link>
-            <Link
-              to="/notificacoes"
-              aria-label="Notificações"
-              className="h-10 w-10 shrink-0 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
-            >
-              <Bell className="h-4 w-4" />
-            </Link>
+            <BellLink />
           </>
         )}
       </div>
