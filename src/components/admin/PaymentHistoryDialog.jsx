@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2, DollarSign, Trash2 } from "lucide-react";
+import { Plus, Loader2, DollarSign, Trash2, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 export default function PaymentHistoryDialog({ student, onClose }) {
   const queryClient = useQueryClient();
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [amountEdited, setAmountEdited] = useState(false);
   const [form, setForm] = useState({
@@ -53,36 +54,64 @@ export default function PaymentHistoryDialog({ student, onClose }) {
     queryFn: () => base44.entities.PaymentHistory.filter({ user_id: student.id }, "-payment_date", 50),
   });
 
+  const resetForm = () => {
+    const initialPrice = getPlanPrice(student.plan || "4_aulas");
+    setForm({ payment_date: format(new Date(), "yyyy-MM-dd"), plan_name: student.plan || "4_aulas", amount: initialPrice, payment_method: "pix", explanation: "" });
+    setAmountEdited(false);
+  };
+
   const handleAdd = async () => {
     if (!form.payment_date) return toast.error("Data de pagamento obrigatória");
     if (amountEdited && !form.explanation) return toast.error("Explicação é obrigatória quando o valor é alterado");
     setSaving(true);
     try {
-      await base44.entities.PaymentHistory.create({
-        user_id: student.id,
-        user_email: student.email,
-        user_name: student.full_name || student.email,
-        plan_name: form.plan_name,
-        amount: parseFloat(form.amount) || 0,
-        payment_date: form.payment_date,
-        payment_method: form.payment_method,
-        notes: form.explanation || "",
-      });
-      // Atualiza last_payment_date no perfil da aluna
-      await base44.entities.User.update(student.id, {
-        last_payment_date: form.payment_date,
-      });
+      if (editingId) {
+        await base44.entities.PaymentHistory.update(editingId, {
+          plan_name: form.plan_name,
+          amount: parseFloat(form.amount) || 0,
+          payment_date: form.payment_date,
+          payment_method: form.payment_method,
+          notes: form.explanation || "",
+        });
+        toast.success("Pagamento atualizado!");
+      } else {
+        await base44.entities.PaymentHistory.create({
+          user_id: student.id,
+          user_email: student.email,
+          user_name: student.full_name || student.email,
+          plan_name: form.plan_name,
+          amount: parseFloat(form.amount) || 0,
+          payment_date: form.payment_date,
+          payment_method: form.payment_method,
+          notes: form.explanation || "",
+        });
+        await base44.entities.User.update(student.id, {
+          last_payment_date: form.payment_date,
+        });
+        toast.success("Pagamento registrado!");
+      }
       queryClient.invalidateQueries({ queryKey: ["paymentHistory", student.id] });
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success("Pagamento registrado!");
       setAdding(false);
-      setAmountEdited(false);
-      const initialPrice = getPlanPrice(student.plan || "4_aulas");
-      setForm({ payment_date: format(new Date(), "yyyy-MM-dd"), plan_name: student.plan || "4_aulas", amount: initialPrice, payment_method: "pix", explanation: "" });
+      setEditingId(null);
+      resetForm();
     } catch {
-      toast.error("Erro ao registrar pagamento");
+      toast.error("Erro ao salvar pagamento");
     }
     setSaving(false);
+  };
+
+  const handleEdit = (p) => {
+    setEditingId(p.id);
+    setForm({
+      payment_date: p.payment_date,
+      plan_name: p.plan_name,
+      amount: p.amount || 0,
+      payment_method: p.payment_method || "pix",
+      explanation: p.notes || "",
+    });
+    setAmountEdited(false);
+    setAdding(true);
   };
 
   const handleDelete = async (id) => {
@@ -110,10 +139,14 @@ export default function PaymentHistoryDialog({ student, onClose }) {
           variant="outline"
           size="sm"
           className="gap-2 w-full"
-          onClick={() => setAdding(!adding)}
+          onClick={() => {
+            if (adding) { setAdding(false); setEditingId(null); resetForm(); }
+            else { setAdding(true); }
+          }}
         >
-          <Plus className="h-4 w-4" /> Registrar pagamento
+          <Plus className="h-4 w-4" /> {editingId ? "Cancelar edição" : adding ? "Cancelar" : "Registrar pagamento"}
         </Button>
+
 
         {adding && (
           <div className="border border-border rounded-xl p-4 space-y-3 bg-muted/20">
@@ -165,7 +198,7 @@ export default function PaymentHistoryDialog({ student, onClose }) {
               </Select>
             </div>
             <Button onClick={handleAdd} disabled={saving} className="w-full rounded-full">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Salvar alterações" : "Salvar"}
             </Button>
           </div>
         )}
@@ -194,9 +227,14 @@ export default function PaymentHistoryDialog({ student, onClose }) {
                     </p>
                   </div>
                 </div>
-                <button onClick={() => handleDelete(p.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={() => handleEdit(p)} className="p-1.5 text-muted-foreground hover:text-primary transition-colors" title="Editar">
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => handleDelete(p.id)} className="p-1.5 text-muted-foreground hover:text-destructive transition-colors" title="Excluir">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             ))
           )}

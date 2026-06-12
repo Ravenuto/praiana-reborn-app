@@ -50,8 +50,8 @@ export default function Navbar() {
           <span className="shrink-0 relative flex h-11 w-11 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white shadow-sm ring-1 ring-primary/10">
             <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
           </span>
-          <span className="hidden lg:inline font-heading italic text-primary text-sm leading-tight whitespace-nowrap">
-            Praiana Pole Dance <span className="text-primary/70">&amp; Artes</span>
+          <span className="hidden lg:inline font-heading italic text-primary text-lg leading-tight whitespace-nowrap">
+            Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span className="text-primary/70">&amp; Artes</span>
           </span>
         </Link>
 
