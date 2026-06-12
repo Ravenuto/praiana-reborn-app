@@ -11,6 +11,7 @@ import { Camera, Loader2, Save, CalendarDays, Phone, RefreshCw } from "lucide-re
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getCredits } from "@/utils";
 import MyPaymentHistory from "@/components/profile/MyPaymentHistory";
 
 const planInfo = {
