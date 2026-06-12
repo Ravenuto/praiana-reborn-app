@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
+import { notifyAllStudents } from "@/hooks/useNotifications";
 
 const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, image_url: "", color: "#c2185b" };
 
