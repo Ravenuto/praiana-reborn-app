@@ -15,6 +15,14 @@ import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const safeFormat = (value, fmt, opts) => {
+  if (!value) return "—";
+  const s = String(value);
+  const d = new Date(s.length === 10 ? s + "T12:00:00" : s);
+  if (isNaN(d.getTime())) return "—";
+  try { return format(d, fmt, opts); } catch { return "—"; }
+};
+
 const EMPTY_MANUAL = { name: "", email: "", phone: "", birth_date: "", plan: "4_aulas", credits: 4 };
 
 export default function ManageStudents() {
@@ -383,7 +391,7 @@ export default function ManageStudents() {
                         {student.phone && <p className="text-xs text-muted-foreground">{student.phone}</p>}
                         {student.plan_start_date && (
                           <p className="text-xs text-muted-foreground">
-                            Plano desde {format(new Date(student.plan_start_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}
+                            Plano desde {safeFormat(student.plan_start_date, "dd/MM/yyyy", { locale: ptBR })}
                           </p>
                         )}
                         {(student.credits != null) && !student.is_invited && (
@@ -485,9 +493,7 @@ export default function ManageStudents() {
                     <div>
                       <p className="text-xs text-muted-foreground mb-0.5">Data de nascimento</p>
                       <p className="font-medium">
-                        {student.birth_date
-                          ? format(new Date(student.birth_date + "T12:00:00"), "dd/MM/yyyy")
-                          : "—"}
+                        {safeFormat(student.birth_date, "dd/MM/yyyy")}
                       </p>
                     </div>
                     <div>
@@ -501,17 +507,13 @@ export default function ManageStudents() {
                     <div>
                       <p className="text-xs text-muted-foreground mb-0.5">Início do plano</p>
                       <p className="font-medium">
-                        {student.plan_start_date
-                          ? format(new Date(student.plan_start_date + "T12:00:00"), "dd/MM/yyyy")
-                          : "—"}
+                        {safeFormat(student.plan_start_date, "dd/MM/yyyy")}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-0.5">Último pagamento</p>
                       <p className="font-medium">
-                        {student.last_payment_date
-                          ? format(new Date(student.last_payment_date + "T12:00:00"), "dd/MM/yyyy")
-                          : "—"}
+                        {safeFormat(student.last_payment_date, "dd/MM/yyyy")}
                       </p>
                     </div>
                     <div>
