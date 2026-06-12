@@ -46,20 +46,48 @@ export default function ManageStudents() {
   const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
 
+  const TEST_EMAIL = "aluna.teste@praiana.app";
+
   const handleCreateTestStudent = async () => {
     setCreatingTestStudent(true);
     try {
-      const response = await base44.functions.invoke("createTestStudent", {});
-      toast.success(`✅ Aluna teste criada: ${response.data.email}`);
-      // Refetch após 1s para garantir persistência
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ["allUsers"] });
-      }, 1000);
+      const existing = await base44.entities.User.filter({ email: TEST_EMAIL });
+      let student = existing[0];
+      if (!student) {
+        const defaultPlan = plans.find((p) => p.key === "4_aulas") || plans[0];
+        student = await base44.entities.User.create({
+          full_name: "Aluna Teste",
+          email: TEST_EMAIL,
+          role: "user",
+          is_admin: false,
+          plan_status: "active",
+          credits_remaining: defaultPlan?.credits || 4,
+          data: {
+            full_name: "Aluna Teste",
+            plan: defaultPlan?.key || "4_aulas",
+            credits: defaultPlan?.credits || 4,
+            is_active: true,
+            plan_start_date: new Date().toISOString().slice(0, 10),
+          },
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      toast.success(`Aluna teste pronta: ${TEST_EMAIL}`);
     } catch (error) {
       console.error("Error:", error);
       toast.error(error?.message || "Erro ao criar aluna teste");
     }
     setCreatingTestStudent(false);
+  };
+
+  const handleLoginAsTestStudent = async () => {
+    const existing = await base44.entities.User.filter({ email: TEST_EMAIL });
+    if (!existing[0]) {
+      toast.error("Crie a aluna teste primeiro");
+      return;
+    }
+    await base44.auth.loginViaEmailPassword({ email: TEST_EMAIL });
+    window.location.assign("/");
   };
 
   const { data: plans = [] } = useQuery({
@@ -333,9 +361,18 @@ export default function ManageStudents() {
             <UserPlus className="h-4 w-4 text-primary" /> Cadastrar nova aluna
           </h3>
         </div>
-        <Button onClick={() => setManualDialog(true)} className="gap-2 w-full sm:w-auto">
-          <UserPlus className="h-4 w-4" /> Cadastro completo
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => setManualDialog(true)} className="gap-2">
+            <UserPlus className="h-4 w-4" /> Cadastro completo
+          </Button>
+          <Button variant="outline" onClick={handleCreateTestStudent} disabled={creatingTestStudent} className="gap-2">
+            {creatingTestStudent ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+            Criar aluna teste
+          </Button>
+          <Button variant="secondary" onClick={handleLoginAsTestStudent} className="gap-2">
+            Entrar como aluna teste
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -462,15 +499,15 @@ export default function ManageStudents() {
                     </Button>
                     {student.is_invited && (
                       <Button
-                        variant="outline"
+                        type="button"
+                        variant="ghost"
                         size="sm"
-                        className="h-8 text-xs gap-1"
+                        className="h-8 w-8 p-0"
                         title="Reenviar convite por email"
                         onClick={() => handleResendInvite(student)}
                         disabled={resendingInvite === student.id}
                       >
-                        {resendingInvite === student.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
-                        Reenviar convite
+                        {resendingInvite === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5 text-primary" />}
                       </Button>
                     )}
                     <Button

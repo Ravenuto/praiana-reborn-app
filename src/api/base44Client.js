@@ -203,9 +203,8 @@ const auth = {
   async loginViaEmailPassword(a, b) {
     const { email } = pickArgs(a, b);
     if (!email) throw new Error('Email obrigatório');
-    // Mock: qualquer login entra como admin (sem backend real ainda)
-    const admin = store.User.find((u) => u.email === 'admin@praiana.app');
-    const user = admin || store.User[0];
+    const match = store.User.find((u) => (u.email || '').toLowerCase() === email.toLowerCase());
+    const user = match || store.User.find((u) => u.email === 'admin@praiana.app') || store.User[0];
     writeAuth(user);
     return { user, token: 'mock-token' };
   },
