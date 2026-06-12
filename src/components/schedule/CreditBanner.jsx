@@ -2,15 +2,25 @@ import React from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { startOfMonth, endOfMonth, format } from "date-fns";
 import { Zap } from "lucide-react";
 import { getCredits, getPlan } from "@/utils";
+
+const FALLBACK_LABELS = {
+  "4_aulas": "4 aulas/mês",
+  "8_aulas": "8 aulas/mês",
+  "12_aulas": "12 aulas/mês",
+  "avulsa": "Aula avulsa",
+};
+
+function humanizePlanKey(key) {
+  if (!key) return "Plano de aulas";
+  if (FALLBACK_LABELS[key]) return FALLBACK_LABELS[key];
+  return String(key).replace(/_/g, " ");
+}
 
 export default function CreditBanner() {
   const { user } = useAuth();
 
-  // Busca o registro do usuário para pegar créditos atualizados
-  // Usa a mesma query key que Schedule e Profile para compartilhar o cache
   const { data: userData } = useQuery({
     queryKey: ["userCredits", user?.email],
     queryFn: async () => {
@@ -23,10 +33,16 @@ export default function CreditBanner() {
     refetchOnWindowFocus: true,
   });
 
+  const { data: plans = [] } = useQuery({
+    queryKey: ["studioPlans"],
+    queryFn: () => base44.entities.StudioPlan.list(),
+  });
+
   if (!user || user.role === "admin") return null;
 
   const credits = getCredits(userData);
-  const planLabel = getPlan(userData) || "Plano de aulas";
+  const planKey = getPlan(userData);
+  const planLabel = plans.find((p) => p.key === planKey)?.label || humanizePlanKey(planKey);
   const noCredits = credits <= 0;
 
   return (

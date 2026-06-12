@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck } from "lucide-react";
+import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { base44 } from "@/api/base44Client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function BottomTabs() {
@@ -86,6 +87,13 @@ export default function BottomTabs() {
                 </Link>
               );
             })}
+            <button
+              onClick={() => { setMoreOpen(false); base44.auth.logout(); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-destructive hover:bg-destructive/5 transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium">Sair</span>
+            </button>
           </div>
         </SheetContent>
       </Sheet>

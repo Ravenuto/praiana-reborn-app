@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/AuthContext";
 import { useUnreadCount } from "@/hooks/useNotifications";
 
 const SUB_TITLES = {
+  "/aulas": "Agenda",
+  "/minhas-reservas": "Minhas reservas",
   "/perfil": "Perfil",
   "/configuracoes": "Configurações",
   "/sobre": "Sobre",
@@ -69,7 +71,7 @@ export default function MobileHeader() {
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <span className="font-heading italic text-primary text-lg truncate">
+            <span className="font-heading italic text-primary font-semibold text-lg truncate">
               {subTitle}
             </span>
             <BellLink />
@@ -81,8 +83,8 @@ export default function MobileHeader() {
                 <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
               </span>
             </Link>
-            <span className="flex-1 text-center font-heading italic text-primary text-base sm:text-lg leading-tight truncate px-1">
-              Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span className="text-primary/70">&amp; Artes</span>
+            <span className="flex-1 text-center font-heading italic text-primary font-semibold text-base sm:text-lg leading-tight truncate px-1">
+              Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>&amp; Artes</span>
             </span>
             <BellLink />
           </>

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, History, Send } from "lucide-react";
+import { UserPlus, Mail, Loader2, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Send, Check } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -42,6 +42,7 @@ export default function ManageStudents() {
   const [expandedId, setExpandedId] = useState(null);
   const [paymentDialog, setPaymentDialog] = useState(null);
   const [sendingWelcome, setSendingWelcome] = useState(null);
+  const [welcomeSent, setWelcomeSent] = useState(() => new Set());
   const [creatingTestStudent, setCreatingTestStudent] = useState(false);
   const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
@@ -272,6 +273,7 @@ export default function ManageStudents() {
         studentEmail: student.email,
         studentName: student.full_name || "",
       });
+      setWelcomeSent((prev) => new Set(prev).add(student.id));
       toast.success("Email de boas-vindas enviado");
     } catch {
       toast.error("Erro ao enviar email");
@@ -430,6 +432,11 @@ export default function ManageStudents() {
                         {student.is_invited && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1"><Mail className="h-3 w-3" /> Email enviado</Badge>}
                         {isActive && !student.is_invited && <Badge className="bg-green-100 text-green-700 border-0 text-xs">Ativa</Badge>}
                         {!isActive && !student.is_invited && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Inativa</Badge>}
+                        {welcomeSent.has(student.id) && (
+                          <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs gap-1">
+                            <Check className="h-3 w-3" /> Boas-vindas enviado
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">{student.email}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0 mt-0.5">
@@ -485,7 +492,7 @@ export default function ManageStudents() {
                       title="Histórico de pagamentos"
                       onClick={() => setPaymentDialog(student)}
                     >
-                      <History className="h-3.5 w-3.5 text-muted-foreground" />
+                      <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                     <Button
                       variant="ghost"
