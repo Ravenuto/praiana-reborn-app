@@ -380,7 +380,7 @@ export default function ManageStudents() {
             const isExpanded = expandedId === student.id;
 
             return (
-              <div key={student.id} className={`rounded-xl border border-border bg-card overflow-hidden transition-opacity ${!isActive ? "opacity-60" : ""}`}>
+              <div key={student.id} className="rounded-xl border border-border bg-card overflow-hidden">
                 {/* Linha principal */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -462,14 +462,15 @@ export default function ManageStudents() {
                     </Button>
                     {student.is_invited && (
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0"
-                        title="Reenviar convite"
+                        className="h-8 text-xs gap-1"
+                        title="Reenviar convite por email"
                         onClick={() => handleResendInvite(student)}
                         disabled={resendingInvite === student.id}
                       >
-                        {resendingInvite === student.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3.5 w-3.5 text-muted-foreground" />}
+                        {resendingInvite === student.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
+                        Reenviar convite
                       </Button>
                     )}
                     <Button
