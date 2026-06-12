@@ -301,8 +301,10 @@ export default function ManageStudents() {
     setSavingEdit(true);
     const student = editDialog.student;
     await base44.entities.User.update(student.id, {
+      full_name: editDialog.full_name,
       data: {
         ...(student.data || {}),
+        full_name: editDialog.full_name,
         plan: student.plan,
         credits: student.credits,
         phone: editDialog.phone,
@@ -320,6 +322,7 @@ export default function ManageStudents() {
     setSavingEdit(false);
     setEditDialog(null);
   };
+
 
   return (
     <div>
