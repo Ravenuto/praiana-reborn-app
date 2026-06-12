@@ -51,7 +51,7 @@ export default function Navbar() {
             <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
           </span>
           <span className="hidden lg:inline font-heading italic text-primary text-lg leading-tight whitespace-nowrap">
-            Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span className="text-primary/70">&amp; Artes</span>
+            Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>&amp; Artes</span>
           </span>
         </Link>
 
