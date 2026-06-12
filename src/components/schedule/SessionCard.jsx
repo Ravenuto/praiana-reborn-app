@@ -47,7 +47,7 @@ export default function SessionCard({
                 <Clock className="h-4 w-4 text-primary" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-heading text-sm font-semibold truncate">{session.class_type_name}</h3>
+                <h3 className="font-heading text-sm font-bold truncate">{session.class_type_name}</h3>
                 <p className="text-xs text-muted-foreground">
                   {session.time}{session.instructor && <span className="ml-2 text-muted-foreground/70">· {session.instructor}</span>}
                 </p>
