@@ -222,6 +222,11 @@ export default function Profile() {
             <p className="font-medium text-sm">
               {format(new Date(entityData.last_payment_date + "T12:00:00"), "dd/MM/yyyy")}
             </p>
+            {lastPayment?.payment_method && (
+              <p className="text-xs text-primary mt-1 font-medium">
+                {lastPayment.payment_method === "pix" ? "PIX" : lastPayment.payment_method === "cartao_credito" ? "Cartão de crédito" : lastPayment.payment_method}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground mt-1">Válido por 30 dias</p>
           </div>
         )}
