@@ -42,6 +42,7 @@ export default function ManageStudents() {
   const [expandedId, setExpandedId] = useState(null);
   const [paymentDialog, setPaymentDialog] = useState(null);
   const [sendingWelcome, setSendingWelcome] = useState(null);
+  const [welcomeSent, setWelcomeSent] = useState(() => new Set());
   const [creatingTestStudent, setCreatingTestStudent] = useState(false);
   const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
