@@ -36,12 +36,14 @@ export default function ManageClassTypes() {
         toast.success("Modalidade atualizada");
       } else {
         await base44.entities.ClassType.create({ ...form, is_active: true });
-        notifyAllStudents({
-          type: "new_notice",
-          title: "Nova modalidade disponível 🎉",
-          message: `${form.name} já está disponível na grade.`,
-          link: "/agenda",
-        });
+        if (form.show_in_app !== false) {
+          notifyAllStudents({
+            type: "new_notice",
+            title: "Nova modalidade disponível 🎉",
+            message: `${form.name} já está disponível na grade.`,
+            link: "/agenda",
+          });
+        }
         toast.success("Modalidade criada");
       }
       queryClient.invalidateQueries({ queryKey: ["classTypes"] });
