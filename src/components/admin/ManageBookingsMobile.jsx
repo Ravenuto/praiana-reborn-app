@@ -51,7 +51,17 @@ export default function ManageBookings() {
   }, [bookings, search, filterStatus]);
 
   const handleStatusChange = async (bookingId, newStatus) => {
+    const booking = bookings.find((b) => b.id === bookingId);
     await base44.entities.Booking.update(bookingId, { status: newStatus });
+    if (newStatus === "cancelada" && booking?.student_email && booking?.status !== "cancelada") {
+      createNotification({
+        user_email: booking.student_email,
+        type: "booking_cancelled",
+        title: "Sua reserva foi cancelada",
+        message: `${booking.class_type_name || "Aula"} foi cancelada pela administração.`,
+        link: "/minhas-reservas",
+      });
+    }
     queryClient.invalidateQueries({ queryKey: ["adminBookingsPeriod"] });
     toast.success("Status atualizado");
   };
