@@ -48,6 +48,11 @@ export default function Profile() {
     enabled: !!user,
   });
 
+  const { data: studioPlans = [] } = useQuery({
+    queryKey: ["studioPlans"],
+    queryFn: () => base44.entities.StudioPlan.list(),
+  });
+
   const today = new Date();
   const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
   const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
@@ -62,17 +67,26 @@ export default function Profile() {
       ),
   });
 
-  const planMaxCredits = { "4_aulas": 4, "8_aulas": 8, "12_aulas": 12, "avulsa": 1 };
+  const { data: lastPayment } = useQuery({
+    queryKey: ["lastPayment", user?.email],
+    queryFn: async () => {
+      const list = await base44.entities.PaymentHistory.filter({ user_email: user?.email }, "-payment_date", 1);
+      return list[0] || null;
+    },
+    enabled: !!user?.email,
+  });
 
-  // userEntity tem os créditos mais atualizados (admin pode ter editado)
-  // Sempre preferir o valor mais fresco em data.credits — não usar Math.max
-  // para não mostrar valor antigo quando a aluna acabou de reservar/cancelar.
+  const planMaxCreditsFallback = { "4_aulas": 4, "8_aulas": 8, "12_aulas": 12, "avulsa": 1 };
+
   const entityData = userEntity?.data || {};
   const currentUser = userEntity || userData || user;
   const plan = entityData?.plan || currentUser?.plan || "4_aulas";
-  const planData = planInfo[plan] || planInfo["4_aulas"];
+  const planFromDb = studioPlans.find((p) => p.key === plan);
+  const planData = planFromDb
+    ? { label: planFromDb.label, price: planFromDb.price || `R$ ${planFromDb.price_value || ""}`, color: "bg-primary/10 text-primary" }
+    : (planInfo[plan] || { label: plan.replace(/_/g, " "), price: "", color: "bg-muted text-muted-foreground" });
   const credits = getCredits(userEntity || currentUser);
-  const maxCredits = planMaxCredits[plan] || 4;
+  const maxCredits = planFromDb?.credits || planMaxCreditsFallback[plan] || 4;
   const usedThisMonth = monthBookings.length;
 
   React.useEffect(() => {
