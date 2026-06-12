@@ -154,6 +154,12 @@ export default function ManageSessions() {
         toast.success("Horário atualizado");
       } else {
         await base44.entities.ClassSession.create(data);
+        notifyAllStudents({
+          type: "schedule_change",
+          title: "Novo horário na grade ✨",
+          message: `${form.class_type_name || "Aula"} ${isRecurring ? `toda ${form.day_of_week}` : `dia ${form.specific_date}`} às ${form.time}.`,
+          link: "/agenda",
+        });
         toast.success("Horário criado");
       }
       queryClient.invalidateQueries({ queryKey: ["allSessions"] });
