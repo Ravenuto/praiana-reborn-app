@@ -659,7 +659,10 @@ export default function ManageStudents() {
               <DialogTitle className="font-heading">Detalhes da Aluna</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 py-2">
-              <p className="text-sm font-medium">{editDialog.student.full_name || editDialog.student.email}</p>
+              <div>
+                <Label className="text-xs mb-1 block">Nome completo</Label>
+                <Input value={editDialog.full_name} onChange={(e) => setEditDialog((d) => ({ ...d, full_name: e.target.value }))} className="h-8 text-sm" placeholder="Nome da aluna" />
+              </div>
               <div>
                 <Label className="text-xs mb-1 block">Plano</Label>
                 <Select 
