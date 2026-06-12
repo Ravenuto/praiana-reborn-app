@@ -205,18 +205,30 @@ export default function ManageSessions() {
 
   // Cancela apenas o dia: cria uma aula única "cancelada" como exceção
   const handleDeleteOneDay = async () => {
-    // Marca a sessão recorrente com uma data cancelada (cancelled_dates array)
     const s = deleteTarget;
     const cancelled = s.cancelled_dates ? [...s.cancelled_dates, selectedDate] : [selectedDate];
     await base44.entities.ClassSession.update(s.id, { cancelled_dates: cancelled });
+    notifyBookedStudents({
+      session_id: s.id,
+      date: selectedDate,
+      type: "schedule_change",
+      title: "Aula cancelada",
+      message: `${s.class_type_name || "Aula"} de ${selectedDate} às ${s.time} foi cancelada.`,
+      link: "/agenda",
+    });
     queryClient.invalidateQueries({ queryKey: ["allSessions"] });
     queryClient.invalidateQueries({ queryKey: ["sessions"] });
     setDeleteTarget(null);
     toast.success("Aula cancelada para este dia");
   };
 
-  // Exclui o horário permanentemente
   const handleDeleteAll = async () => {
+    notifyAllStudents({
+      type: "schedule_change",
+      title: "Horário removido da grade",
+      message: `${deleteTarget.class_type_name || "Aula"} de ${deleteTarget.day_of_week || ""} às ${deleteTarget.time || ""} não acontecerá mais.`,
+      link: "/agenda",
+    });
     await base44.entities.ClassSession.delete(deleteTarget.id);
     queryClient.invalidateQueries({ queryKey: ["allSessions"] });
     queryClient.invalidateQueries({ queryKey: ["sessions"] });
