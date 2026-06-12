@@ -380,7 +380,7 @@ export default function ManageStudents() {
             const isExpanded = expandedId === student.id;
 
             return (
-              <div key={student.id} className={`rounded-xl border border-border bg-card overflow-hidden transition-opacity ${!isActive ? "opacity-60" : ""}`}>
+              <div key={student.id} className="rounded-xl border border-border bg-card overflow-hidden">
                 {/* Linha principal */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
