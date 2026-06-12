@@ -185,8 +185,13 @@ export default function ManageClassTypes() {
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ct.color || "#c2185b" }} />
                 <div>
-                  <p className="font-semibold text-sm">{ct.name}</p>
-                   <p className="text-xs text-muted-foreground">{ct.duration_minutes || 60}min · Até {ct.max_students || 8} alunas</p>
+                  <p className="font-semibold text-sm flex items-center gap-2">
+                    {ct.name}
+                    {ct.show_in_app === false && (
+                      <span className="text-[10px] uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Oculta no app</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{ct.duration_minutes || 60}min · Até {ct.max_students || 8} alunas</p>
                 </div>
               </div>
               <div className="flex gap-1">
