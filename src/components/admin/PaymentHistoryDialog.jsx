@@ -54,36 +54,64 @@ export default function PaymentHistoryDialog({ student, onClose }) {
     queryFn: () => base44.entities.PaymentHistory.filter({ user_id: student.id }, "-payment_date", 50),
   });
 
+  const resetForm = () => {
+    const initialPrice = getPlanPrice(student.plan || "4_aulas");
+    setForm({ payment_date: format(new Date(), "yyyy-MM-dd"), plan_name: student.plan || "4_aulas", amount: initialPrice, payment_method: "pix", explanation: "" });
+    setAmountEdited(false);
+  };
+
   const handleAdd = async () => {
     if (!form.payment_date) return toast.error("Data de pagamento obrigatória");
     if (amountEdited && !form.explanation) return toast.error("Explicação é obrigatória quando o valor é alterado");
     setSaving(true);
     try {
-      await base44.entities.PaymentHistory.create({
-        user_id: student.id,
-        user_email: student.email,
-        user_name: student.full_name || student.email,
-        plan_name: form.plan_name,
-        amount: parseFloat(form.amount) || 0,
-        payment_date: form.payment_date,
-        payment_method: form.payment_method,
-        notes: form.explanation || "",
-      });
-      // Atualiza last_payment_date no perfil da aluna
-      await base44.entities.User.update(student.id, {
-        last_payment_date: form.payment_date,
-      });
+      if (editingId) {
+        await base44.entities.PaymentHistory.update(editingId, {
+          plan_name: form.plan_name,
+          amount: parseFloat(form.amount) || 0,
+          payment_date: form.payment_date,
+          payment_method: form.payment_method,
+          notes: form.explanation || "",
+        });
+        toast.success("Pagamento atualizado!");
+      } else {
+        await base44.entities.PaymentHistory.create({
+          user_id: student.id,
+          user_email: student.email,
+          user_name: student.full_name || student.email,
+          plan_name: form.plan_name,
+          amount: parseFloat(form.amount) || 0,
+          payment_date: form.payment_date,
+          payment_method: form.payment_method,
+          notes: form.explanation || "",
+        });
+        await base44.entities.User.update(student.id, {
+          last_payment_date: form.payment_date,
+        });
+        toast.success("Pagamento registrado!");
+      }
       queryClient.invalidateQueries({ queryKey: ["paymentHistory", student.id] });
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success("Pagamento registrado!");
       setAdding(false);
-      setAmountEdited(false);
-      const initialPrice = getPlanPrice(student.plan || "4_aulas");
-      setForm({ payment_date: format(new Date(), "yyyy-MM-dd"), plan_name: student.plan || "4_aulas", amount: initialPrice, payment_method: "pix", explanation: "" });
+      setEditingId(null);
+      resetForm();
     } catch {
-      toast.error("Erro ao registrar pagamento");
+      toast.error("Erro ao salvar pagamento");
     }
     setSaving(false);
+  };
+
+  const handleEdit = (p) => {
+    setEditingId(p.id);
+    setForm({
+      payment_date: p.payment_date,
+      plan_name: p.plan_name,
+      amount: p.amount || 0,
+      payment_method: p.payment_method || "pix",
+      explanation: p.notes || "",
+    });
+    setAmountEdited(false);
+    setAdding(true);
   };
 
   const handleDelete = async (id) => {
