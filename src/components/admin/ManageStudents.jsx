@@ -273,6 +273,7 @@ export default function ManageStudents() {
         studentEmail: student.email,
         studentName: student.full_name || "",
       });
+      setWelcomeSent((prev) => new Set(prev).add(student.id));
       toast.success("Email de boas-vindas enviado");
     } catch {
       toast.error("Erro ao enviar email");
