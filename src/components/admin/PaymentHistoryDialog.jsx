@@ -15,6 +15,7 @@ import { toast } from "sonner";
 export default function PaymentHistoryDialog({ student, onClose }) {
   const queryClient = useQueryClient();
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [amountEdited, setAmountEdited] = useState(false);
   const [form, setForm] = useState({
