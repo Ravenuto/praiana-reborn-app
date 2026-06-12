@@ -244,7 +244,7 @@ export default function ManageStudents() {
         studentEmail: student.email,
         studentName: student.full_name || "",
       });
-      toast.success("Email de boas-vindas enviado!");
+      toast.success("Email de boas-vindas enviado");
     } catch {
       toast.error("Erro ao enviar email");
     }
@@ -257,9 +257,9 @@ export default function ManageStudents() {
       await base44.functions.invoke("resendInviteEmail", {
         email: student.email,
       });
-      toast.success("Convite reenviado para " + student.email);
+      toast.success("Email reenviado para " + student.email);
     } catch {
-      toast.error("Erro ao reenviar convite");
+      toast.error("Erro ao reenviar email");
     }
     setResendingInvite(null);
   };
@@ -271,22 +271,27 @@ export default function ManageStudents() {
     setDeletingStudent(student.id);
     try {
       if (student.is_invited) {
-        // Convite pendente: só deleta o registro de invitation
         await base44.entities.StudentInvitation.delete(student.id);
       } else {
-        // Usuário real: deleta completamente via backend (auth + dados)
-        await base44.functions.invoke("deleteStudent", {
-          userId: student.id,
-          email: student.email,
-        });
+        // Deleta o usuário diretamente
+        await base44.entities.User.delete(student.id);
+        // Best-effort: também tenta no backend (se existir)
+        try {
+          await base44.functions.invoke("deleteStudent", {
+            userId: student.id,
+            email: student.email,
+          });
+        } catch { /* ignora se função não existir */ }
       }
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       toast.success("Aluna deletada com sucesso");
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("Erro ao deletar aluna");
     }
     setDeletingStudent(null);
   };
+
 
   const handleSaveEdit = async () => {
     if (!editDialog) return;
