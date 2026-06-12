@@ -10,6 +10,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Search, UserCheck, CalendarRange, Filter } from "lucide-react";
 import { toast } from "sonner";
+import { createNotification } from "@/hooks/useNotifications";
 
 const statusOptions = [
   { value: "confirmada", label: "Confirmada", class: "bg-primary/10 text-primary" },
