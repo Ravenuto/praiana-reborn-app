@@ -68,11 +68,20 @@ export default function MyBookings() {
         const cleanData = Object.fromEntries(Object.entries(userData.data || {}).filter(([k]) => k !== 'data'));
         await base44.entities.User.update(userData.id, { data: { ...cleanData, credits: currentCredits + 1 } });
       }
+      // Promove próxima da fila de espera (se houver)
+      await promoteFromWaitlist({
+        session_id: booking.session_id,
+        session_date: booking.session_date,
+        session_time: booking.session_time,
+        class_type_name: booking.class_type_name,
+      });
       queryClient.invalidateQueries({ queryKey: ["myAllBookings"] });
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       queryClient.invalidateQueries({ queryKey: ["myBookings"] });
       queryClient.invalidateQueries({ queryKey: ["userCredits"] });
       queryClient.invalidateQueries({ queryKey: ["myProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["allWaitlist"] });
+      queryClient.invalidateQueries({ queryKey: ["myWaitlist"] });
       toast.success("Reserva cancelada e crédito devolvido!");
     } catch {
       toast.error("Erro ao cancelar");
