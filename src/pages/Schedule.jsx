@@ -17,6 +17,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { getStudioSettings } from "@/lib/studioSettings";
 import PraianaBlobs from "@/components/shared/PraianaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
+import { promoteFromWaitlist } from "@/lib/waitlist";
 
 function getTodayDayKey() {
   const days = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
