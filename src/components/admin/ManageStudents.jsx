@@ -361,9 +361,18 @@ export default function ManageStudents() {
             <UserPlus className="h-4 w-4 text-primary" /> Cadastrar nova aluna
           </h3>
         </div>
-        <Button onClick={() => setManualDialog(true)} className="gap-2 w-full sm:w-auto">
-          <UserPlus className="h-4 w-4" /> Cadastro completo
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => setManualDialog(true)} className="gap-2">
+            <UserPlus className="h-4 w-4" /> Cadastro completo
+          </Button>
+          <Button variant="outline" onClick={handleCreateTestStudent} disabled={creatingTestStudent} className="gap-2">
+            {creatingTestStudent ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+            Criar aluna teste
+          </Button>
+          <Button variant="secondary" onClick={handleLoginAsTestStudent} className="gap-2">
+            Entrar como aluna teste
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
