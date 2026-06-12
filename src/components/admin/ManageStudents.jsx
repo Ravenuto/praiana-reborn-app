@@ -451,11 +451,6 @@ export default function ManageStudents() {
                         {student.is_invited && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1"><Mail className="h-3 w-3" /> Email enviado</Badge>}
                         {isActive && !student.is_invited && <Badge className="bg-green-100 text-green-700 border-0 text-xs">Ativa</Badge>}
                         {!isActive && !student.is_invited && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Inativa</Badge>}
-                        {welcomeSent.has(student.id) && (
-                          <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs gap-1">
-                            <Check className="h-3 w-3" /> Boas-vindas enviado
-                          </Badge>
-                        )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">{student.email}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0 mt-0.5">

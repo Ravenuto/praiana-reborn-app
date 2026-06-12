@@ -85,10 +85,32 @@ export default function PaymentHistoryDialog({ student, onClose }) {
           payment_method: form.payment_method,
           notes: form.explanation || "",
         });
+        // Atualiza créditos da aluna conforme o plano pago
+        const planObj = plans.find((p) => p.key === form.plan_name);
+        const planCredits = planObj?.credits ?? 0;
         await base44.entities.User.update(student.id, {
           last_payment_date: form.payment_date,
+          plan: form.plan_name,
+          plan_start_date: form.payment_date,
+          data: {
+            ...(student.data || {}),
+            credits: planCredits,
+            plan: form.plan_name,
+            plan_start_date: form.payment_date,
+          },
         });
-        toast.success("Pagamento registrado!");
+        // Notifica aluna
+        try {
+          await base44.entities.Notification.create({
+            user_email: student.email,
+            type: "credits_added",
+            title: "Pagamento confirmado 💚",
+            message: `Seu plano foi renovado com ${planCredits} créditos.`,
+            link: "/perfil",
+            read: false,
+          });
+        } catch { /* noop */ }
+        toast.success(`Pagamento registrado! ${planCredits} créditos adicionados.`);
       }
       queryClient.invalidateQueries({ queryKey: ["paymentHistory", student.id] });
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });

@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
+import { notifyAllStudents } from "@/hooks/useNotifications";
 
 const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, image_url: "", color: "#c2185b" };
 
@@ -35,6 +36,12 @@ export default function ManageClassTypes() {
         toast.success("Modalidade atualizada");
       } else {
         await base44.entities.ClassType.create({ ...form, is_active: true });
+        notifyAllStudents({
+          type: "new_notice",
+          title: "Nova modalidade disponível 🎉",
+          message: `${form.name} já está disponível na grade.`,
+          link: "/agenda",
+        });
         toast.success("Modalidade criada");
       }
       queryClient.invalidateQueries({ queryKey: ["classTypes"] });
