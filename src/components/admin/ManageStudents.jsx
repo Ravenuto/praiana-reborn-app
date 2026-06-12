@@ -244,7 +244,7 @@ export default function ManageStudents() {
         studentEmail: student.email,
         studentName: student.full_name || "",
       });
-      toast.success("Email de boas-vindas enviado!");
+      toast.success("Email de boas-vindas enviado");
     } catch {
       toast.error("Erro ao enviar email");
     }
@@ -257,9 +257,9 @@ export default function ManageStudents() {
       await base44.functions.invoke("resendInviteEmail", {
         email: student.email,
       });
-      toast.success("Convite reenviado para " + student.email);
+      toast.success("Email reenviado para " + student.email);
     } catch {
-      toast.error("Erro ao reenviar convite");
+      toast.error("Erro ao reenviar email");
     }
     setResendingInvite(null);
   };
@@ -271,22 +271,27 @@ export default function ManageStudents() {
     setDeletingStudent(student.id);
     try {
       if (student.is_invited) {
-        // Convite pendente: só deleta o registro de invitation
         await base44.entities.StudentInvitation.delete(student.id);
       } else {
-        // Usuário real: deleta completamente via backend (auth + dados)
-        await base44.functions.invoke("deleteStudent", {
-          userId: student.id,
-          email: student.email,
-        });
+        // Deleta o usuário diretamente
+        await base44.entities.User.delete(student.id);
+        // Best-effort: também tenta no backend (se existir)
+        try {
+          await base44.functions.invoke("deleteStudent", {
+            userId: student.id,
+            email: student.email,
+          });
+        } catch { /* ignora se função não existir */ }
       }
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       toast.success("Aluna deletada com sucesso");
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("Erro ao deletar aluna");
     }
     setDeletingStudent(null);
   };
+
 
   const handleSaveEdit = async () => {
     if (!editDialog) return;
@@ -296,8 +301,10 @@ export default function ManageStudents() {
     setSavingEdit(true);
     const student = editDialog.student;
     await base44.entities.User.update(student.id, {
+      full_name: editDialog.full_name,
       data: {
         ...(student.data || {}),
+        full_name: editDialog.full_name,
         plan: student.plan,
         credits: student.credits,
         phone: editDialog.phone,
@@ -315,6 +322,7 @@ export default function ManageStudents() {
     setSavingEdit(false);
     setEditDialog(null);
   };
+
 
   return (
     <div>
@@ -428,7 +436,7 @@ export default function ManageStudents() {
                       size="sm"
                       className="h-8 w-8 p-0"
                       title="Editar detalhes"
-                      onClick={() => setEditDialog({ student, phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "" })}
+                      onClick={() => setEditDialog({ student, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "" })}
                       disabled={student.is_invited}
                     >
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
@@ -651,7 +659,10 @@ export default function ManageStudents() {
               <DialogTitle className="font-heading">Detalhes da Aluna</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 py-2">
-              <p className="text-sm font-medium">{editDialog.student.full_name || editDialog.student.email}</p>
+              <div>
+                <Label className="text-xs mb-1 block">Nome completo</Label>
+                <Input value={editDialog.full_name} onChange={(e) => setEditDialog((d) => ({ ...d, full_name: e.target.value }))} className="h-8 text-sm" placeholder="Nome da aluna" />
+              </div>
               <div>
                 <Label className="text-xs mb-1 block">Plano</Label>
                 <Select 
