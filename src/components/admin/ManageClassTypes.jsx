@@ -11,7 +11,7 @@ import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { notifyAllStudents } from "@/hooks/useNotifications";
 
-const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, image_url: "", color: "#c2185b" };
+const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, image_url: "", color: "#c2185b", show_in_app: true };
 
 export default function ManageClassTypes() {
   const queryClient = useQueryClient();
