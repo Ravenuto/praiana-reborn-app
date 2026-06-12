@@ -203,7 +203,8 @@ const pickArgs = (a, b) => {
 };
 
 // Seed an admin session on first load so all screens are visible without manual login.
-if (isBrowser && !window.localStorage.getItem(AUTH_KEY)) {
+// Skip seeding if the user explicitly logged out.
+if (isBrowser && !window.localStorage.getItem(AUTH_KEY) && !window.localStorage.getItem('praiana_logged_out')) {
   const admin = store.User.find((u) => u.email === 'admin@praiana.app');
   if (admin) writeAuth(admin);
 }
