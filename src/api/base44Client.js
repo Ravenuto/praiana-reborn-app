@@ -120,11 +120,13 @@ const matchFilter = (row, filter) => {
 };
 
 const makeEntity = (name) => ({
-  async list(_sort, _limit) {
-    return [...(store[name] || [])];
+  async list(sort, limit) {
+    const rows = [...(store[name] || [])];
+    return applySortLimit(rows, sort, limit);
   },
-  async filter(filter, _sort, _limit) {
-    return (store[name] || []).filter((r) => matchFilter(r, filter));
+  async filter(filter, sort, limit) {
+    const rows = (store[name] || []).filter((r) => matchFilter(r, filter));
+    return applySortLimit(rows, sort, limit);
   },
   async get(id) {
     return (store[name] || []).find((r) => r.id === id) || null;
