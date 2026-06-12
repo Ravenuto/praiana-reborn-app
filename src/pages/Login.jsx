@@ -43,7 +43,7 @@ export default function Login() {
             <img
               src={logoPraiana}
               alt="Praiana Pole Dance"
-              className="w-24 h-24 object-contain animate-float-y"
+              className="w-24 h-24 object-contain animate-float-y dark:bg-white dark:rounded-full dark:p-2 dark:shadow-md"
             />
           </div>
           <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Praiana Pole Dance</h1>
