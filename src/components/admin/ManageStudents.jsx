@@ -53,27 +53,46 @@ export default function ManageStudents() {
     setCreatingTestStudent(true);
     try {
       const existing = await base44.entities.User.filter({ email: TEST_EMAIL });
+      // Remove duplicatas (mantém apenas a primeira) para evitar leituras inconsistentes
+      if (existing.length > 1) {
+        for (const dup of existing.slice(1)) {
+          await base44.entities.User.delete(dup.id);
+        }
+      }
       let student = existing[0];
+      const defaultPlan = plans.find((p) => p.key === "4_aulas") || plans[0];
+      const planKey = defaultPlan?.key || "4_aulas";
+      const planCredits = defaultPlan?.credits || 4;
       if (!student) {
-        const defaultPlan = plans.find((p) => p.key === "4_aulas") || plans[0];
         student = await base44.entities.User.create({
           full_name: "Aluna Teste",
           email: TEST_EMAIL,
           role: "user",
           is_admin: false,
           plan_status: "active",
-          credits_remaining: defaultPlan?.credits || 4,
           data: {
             full_name: "Aluna Teste",
-            plan: defaultPlan?.key || "4_aulas",
-            credits: defaultPlan?.credits || 4,
+            plan: planKey,
+            credits: planCredits,
             is_active: true,
             plan_start_date: new Date().toISOString().slice(0, 10),
           },
         });
+      } else {
+        // Reseta créditos para o valor do plano (garante teste limpo)
+        const cleanData = Object.fromEntries(Object.entries(student.data || {}).filter(([k]) => k !== 'data'));
+        await base44.entities.User.update(student.id, {
+          data: {
+            ...cleanData,
+            plan: cleanData.plan || planKey,
+            credits: planCredits,
+            is_active: true,
+            plan_start_date: cleanData.plan_start_date || new Date().toISOString().slice(0, 10),
+          },
+        });
       }
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success(`Aluna teste pronta: ${TEST_EMAIL}`);
+      toast.success(`Aluna teste pronta com ${planCredits} créditos: ${TEST_EMAIL}`);
     } catch (error) {
       console.error("Error:", error);
       toast.error(error?.message || "Erro ao criar aluna teste");
