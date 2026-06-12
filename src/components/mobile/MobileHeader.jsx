@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/AuthContext";
 import { useUnreadCount } from "@/hooks/useNotifications";
 
 const SUB_TITLES = {
+  "/aulas": "Agenda",
+  "/minhas-reservas": "Minhas reservas",
   "/perfil": "Perfil",
   "/configuracoes": "Configurações",
   "/sobre": "Sobre",
