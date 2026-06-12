@@ -492,7 +492,7 @@ export default function ManageStudents() {
                       title="Histórico de pagamentos"
                       onClick={() => setPaymentDialog(student)}
                     >
-                      <History className="h-3.5 w-3.5 text-muted-foreground" />
+                      <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                     <Button
                       variant="ghost"
