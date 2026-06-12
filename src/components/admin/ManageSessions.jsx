@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { format, addDays, startOfWeek, addMonths, subMonths, startOfMonth, endOfMonth, isSameMonth, isSameDay, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import DaySelector, { DAYS } from "@/components/schedule/DaySelector";
+import { notifyAllStudents, notifyBookedStudents } from "@/hooks/useNotifications";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
