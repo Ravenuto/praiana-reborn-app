@@ -462,15 +462,15 @@ export default function ManageStudents() {
                     </Button>
                     {student.is_invited && (
                       <Button
-                        variant="outline"
+                        type="button"
+                        variant="ghost"
                         size="sm"
-                        className="h-8 text-xs gap-1"
+                        className="h-8 w-8 p-0"
                         title="Reenviar convite por email"
                         onClick={() => handleResendInvite(student)}
                         disabled={resendingInvite === student.id}
                       >
-                        {resendingInvite === student.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
-                        Reenviar convite
+                        {resendingInvite === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5 text-primary" />}
                       </Button>
                     )}
                     <Button
