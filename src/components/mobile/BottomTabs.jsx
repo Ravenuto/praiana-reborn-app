@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck } from "lucide-react";
+import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { base44 } from "@/api/base44Client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function BottomTabs() {
