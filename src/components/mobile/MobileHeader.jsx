@@ -71,7 +71,7 @@ export default function MobileHeader() {
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <span className="font-heading italic text-primary text-lg truncate">
+            <span className="font-heading italic text-primary font-semibold text-lg truncate">
               {subTitle}
             </span>
             <BellLink />
