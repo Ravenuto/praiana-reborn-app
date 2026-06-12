@@ -119,6 +119,23 @@ const matchFilter = (row, filter) => {
   });
 };
 
+const applySortLimit = (rows, sort, limit) => {
+  let out = rows;
+  if (typeof sort === "string" && sort) {
+    const desc = sort.startsWith("-");
+    const key = desc ? sort.slice(1) : sort;
+    out = [...out].sort((a, b) => {
+      const av = a?.[key], bv = b?.[key];
+      if (av === bv) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      return desc ? (av < bv ? 1 : -1) : (av < bv ? -1 : 1);
+    });
+  }
+  if (typeof limit === "number" && limit > 0) out = out.slice(0, limit);
+  return out;
+};
+
 const makeEntity = (name) => ({
   async list(sort, limit) {
     const rows = [...(store[name] || [])];
