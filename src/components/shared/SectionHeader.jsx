@@ -34,7 +34,7 @@ export default function SectionHeader({ eyebrow, title, goldWord, subtitle, alig
         </span>
       )}
       {title && (
-        <h1 className="mt-3 font-heading italic text-primary text-4xl md:text-5xl leading-[1.05] tracking-tight">
+        <h1 className="mt-3 font-heading italic font-bold text-primary text-4xl md:text-5xl leading-[1.05] tracking-tight">
           {renderTitle()}
         </h1>
       )}
