@@ -64,6 +64,7 @@ export default function ManageClassTypes() {
       max_students: ct.max_students || 8,
       image_url: ct.image_url || "",
       color: ct.color || "#c2185b",
+      show_in_app: ct.show_in_app !== false,
     });
     setEditingId(ct.id);
     setOpen(true);
