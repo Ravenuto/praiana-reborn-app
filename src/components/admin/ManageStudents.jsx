@@ -62,8 +62,29 @@ export default function ManageStudents() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["allUsers"],
     queryFn: async () => {
-      const response = await base44.functions.invoke("getAllUsers", {});
-      return response.data.users;
+      const [allUsers, invites] = await Promise.all([
+        base44.entities.User.list(),
+        base44.entities.StudentInvitation.filter({ status: "pending" }),
+      ]);
+      // Marca convites pendentes como is_invited para a UI
+      const inviteRows = invites
+        .filter((inv) => !allUsers.some((u) => u.email === inv.email))
+        .map((inv) => ({
+          id: inv.id,
+          full_name: inv.full_name || "",
+          email: inv.email,
+          plan: inv.plan,
+          credits: inv.credits,
+          is_active: false,
+          is_invited: true,
+          role: "user",
+        }));
+      // Flatten data field so a aluna ative apareça com os campos esperados
+      const normalUsers = allUsers.map((u) => ({
+        ...u,
+        ...(u.data || {}),
+      }));
+      return [...normalUsers, ...inviteRows];
     },
   });
 
@@ -114,38 +135,34 @@ export default function ManageStudents() {
     if (!manualForm.email.includes("@")) return toast.error("Email inválido");
     setSavingManual(true);
     try {
-      // Convida a aluna para criar a conta
-      await base44.users.inviteUser(manualForm.email, "user");
-      // Cria registro de StudentInvitation com status "pending"
+      // Verifica se já existe convite ou usuária com este email
+      const existingInvites = await base44.entities.StudentInvitation.filter({ email: manualForm.email });
+      const existingUsers = await base44.entities.User.filter({ email: manualForm.email });
+      if (existingInvites.length > 0 || existingUsers.length > 0) {
+        toast.error("Já existe uma aluna ou convite com este email.");
+        setSavingManual(false);
+        return;
+      }
+
+      // Cria o registro de convite pendente
       await base44.entities.StudentInvitation.create({
         email: manualForm.email,
         full_name: manualForm.name,
+        phone: manualForm.phone,
+        birth_date: manualForm.birth_date,
         plan: manualForm.plan,
         credits: manualForm.credits,
         status: "pending",
         invited_date: new Date().toISOString(),
       });
-      // Aguarda um pouco para o user ser criado, então busca e atualiza
-      await new Promise(r => setTimeout(r, 1500));
-      const users = await base44.entities.User.filter({ email: manualForm.email });
-      if (users[0]) {
-        await base44.entities.User.update(users[0].id, {
-          data: {
-            ...(users[0].data || {}),
-            phone: manualForm.phone,
-            birth_date: manualForm.birth_date,
-            plan: manualForm.plan,
-            credits: manualForm.credits,
-            plan_start_date: format(new Date(), "yyyy-MM-dd"),
-          }
-        });
-      }
+
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success(`Aluna ${manualForm.name} cadastrada! Um convite foi enviado para ${manualForm.email}`);
+      toast.success(`Convite enviado para ${manualForm.email}. A aluna aparecerá como "Email enviado" até ativar a conta.`);
       setManualDialog(false);
       setManualForm(EMPTY_MANUAL);
-    } catch {
-      toast.error("Erro ao cadastrar. Verifique se o email já está cadastrado.");
+    } catch (err) {
+      console.error("Erro ao cadastrar aluna:", err);
+      toast.error("Erro ao cadastrar: " + (err?.message || "tente novamente"));
     }
     setSavingManual(false);
   };

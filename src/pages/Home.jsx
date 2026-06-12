@@ -37,10 +37,14 @@ export default function Home() {
             </div>
 
             {/* Brand tagline */}
-            <div className="text-center -mt-2">
-              <p className="font-heading not-italic font-extrabold text-primary text-2xl md:text-3xl uppercase tracking-[0.18em] drop-shadow-[0_2px_10px_hsl(var(--primary)/0.25)]">
-                Praiana <span className="gold-word font-extrabold">Pole Dance</span> e Artes
+            <div className="text-center -mt-2 flex flex-col items-center gap-2">
+              <span className="h-px w-16 bg-accent/70" />
+              <p className="font-heading italic text-primary text-3xl md:text-4xl leading-tight">
+                Praiana <span className="gold-word">Pole Dance</span>
+                <br />
+                <span className="text-2xl md:text-3xl text-primary/80">e Artes</span>
               </p>
+              <span className="h-px w-16 bg-accent/70" />
             </div>
 
             {/* Greeting */}
