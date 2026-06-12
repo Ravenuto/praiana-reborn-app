@@ -203,7 +203,8 @@ const pickArgs = (a, b) => {
 };
 
 // Seed an admin session on first load so all screens are visible without manual login.
-if (isBrowser && !window.localStorage.getItem(AUTH_KEY)) {
+// Skip seeding if the user explicitly logged out.
+if (isBrowser && !window.localStorage.getItem(AUTH_KEY) && !window.localStorage.getItem('praiana_logged_out')) {
   const admin = store.User.find((u) => u.email === 'admin@praiana.app');
   if (admin) writeAuth(admin);
 }
@@ -225,6 +226,7 @@ const auth = {
     const match = store.User.find((u) => (u.email || '').toLowerCase() === email.toLowerCase());
     const user = match || store.User.find((u) => u.email === 'admin@praiana.app') || store.User[0];
     writeAuth(user);
+    try { window.localStorage.removeItem('praiana_logged_out'); } catch {}
     return { user, token: 'mock-token' };
   },
   async register(a, b) {
