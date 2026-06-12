@@ -226,6 +226,7 @@ const auth = {
     const match = store.User.find((u) => (u.email || '').toLowerCase() === email.toLowerCase());
     const user = match || store.User.find((u) => u.email === 'admin@praiana.app') || store.User[0];
     writeAuth(user);
+    try { window.localStorage.removeItem('praiana_logged_out'); } catch {}
     return { user, token: 'mock-token' };
   },
   async register(a, b) {
