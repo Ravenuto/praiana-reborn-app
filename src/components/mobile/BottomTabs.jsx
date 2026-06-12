@@ -88,7 +88,12 @@ export default function BottomTabs() {
               );
             })}
             <button
-              onClick={() => { setMoreOpen(false); base44.auth.logout(); }}
+              onClick={async () => {
+                setMoreOpen(false);
+                try { window.localStorage.setItem('praiana_logged_out', '1'); } catch {}
+                await base44.auth.logout();
+                window.location.assign('/login');
+              }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-destructive hover:bg-destructive/5 transition-colors"
             >
               <LogOut className="h-5 w-5" />
