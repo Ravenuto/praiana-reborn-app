@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import PraianaBlobs from "@/components/shared/PraianaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
+import { promoteFromWaitlist } from "@/lib/waitlist";
 
 const STATUS_FILTERS = [
 { key: "all", label: "Todas" },
