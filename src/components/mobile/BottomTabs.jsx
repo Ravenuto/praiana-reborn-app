@@ -87,6 +87,13 @@ export default function BottomTabs() {
                 </Link>
               );
             })}
+            <button
+              onClick={() => { setMoreOpen(false); base44.auth.logout(); }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-destructive hover:bg-destructive/5 transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium">Sair</span>
+            </button>
           </div>
         </SheetContent>
       </Sheet>
