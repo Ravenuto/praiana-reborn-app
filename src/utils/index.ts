@@ -2,10 +2,13 @@ export function createPageUrl(pageName: string) {
     return '/' + pageName.replace(/ /g, '-');
 }
 
-// Utilitário à prova de erros para ler créditos (resolve data.data aninhado)
+// Utilitário à prova de erros para ler créditos.
+// Source of truth = user.data.credits (escrita por Schedule/Admin).
+// Top-level user.credits é usado apenas como fallback legado.
 export function getCredits(user: any) {
     if (!user) return 0;
-    return user.credits ?? user.data?.credits ?? user.data?.data?.credits ?? 0;
+    const c = user.data?.credits ?? user.data?.data?.credits ?? user.credits;
+    return typeof c === "number" ? c : Number(c) || 0;
 }
 
 // Utilitário à prova de erros para ler plano

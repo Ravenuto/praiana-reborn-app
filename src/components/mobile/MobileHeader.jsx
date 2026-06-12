@@ -64,14 +64,12 @@ export default function MobileHeader() {
       >
         {subTitle ? (
           <>
-            <button
-              onClick={() => navigate(-1)}
-              aria-label="Voltar"
-              className="h-10 w-10 shrink-0 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <span className="font-heading italic text-primary font-semibold text-lg truncate">
+            <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="Ir para Home">
+              <span className="shrink-0 relative flex h-10 w-10 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white dark:bg-white shadow-sm ring-1 ring-primary/10">
+                <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
+              </span>
+            </Link>
+            <span className="flex-1 text-center font-heading italic text-primary font-semibold text-lg truncate">
               {subTitle}
             </span>
             <BellLink />

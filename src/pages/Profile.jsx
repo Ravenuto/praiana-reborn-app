@@ -11,6 +11,7 @@ import { Camera, Loader2, Save, CalendarDays, Phone, RefreshCw } from "lucide-re
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getCredits } from "@/utils";
 import MyPaymentHistory from "@/components/profile/MyPaymentHistory";
 
 const planInfo = {
@@ -70,11 +71,7 @@ export default function Profile() {
   const currentUser = userEntity || userData || user;
   const plan = entityData?.plan || currentUser?.plan || "4_aulas";
   const planData = planInfo[plan] || planInfo["4_aulas"];
-  const credits =
-    entityData?.credits ??
-    entityData?.data?.credits ??
-    currentUser?.credits ??
-    0;
+  const credits = getCredits(userEntity || currentUser);
   const maxCredits = planMaxCredits[plan] || 4;
   const usedThisMonth = monthBookings.length;
 
@@ -142,7 +139,7 @@ export default function Profile() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 font-body">
       <div className="mb-6">
-        <h1 className="font-heading text-3xl md:text-4xl font-extrabold text-foreground">Meu Perfil</h1>
+        <h1 className="font-heading text-3xl md:text-4xl font-semibold tracking-tight text-foreground">Meu Perfil</h1>
         <p className="mt-1 text-muted-foreground text-sm">Seus dados pessoais e informações do plano</p>
       </div>
 

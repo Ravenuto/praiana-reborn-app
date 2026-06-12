@@ -59,15 +59,18 @@ export default function MyBookings() {
       }
     }
     try {
-      // Devolver crédito
+      // Devolver crédito (escreve em data.credits — fonte da verdade)
       const [userData] = await base44.entities.User.filter({ email: user?.email }, "-created_date", 1);
       await base44.entities.Booking.update(booking.id, { status: "cancelada" });
       if (userData?.id && user?.role !== "admin") {
-        await base44.entities.User.update(userData.id, { credits: (userData.credits || 0) + 1 });
+        const currentCredits = userData?.data?.credits ?? userData?.credits ?? 0;
+        const cleanData = Object.fromEntries(Object.entries(userData.data || {}).filter(([k]) => k !== 'data'));
+        await base44.entities.User.update(userData.id, { data: { ...cleanData, credits: currentCredits + 1 } });
       }
       queryClient.invalidateQueries({ queryKey: ["myAllBookings"] });
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       queryClient.invalidateQueries({ queryKey: ["myBookings"] });
+      queryClient.invalidateQueries({ queryKey: ["userCredits"] });
       queryClient.invalidateQueries({ queryKey: ["myProfile"] });
       toast.success("Reserva cancelada e crédito devolvido!");
     } catch {
