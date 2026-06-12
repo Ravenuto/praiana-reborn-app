@@ -507,17 +507,13 @@ export default function ManageStudents() {
                     <div>
                       <p className="text-xs text-muted-foreground mb-0.5">Início do plano</p>
                       <p className="font-medium">
-                        {student.plan_start_date
-                          ? format(new Date(student.plan_start_date + "T12:00:00"), "dd/MM/yyyy")
-                          : "—"}
+                        {safeFormat(student.plan_start_date, "dd/MM/yyyy")}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-0.5">Último pagamento</p>
                       <p className="font-medium">
-                        {student.last_payment_date
-                          ? format(new Date(student.last_payment_date + "T12:00:00"), "dd/MM/yyyy")
-                          : "—"}
+                        {safeFormat(student.last_payment_date, "dd/MM/yyyy")}
                       </p>
                     </div>
                     <div>
