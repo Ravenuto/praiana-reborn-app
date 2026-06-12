@@ -139,10 +139,14 @@ export default function PaymentHistoryDialog({ student, onClose }) {
           variant="outline"
           size="sm"
           className="gap-2 w-full"
-          onClick={() => setAdding(!adding)}
+          onClick={() => {
+            if (adding) { setAdding(false); setEditingId(null); resetForm(); }
+            else { setAdding(true); }
+          }}
         >
-          <Plus className="h-4 w-4" /> Registrar pagamento
+          <Plus className="h-4 w-4" /> {editingId ? "Cancelar edição" : adding ? "Cancelar" : "Registrar pagamento"}
         </Button>
+
 
         {adding && (
           <div className="border border-border rounded-xl p-4 space-y-3 bg-muted/20">
