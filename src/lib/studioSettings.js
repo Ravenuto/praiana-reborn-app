@@ -13,8 +13,8 @@ export const DEFAULTS = {
 
 let _cache = null;
 
-export async function getStudioSettings() {
-  if (_cache) return _cache;
+export async function getStudioSettings({ fresh = false } = {}) {
+  if (_cache && !fresh) return _cache;
   const rows = await base44.entities.StudioSettings.list();
   const map = { ...DEFAULTS };
   rows.forEach((r) => { map[r.key] = r.value; });

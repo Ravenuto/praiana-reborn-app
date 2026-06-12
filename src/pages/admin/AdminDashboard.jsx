@@ -42,25 +42,25 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 font-body">
-      <div className="mb-6">
-         <h1 className="font-heading text-lg font-semibold">Painel Admin</h1>
+      <div className="mb-6 text-center sm:text-center">
+         <h1 className="font-heading uppercase tracking-wide text-lg font-semibold">Painel Admin</h1>
          <p className="mt-1 text-muted-foreground text-xs">Gerencie modalidades, horários e reservas</p>
        </div>
 
-      {/* Tab nav — grid para caber na tela em mobile */}
-      <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 mb-6">
+      {/* Tab nav — grid para caber na tela em mobile, centralizado no desktop */}
+      <div className="grid grid-cols-4 sm:flex sm:flex-wrap sm:justify-center gap-1.5 mb-6">
         {TABS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
-            className={`flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-xl text-center transition-colors text-xs font-medium ${
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-2.5 rounded-xl text-center transition-colors text-xs font-medium sm:min-w-[96px] ${
               activeTab === key
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
             }`}
           >
             <Icon className="h-4 w-4" />
-            <span className="leading-tight">{label}</span>
+            <span className="leading-tight uppercase tracking-wide">{label}</span>
           </button>
         ))}
       </div>

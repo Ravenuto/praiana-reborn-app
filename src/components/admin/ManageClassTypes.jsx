@@ -11,7 +11,7 @@ import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { notifyAllStudents } from "@/hooks/useNotifications";
 
-const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, image_url: "", color: "#c2185b" };
+const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, image_url: "", color: "#c2185b", show_in_app: true };
 
 export default function ManageClassTypes() {
   const queryClient = useQueryClient();
@@ -36,12 +36,14 @@ export default function ManageClassTypes() {
         toast.success("Modalidade atualizada");
       } else {
         await base44.entities.ClassType.create({ ...form, is_active: true });
-        notifyAllStudents({
-          type: "new_notice",
-          title: "Nova modalidade disponível 🎉",
-          message: `${form.name} já está disponível na grade.`,
-          link: "/agenda",
-        });
+        if (form.show_in_app !== false) {
+          notifyAllStudents({
+            type: "new_notice",
+            title: "Nova modalidade disponível 🎉",
+            message: `${form.name} já está disponível na grade.`,
+            link: "/agenda",
+          });
+        }
         toast.success("Modalidade criada");
       }
       queryClient.invalidateQueries({ queryKey: ["classTypes"] });
@@ -62,6 +64,7 @@ export default function ManageClassTypes() {
       max_students: ct.max_students || 8,
       image_url: ct.image_url || "",
       color: ct.color || "#c2185b",
+      show_in_app: ct.show_in_app !== false,
     });
     setEditingId(ct.id);
     setOpen(true);
@@ -155,6 +158,18 @@ export default function ManageClassTypes() {
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </div>
+              <label className="flex items-center gap-2 text-sm cursor-pointer select-none p-3 rounded-xl bg-muted/30 border border-border">
+                <input
+                  type="checkbox"
+                  checked={form.show_in_app !== false}
+                  onChange={(e) => setForm({ ...form, show_in_app: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                <span>
+                  <span className="font-medium">Mostrar no app das alunas</span>
+                  <span className="block text-xs text-muted-foreground">Desmarque para aulas especiais — fica visível só ao admin.</span>
+                </span>
+              </label>
               <Button onClick={handleSave} disabled={saving} className="w-full rounded-full">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Salvar Alterações" : "Criar Modalidade"}
               </Button>
@@ -170,8 +185,13 @@ export default function ManageClassTypes() {
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ct.color || "#c2185b" }} />
                 <div>
-                  <p className="font-semibold text-sm">{ct.name}</p>
-                   <p className="text-xs text-muted-foreground">{ct.duration_minutes || 60}min · Até {ct.max_students || 8} alunas</p>
+                  <p className="font-semibold text-sm flex items-center gap-2">
+                    {ct.name}
+                    {ct.show_in_app === false && (
+                      <span className="text-[10px] uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Oculta no app</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{ct.duration_minutes || 60}min · Até {ct.max_students || 8} alunas</p>
                 </div>
               </div>
               <div className="flex gap-1">

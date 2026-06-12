@@ -44,7 +44,7 @@ export default function Home() {
                 <span className="h-px w-8 bg-accent" />
                 Área da aluna
               </span>
-              <h1 className="mt-3 font-heading text-4xl md:text-5xl leading-[1.15] text-primary text-balance">
+              <h1 className="mt-3 font-heading text-5xl md:text-6xl leading-[1.1] text-primary text-balance">
                 <span>Olá, <span className="gold-word">{firstName}</span>,</span>
                 <br />
                 <span className="italic">bem-vinda de volta.</span>

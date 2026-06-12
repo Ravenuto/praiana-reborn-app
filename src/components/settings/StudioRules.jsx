@@ -6,7 +6,7 @@ export default function StudioRules() {
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {
-    getStudioSettings().then(setSettings);
+    getStudioSettings({ fresh: true }).then(setSettings);
   }, []);
 
   if (!settings) return (

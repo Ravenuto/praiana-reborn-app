@@ -8,7 +8,10 @@ import StudioRules from "@/components/settings/StudioRules";
 export default function About() {
   const { data: classTypes = [] } = useQuery({
     queryKey: ["classTypes"],
-    queryFn: () => base44.entities.ClassType.filter({ is_active: true })
+    queryFn: async () => {
+      const list = await base44.entities.ClassType.filter({ is_active: true });
+      return list.filter((ct) => ct.show_in_app !== false);
+    }
   });
 
   return (

@@ -17,6 +17,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { getStudioSettings } from "@/lib/studioSettings";
 import PraianaBlobs from "@/components/shared/PraianaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
+import { promoteFromWaitlist } from "@/lib/waitlist";
 
 function getTodayDayKey() {
   const days = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
@@ -313,7 +314,15 @@ export default function Schedule() {
         const cleanData = Object.fromEntries(Object.entries(latestUser.data || {}).filter(([k]) => k !== 'data'));
         await base44.entities.User.update(latestUser.id, { data: { ...cleanData, credits: currentCredits + 1 } });
       }
-      
+
+      // Promove próxima da fila de espera (se houver)
+      await promoteFromWaitlist({
+        session_id: session.id,
+        session_date: selectedDate,
+        session_time: session.time,
+        class_type_name: session.class_type_name,
+      });
+
       invalidate();
       toast.success("Reserva cancelada! Crédito devolvido.");
       // Notificar admins com data em formato brasileiro
