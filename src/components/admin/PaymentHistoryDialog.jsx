@@ -198,7 +198,7 @@ export default function PaymentHistoryDialog({ student, onClose }) {
               </Select>
             </div>
             <Button onClick={handleAdd} disabled={saving} className="w-full rounded-full">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Salvar alterações" : "Salvar"}
             </Button>
           </div>
         )}
