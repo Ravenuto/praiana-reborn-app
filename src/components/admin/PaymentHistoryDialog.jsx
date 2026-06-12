@@ -104,7 +104,7 @@ export default function PaymentHistoryDialog({ student, onClose }) {
           await base44.entities.Notification.create({
             user_email: student.email,
             type: "credits_added",
-            title: "Pagamento confirmado 💚",
+            title: "Pagamento confirmado 💙",
             message: `Seu plano foi renovado com ${planCredits} créditos.`,
             link: "/perfil",
             read: false,
