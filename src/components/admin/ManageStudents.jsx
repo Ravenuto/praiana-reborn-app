@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, History, Send } from "lucide-react";
+import { UserPlus, Mail, Loader2, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Send, Check } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
