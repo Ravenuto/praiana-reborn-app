@@ -158,6 +158,18 @@ export default function ManageClassTypes() {
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </div>
+              <label className="flex items-center gap-2 text-sm cursor-pointer select-none p-3 rounded-xl bg-muted/30 border border-border">
+                <input
+                  type="checkbox"
+                  checked={form.show_in_app !== false}
+                  onChange={(e) => setForm({ ...form, show_in_app: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                <span>
+                  <span className="font-medium">Mostrar no app das alunas</span>
+                  <span className="block text-xs text-muted-foreground">Desmarque para aulas especiais — fica visível só ao admin.</span>
+                </span>
+              </label>
               <Button onClick={handleSave} disabled={saving} className="w-full rounded-full">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Salvar Alterações" : "Criar Modalidade"}
               </Button>
