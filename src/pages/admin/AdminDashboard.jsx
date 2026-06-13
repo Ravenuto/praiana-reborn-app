@@ -42,8 +42,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 font-body">
-      <div className="mb-6 text-center sm:text-center">
-         <h1 className="font-heading uppercase tracking-wide text-lg font-semibold">Painel Admin</h1>
+      <div className="mb-6">
+         <h1 className="font-heading text-lg font-semibold">Painel Admin</h1>
          <p className="mt-1 text-muted-foreground text-xs">Gerencie modalidades, horários e reservas</p>
        </div>
 
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
             }`}
           >
             <Icon className="h-4 w-4" />
-            <span className="leading-tight uppercase tracking-wide">{label}</span>
+            <span className="leading-tight">{label}</span>
           </button>
         ))}
       </div>
