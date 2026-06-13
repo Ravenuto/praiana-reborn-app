@@ -148,6 +148,10 @@ export default function PaymentHistoryDialog({ student, onClose }) {
     "12_aulas": "12 aulas/mês",
     "avulsa": "Avulsa",
   };
+  const labelFor = (key) => {
+    const fromDb = plans.find((p) => p.key === key)?.label;
+    return fromDb || planLabels[key] || (key ? key.replace(/_/g, " ") : "—");
+  };
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -243,7 +247,7 @@ export default function PaymentHistoryDialog({ student, onClose }) {
                       {p.amount ? ` — R$ ${p.amount.toFixed(2).replace(".", ",")}` : ""}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {planLabels[p.plan_name] || p.plan_name}
+                      {labelFor(p.plan_name)}
                       {p.payment_method && ` · ${p.payment_method === "pix" ? "PIX" : p.payment_method === "cartao_credito" ? "Cartão crédito" : p.payment_method.replace("_", " ")}`}
                       {p.notes && ` · ${p.notes}`}
                     </p>

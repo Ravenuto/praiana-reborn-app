@@ -6,7 +6,7 @@ import { DollarSign, Receipt } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-const planLabels = {
+const fallbackLabels = {
   "4_aulas": "4 aulas/mês",
   "8_aulas": "8 aulas/mês",
   "12_aulas": "12 aulas/mês",
@@ -14,6 +14,12 @@ const planLabels = {
 };
 
 export default function MyPaymentHistory({ userId }) {
+  const { data: plans = [] } = useQuery({
+    queryKey: ["studioPlans"],
+    queryFn: () => base44.entities.StudioPlan.list(),
+  });
+  const labelFor = (key) => plans.find((p) => p.key === key)?.label || fallbackLabels[key] || (key ? key.replace(/_/g, " ") : "—");
+
   const { data: payments = [], isLoading } = useQuery({
     queryKey: ["myPaymentHistory", userId],
     queryFn: () => base44.entities.PaymentHistory.filter({ user_id: userId }, "-payment_date", 20),
@@ -50,7 +56,7 @@ export default function MyPaymentHistory({ userId }) {
                   {p.amount ? ` — R$ ${p.amount.toFixed(2).replace(".", ",")}` : ""}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {planLabels[p.plan_name] || p.plan_name}
+                  {labelFor(p.plan_name)}
                   {p.payment_method && ` · ${p.payment_method === "pix" ? "PIX" : p.payment_method === "cartao_credito" ? "Cartão de crédito" : p.payment_method.replace("_", " ")}`}
                   {p.notes ? ` · ${p.notes}` : ""}
                 </p>

@@ -13,6 +13,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getCredits } from "@/utils";
 import MyPaymentHistory from "@/components/profile/MyPaymentHistory";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 const planInfo = {
   "4_aulas": { label: "4 aulas/mês", price: "R$ 230", color: "bg-blue-100 text-blue-700" },
@@ -152,10 +153,12 @@ export default function Profile() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 font-body">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl md:text-4xl font-semibold tracking-tight text-foreground">Meu Perfil</h1>
-        <p className="mt-1 text-muted-foreground text-sm">Seus dados pessoais e informações do plano</p>
-      </div>
+      <SectionHeader
+        eyebrow="Sua conta"
+        title="Meu Perfil"
+        goldWord="Perfil"
+        subtitle="Seus dados pessoais e informações do plano"
+      />
 
       {/* Foto + nome */}
       <div className="flex items-center gap-4 mb-6 p-5 rounded-2xl border border-border bg-card">
