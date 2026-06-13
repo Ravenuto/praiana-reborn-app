@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import StudioRules from "@/components/settings/StudioRules";
+import SectionHeader from "@/components/shared/SectionHeader";
 
 export default function About() {
   const { data: classTypes = [] } = useQuery({
@@ -17,21 +18,16 @@ export default function About() {
   return (
     <div className="font-body">
       {/* Header */}
-      <section className="relative overflow-hidden py-12 border-b border-border">
+      <section className="relative overflow-hidden py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <h1 className="font-heading text-4xl sm:text-5xl font-bold tracking-tight">
-              Sobre Praiana
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Conheça nosso estúdio e as modalidades que oferecemos
-            </p>
-          </motion.div>
+          <SectionHeader
+            eyebrow="Conheça o estúdio"
+            title="Sobre Praiana"
+            goldWord="Praiana"
+            subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
+            align="center"
+            className="mx-auto text-center"
+          />
 
           {/* Contact Info Grid */}
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
