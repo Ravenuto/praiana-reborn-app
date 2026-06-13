@@ -56,7 +56,7 @@ export default function MyPaymentHistory({ userId }) {
                   {p.amount ? ` — R$ ${p.amount.toFixed(2).replace(".", ",")}` : ""}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {planLabels[p.plan_name] || p.plan_name}
+                  {labelFor(p.plan_name)}
                   {p.payment_method && ` · ${p.payment_method === "pix" ? "PIX" : p.payment_method === "cartao_credito" ? "Cartão de crédito" : p.payment_method.replace("_", " ")}`}
                   {p.notes ? ` · ${p.notes}` : ""}
                 </p>
