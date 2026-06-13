@@ -36,6 +36,8 @@ const AnimatedRoute = ({ children }) => (
   </motion.div>
 );
 
+const HIDDEN_BOTTOM_TABS = ["/login", "/forgot-password", "/reset-password"];
+
 const AuthenticatedApp = () => {
   const location = useLocation();
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -59,6 +61,8 @@ const AuthenticatedApp = () => {
     navigateToLogin();
     return null;
   }
+
+  const showBottomTabs = !HIDDEN_BOTTOM_TABS.includes(location.pathname);
 
   // Render the main app
   return (
@@ -84,7 +88,7 @@ const AuthenticatedApp = () => {
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </AnimatePresence>
-      <BottomTabs />
+      {showBottomTabs && <BottomTabs />}
     </>
   );
 };

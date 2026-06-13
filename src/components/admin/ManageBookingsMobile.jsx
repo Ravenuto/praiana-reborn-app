@@ -75,9 +75,9 @@ export default function ManageBookings() {
   return (
     <div>
       {/* Presets + período */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <h2 className="font-heading text-xl font-semibold">Reservas</h2>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 flex-wrap">
           {presets.map((p) => (
             <Button key={p.label} size="sm" variant={dateFrom === p.from && dateTo === p.to ? "default" : "outline"}
               className="text-xs h-7 rounded-full" onClick={() => { setDateFrom(p.from); setDateTo(p.to); }}>
@@ -88,7 +88,7 @@ export default function ManageBookings() {
       </div>
 
       {/* Datas + status em linha compacta */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">De</label>
           <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-8 text-xs" />

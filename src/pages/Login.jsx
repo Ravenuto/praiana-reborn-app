@@ -40,12 +40,15 @@ export default function Login() {
         {/* Branding Praiana */}
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
-            <div className="w-24 h-24 rounded-full bg-white p-1 ring-1 ring-primary/15 shadow-sm flex items-center justify-center animate-float-y">
-              <img
-                src={logoPraiana}
-                alt="Praiana Pole Dance"
-                className="w-full h-full object-contain"
-              />
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
+              <div className="relative h-28 w-28 rounded-full bg-background/90 dark:bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] grid place-items-center p-3 animate-float-y">
+                <img
+                  src={logoPraiana}
+                  alt="Praiana Pole Dance"
+                  className="h-full w-full object-contain"
+                />
+              </div>
             </div>
           </div>
           <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Praiana Pole Dance</h1>
