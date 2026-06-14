@@ -90,12 +90,12 @@ export default function ManageBookings() {
       {/* Datas + status em linha compacta */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
         <div>
-          <label className="text-xs text-muted-foreground mb-0.5 block">De</label>
-          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-7 text-xs px-2" />
+          <label className="text-[10px] text-muted-foreground mb-0 block">De</label>
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-6 text-[10px] px-1.5 py-0" />
         </div>
         <div>
-          <label className="text-xs text-muted-foreground mb-0.5 block">Até</label>
-          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-7 text-xs px-2" />
+          <label className="text-[10px] text-muted-foreground mb-0 block">Até</label>
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-6 text-[10px] px-1.5 py-0" />
         </div>
       </div>
 
