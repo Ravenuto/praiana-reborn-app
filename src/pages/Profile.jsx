@@ -264,7 +264,7 @@ export default function Profile() {
             type="date"
             value={form.birth_date}
             onChange={(e) => setForm((f) => ({ ...f, birth_date: e.target.value }))}
-            className="w-full min-w-0 block"
+            className="mobile-native-field h-9 w-full block"
           />
         </div>
         <Button onClick={handleSave} disabled={saving} className="w-full rounded-full gap-2">

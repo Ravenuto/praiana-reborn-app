@@ -88,14 +88,14 @@ export default function ManageBookings() {
       </div>
 
       {/* Datas + status em linha compacta */}
-      <div className="grid grid-cols-[116px_116px] gap-2 mb-3 max-w-full">
+      <div className="grid grid-cols-[104px_104px] sm:grid-cols-[116px_116px] gap-2 mb-3 max-w-full">
         <div className="min-w-0">
           <label className="text-[10px] text-muted-foreground mb-1 block">De</label>
-          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-8 w-[116px] min-w-0 px-1.5 text-[11px]" />
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="mobile-native-field h-8 w-[104px] sm:w-[116px] text-[11px]" />
         </div>
         <div className="min-w-0">
           <label className="text-[10px] text-muted-foreground mb-1 block">Até</label>
-          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-[116px] min-w-0 px-1.5 text-[11px]" />
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="mobile-native-field h-8 w-[104px] sm:w-[116px] text-[11px]" />
         </div>
       </div>
 
