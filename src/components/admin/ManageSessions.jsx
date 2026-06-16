@@ -479,20 +479,20 @@ export default function ManageSessions() {
                 </Select>
               </div>
             ) : (
-              <div>
+              <div className="min-w-0">
                 <Label>Data da Aula *</Label>
-                <Input type="date" value={form.specific_date} onChange={(e) => setForm({ ...form, specific_date: e.target.value })} />
+                <Input type="date" value={form.specific_date} onChange={(e) => setForm({ ...form, specific_date: e.target.value })} className="w-full min-w-0 block" />
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="min-w-0">
                 <Label>Horário *</Label>
-                <Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
+                <Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} className="w-full min-w-0 block" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <Label>Máx. Alunas</Label>
-                <Input type="number" value={form.max_students} onChange={(e) => setForm({ ...form, max_students: parseInt(e.target.value) || 8 })} />
+                <Input type="number" value={form.max_students} onChange={(e) => setForm({ ...form, max_students: parseInt(e.target.value) || 8 })} className="w-full min-w-0 block" />
               </div>
             </div>
 

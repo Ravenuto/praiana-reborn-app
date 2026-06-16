@@ -256,7 +256,7 @@ export default function Profile() {
             placeholder="(11) 99999-9999"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <Label className="text-xs mb-1 block">
             <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Data de nascimento</span>
           </Label>
@@ -264,6 +264,7 @@ export default function Profile() {
             type="date"
             value={form.birth_date}
             onChange={(e) => setForm((f) => ({ ...f, birth_date: e.target.value }))}
+            className="w-full min-w-0 block"
           />
         </div>
         <Button onClick={handleSave} disabled={saving} className="w-full rounded-full gap-2">

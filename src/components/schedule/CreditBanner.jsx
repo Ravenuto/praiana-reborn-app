@@ -2,7 +2,7 @@ import React from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Zap } from "lucide-react";
+import { Heart } from "lucide-react";
 import { getCredits, getPlan } from "@/utils";
 
 const FALLBACK_LABELS = {
@@ -49,7 +49,7 @@ export default function CreditBanner() {
     <div className="rounded-2xl border-2 p-4 mb-6 bg-primary/5 border-primary/20">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Zap className="h-4 w-4 text-primary" />
+          <Heart className="h-4 w-4 text-primary fill-primary" />
           <span className="text-sm font-semibold">{planLabel}</span>
         </div>
         <div className="text-right">
