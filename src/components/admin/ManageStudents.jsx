@@ -628,9 +628,9 @@ export default function ManageStudents() {
                 <Label className="text-xs mb-1 block">Telefone / WhatsApp</Label>
                 <Input value={manualForm.phone} onChange={(e) => setManualForm((f) => ({ ...f, phone: e.target.value }))} className="h-8 text-sm" placeholder="(99) 99999-9999" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Data de nascimento</Label>
-                <Input type="date" value={manualForm.birth_date} onChange={(e) => setManualForm((f) => ({ ...f, birth_date: e.target.value }))} className="h-8 text-sm" />
+                <Input type="date" value={manualForm.birth_date} onChange={(e) => setManualForm((f) => ({ ...f, birth_date: e.target.value }))} className="h-8 text-sm w-full min-w-0 block" />
               </div>
               <div>
                 <Label className="text-xs mb-1 block">Plano inicial</Label>
@@ -750,13 +750,13 @@ export default function ManageStudents() {
                 <Label className="text-xs mb-1 block">Telefone / WhatsApp</Label>
                 <Input value={editDialog.phone} onChange={(e) => setEditDialog((d) => ({ ...d, phone: e.target.value }))} className="h-8 text-sm" placeholder="(11) 99999-9999" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Data de nascimento</Label>
-                <Input type="date" value={editDialog.birth_date} onChange={(e) => setEditDialog((d) => ({ ...d, birth_date: e.target.value }))} className="h-8 text-sm" />
+                <Input type="date" value={editDialog.birth_date} onChange={(e) => setEditDialog((d) => ({ ...d, birth_date: e.target.value }))} className="h-8 text-sm w-full min-w-0 block" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Início do plano atual</Label>
-                <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_start_date: e.target.value }))} className="h-8 text-sm" />
+                <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_start_date: e.target.value }))} className="h-8 text-sm w-full min-w-0 block" />
               </div>
               <div>
                 <Label className="text-xs mb-1 block">Observações</Label>
