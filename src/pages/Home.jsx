@@ -1,4 +1,4 @@
-import logoPraiana from "@/assets/logo-praiana.png";
+import logoRaissa from "@/assets/logo-raissa.png.asset.json";
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
