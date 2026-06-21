@@ -11,7 +11,7 @@ import useReveal from "@/hooks/useReveal";
 const WHATSAPP_NUMBER = "5521999999999";
 
 function getWhatsappLink(planLabel) {
-  const msg = encodeURIComponent(`Oii, quero comprar o plano de ${planLabel} da Praiana`);
+  const msg = encodeURIComponent(`Oii, quero comprar o plano de ${planLabel} da Raissa`);
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
 }
 

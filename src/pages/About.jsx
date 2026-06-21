@@ -22,8 +22,8 @@ export default function About() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <SectionHeader
             eyebrow="Conheça o estúdio"
-            title="Sobre Praiana"
-            goldWord="Praiana"
+            title="Sobre Raissa"
+            goldWord="Raissa"
             subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
             align="center"
             className="mx-auto text-center"

@@ -54,8 +54,8 @@ export default function Feed() {
 
         <SectionHeader
           eyebrow="Comunidade"
-          title="Feed Praiana"
-          goldWord="Praiana"
+          title="Feed Raissa"
+          goldWord="Raissa"
           subtitle="Compartilhe seus momentos no pole."
         />
 
