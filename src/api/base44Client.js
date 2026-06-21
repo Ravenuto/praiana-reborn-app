@@ -65,8 +65,8 @@ const seedData = () => ({
     {
       id: 'post-1',
       author_id: 'u-admin',
-      author_name: 'Admin Praiana',
-      content: 'Bem-vindas ao novo app da Praiana! 🌊 Reservem suas aulas pelo menu Aulas.',
+      author_name: 'Admin Raissa',
+      content: 'Bem-vindas ao novo app da Raissa Pole Dance Studio! 🌊 Reservem suas aulas pelo menu Aulas.',
       created_date: new Date(Date.now() - 86400000).toISOString(),
       likes: ['u-aluna'],
       image_url: '',
