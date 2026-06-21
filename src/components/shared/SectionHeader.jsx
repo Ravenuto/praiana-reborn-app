@@ -2,7 +2,7 @@ import React from "react";
 import useReveal from "@/hooks/useReveal";
 
 /**
- * Praiana section header — eyebrow + italic ocean title with optional gold word + subtitle.
+ * Raissa section header — eyebrow + italic ocean title with optional gold word + subtitle.
  * Usage: <SectionHeader eyebrow="Sua semana" title="Aulas" goldWord="Aulas" subtitle="Reserve seu horário" />
  *
  * If `title` contains the `goldWord` substring, that word is highlighted in gold.
