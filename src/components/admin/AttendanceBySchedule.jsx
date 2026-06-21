@@ -112,7 +112,7 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
     try {
       const session = addStudentDialog.session;
       let studentName = "Avulsa";
-      let studentEmail = `avulsa-${Date.now()}@praiana.app`;
+      let studentEmail = `avulsa-${Date.now()}@raissapoledance.com`;
 
       if (!addStudentForm.isAvulsa) {
         const student = activeStudents.find(s => s.id === addStudentForm.selectedUserId);
