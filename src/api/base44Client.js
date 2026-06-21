@@ -8,8 +8,8 @@ const seedData = () => ({
   User: [
     {
       id: 'u-admin',
-      full_name: 'Admin Praiana',
-      email: 'admin@praiana.app',
+      full_name: 'Admin Raissa',
+      email: 'admin@raissapoledance.com',
       role: 'admin',
       is_admin: true,
       avatar_url: '',
@@ -22,8 +22,8 @@ const seedData = () => ({
     },
     {
       id: 'u-aluna',
-      full_name: 'Maria Praiana',
-      email: 'maria@praiana.app',
+      full_name: 'Maria Raissa',
+      email: 'maria@raissapoledance.com',
       role: 'user',
       is_admin: false,
       avatar_url: '',
