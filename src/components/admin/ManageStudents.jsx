@@ -47,7 +47,7 @@ export default function ManageStudents() {
   const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
 
-  const TEST_EMAIL = "aluna.teste@praiana.app";
+  const TEST_EMAIL = "aluna.teste@raissapoledance.com";
 
   const handleCreateTestStudent = async () => {
     setCreatingTestStudent(true);
