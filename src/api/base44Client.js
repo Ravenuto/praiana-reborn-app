@@ -224,15 +224,15 @@ const auth = {
     const { email } = pickArgs(a, b);
     if (!email) throw new Error('Email obrigatório');
     const match = store.User.find((u) => (u.email || '').toLowerCase() === email.toLowerCase());
-    const user = match || store.User.find((u) => u.email === 'admin@praiana.app') || store.User[0];
+    const user = match || store.User.find((u) => u.email === 'admin@raissapoledance.com') || store.User[0];
     writeAuth(user);
-    try { window.localStorage.removeItem('praiana_logged_out'); } catch {}
+    try { window.localStorage.removeItem('raissa_logged_out'); } catch {}
     return { user, token: 'mock-token' };
   },
   async register(a, b) {
     const { email, full_name } = pickArgs(a, b);
     if (!email) throw new Error('Email obrigatório');
-    const admin = store.User.find((u) => u.email === 'admin@praiana.app');
+    const admin = store.User.find((u) => u.email === 'admin@raissapoledance.com');
     const user = admin ? { ...admin, full_name: full_name || admin.full_name } : store.User[0];
     writeAuth(user);
     return { user, token: 'mock-token' };

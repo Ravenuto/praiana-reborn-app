@@ -76,8 +76,8 @@ export default function About() {
                 <Mail className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <h3 className="font-semibold text-sm mb-1">Email</h3>
-                  <a href="mailto:contato@praiana.com" className="text-xs text-primary hover:text-primary/80 break-all">
-                    contato@praiana.com
+                  <a href="mailto:contato@raissapoledance.com" className="text-xs text-primary hover:text-primary/80 break-all">
+                    contato@raissapoledance.com
                   </a>
                 </div>
               </div>
