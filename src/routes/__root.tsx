@@ -34,8 +34,8 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" },
-      { title: "Praiana" },
-      { name: "description", content: "App da Praiana — aulas, reservas, feed e recados." },
+      { title: "Raissa" },
+      { name: "description", content: "App da Raissa Pole Dance Studio — aulas, reservas, feed e recados." },
       { name: "theme-color", content: "#266aae" },
     ],
     links: [
