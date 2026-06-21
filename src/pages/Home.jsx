@@ -76,7 +76,7 @@ export default function Home() {
       <section className="relative px-5 py-10">
         <div className="max-w-md mx-auto text-center">
           <span className="eyebrow">Conecte-se</span>
-          <h3 className="mt-3 font-heading italic text-primary text-3xl">Praiana nas redes</h3>
+          <h3 className="mt-3 font-heading italic text-primary text-3xl">Raissa nas redes</h3>
           <div className="mt-6 flex items-center justify-center gap-4">
             <a
               href="https://instagram.com/praianapoledance"
