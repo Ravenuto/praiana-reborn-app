@@ -1,4 +1,4 @@
-import logoPraiana from "@/assets/logo-praiana.png";
+import logoRaissa from "@/assets/logo-raissa.png.asset.json";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -37,24 +37,25 @@ export default function Login() {
       <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-20 w-96 h-96 bg-accent/15 organic-blob-2 animate-float-slow" />
 
       <div className="relative w-full max-w-md animate-fade-up">
-        {/* Branding Praiana */}
+        {/* Branding Raissa */}
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
               <div className="relative h-28 w-28 rounded-full bg-background/90 dark:bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] grid place-items-center p-3 animate-float-y">
                 <img
-                  src={logoPraiana}
-                  alt="Praiana Pole Dance"
+                  src={logoRaissa.url}
+                  alt="Raissa Pole Dance Studio"
                   className="h-full w-full object-contain"
                 />
               </div>
             </div>
           </div>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Praiana Pole Dance</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Raissa Pole Dance Studio</h1>
           <p className="font-script text-2xl text-primary mt-1">bem-vinda de volta</p>
           <p className="text-muted-foreground mt-2 text-sm">Entre na sua conta</p>
         </div>
+
 
 
         <div className="bg-card rounded-2xl shadow-sm border border-border p-8">
