@@ -5,7 +5,7 @@ import React from "react";
  * Render INSIDE a `relative overflow-hidden` container. Sits behind content
  * with `pointer-events-none`.
  */
-export default function PraianaBlobs({ variant = "default", className = "" }) {
+export default function RaissaBlobs({ variant = "default", className = "" }) {
   if (variant === "minimal") {
     return (
       <div className={`pointer-events-none absolute inset-0 -z-10 overflow-hidden ${className}`} aria-hidden>

@@ -15,7 +15,7 @@ import { createNotification } from "@/hooks/useNotifications";
 import { getCredits } from "@/utils";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { getStudioSettings } from "@/lib/studioSettings";
-import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import { promoteFromWaitlist } from "@/lib/waitlist";
 
@@ -471,7 +471,7 @@ export default function Schedule() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <PraianaBlobs variant="minimal" />
+      <RaissaBlobs variant="minimal" />
       <div
         ref={containerRef}
         className="relative max-w-4xl mx-auto px-4 sm:px-6 overflow-y-auto transition-transform"

@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Bookmark, Instagram } from "lucide-react";
-import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import useReveal from "@/hooks/useReveal";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -21,7 +21,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <PraianaBlobs />
+      <RaissaBlobs />
 
       <section className="relative px-5 pt-6 pb-10">
         <div className="max-w-3xl mx-auto">

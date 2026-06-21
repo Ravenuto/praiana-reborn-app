@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import useReveal from "@/hooks/useReveal";
 
@@ -26,7 +26,7 @@ export default function Plans() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <PraianaBlobs />
+      <RaissaBlobs />
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
         <SectionHeader
           eyebrow="Invista em você"

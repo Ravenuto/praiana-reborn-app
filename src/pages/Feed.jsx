@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Images, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
-import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 
 export default function Feed() {
@@ -38,7 +38,7 @@ export default function Feed() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <PraianaBlobs variant="minimal" />
+      <RaissaBlobs variant="minimal" />
       <div
         ref={containerRef}
         className="relative max-w-xl mx-auto px-4 overflow-y-auto transition-transform"
