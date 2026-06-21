@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays, Clock, X, Check, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import { promoteFromWaitlist } from "@/lib/waitlist";
 
@@ -97,7 +97,7 @@ export default function MyBookings() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <PraianaBlobs variant="minimal" />
+      <RaissaBlobs variant="minimal" />
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6">
         <SectionHeader
           eyebrow="Sua jornada"

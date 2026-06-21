@@ -1,4 +1,4 @@
-import logoPraiana from "@/assets/logo-praiana.png";
+import logoRaissa from "@/assets/logo-raissa.png.asset.json";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
@@ -46,14 +46,15 @@ export default function Navbar() {
         }`}
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="Praiana Pole Dance e Artes">
+        <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="Raissa Pole Dance Studio">
           <span className="shrink-0 relative flex h-11 w-11 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white shadow-sm ring-1 ring-primary/10">
-            <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
+            <img src={logoRaissa.url} alt="Raissa Pole Dance Studio" className="h-full w-full object-contain" />
           </span>
           <span className="hidden lg:inline font-heading italic text-primary text-lg leading-tight whitespace-nowrap">
-            Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>&amp; Artes</span>
+            Raissa <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>Studio</span>
           </span>
         </Link>
+
 
         {/* Tabs */}
         <div className="flex items-center gap-1 text-sm">

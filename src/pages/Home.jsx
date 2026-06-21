@@ -1,9 +1,9 @@
-import logoPraiana from "@/assets/logo-praiana.png";
+import logoRaissa from "@/assets/logo-raissa.png.asset.json";
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Bookmark, Instagram } from "lucide-react";
-import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import useReveal from "@/hooks/useReveal";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -21,7 +21,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <PraianaBlobs />
+      <RaissaBlobs />
 
       <section className="relative px-5 pt-6 pb-10">
         <div className="max-w-3xl mx-auto">
@@ -31,7 +31,7 @@ export default function Home() {
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
                 <div className="relative h-28 w-28 rounded-full bg-background/90 dark:bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] grid place-items-center p-3 animate-float-y">
-                  <img src={logoPraiana} alt="Praiana Pole Dance e Artes" className="h-full w-full object-contain" />
+                  <img src={logoRaissa.url} alt="Raissa Pole Dance Studio" className="h-full w-full object-contain" />
                 </div>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default function Home() {
       <section className="relative px-5 py-10">
         <div className="max-w-md mx-auto text-center">
           <span className="eyebrow">Conecte-se</span>
-          <h3 className="mt-3 font-heading italic text-primary text-3xl">Praiana nas redes</h3>
+          <h3 className="mt-3 font-heading italic text-primary text-3xl">Raissa nas redes</h3>
           <div className="mt-6 flex items-center justify-center gap-4">
             <a
               href="https://instagram.com/praianapoledance"

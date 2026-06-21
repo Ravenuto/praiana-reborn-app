@@ -13,7 +13,7 @@ import { AnimatePresence } from "framer-motion";
 import NoticeCard from "@/components/notices/NoticeCard";
 import PollCard from "@/components/notices/PollCard";
 import NewPollForm from "@/components/notices/NewPollForm";
-import PraianaBlobs from "@/components/shared/PraianaBlobs";
+import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 
 const emptyForm = { title: "", content: "", pinned: false, color: "blue", media_url: "", media_type: "image" };
@@ -92,7 +92,7 @@ export default function Notices() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <PraianaBlobs variant="minimal" />
+      <RaissaBlobs variant="minimal" />
       <div className="relative max-w-3xl mx-auto px-4">
         <div className="flex items-start justify-between gap-4 mb-2">
           <SectionHeader

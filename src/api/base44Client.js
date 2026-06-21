@@ -8,8 +8,8 @@ const seedData = () => ({
   User: [
     {
       id: 'u-admin',
-      full_name: 'Admin Praiana',
-      email: 'admin@praiana.app',
+      full_name: 'Admin Raissa',
+      email: 'admin@raissapoledance.com',
       role: 'admin',
       is_admin: true,
       avatar_url: '',
@@ -22,8 +22,8 @@ const seedData = () => ({
     },
     {
       id: 'u-aluna',
-      full_name: 'Maria Praiana',
-      email: 'maria@praiana.app',
+      full_name: 'Maria Raissa',
+      email: 'maria@raissapoledance.com',
       role: 'user',
       is_admin: false,
       avatar_url: '',
@@ -65,8 +65,8 @@ const seedData = () => ({
     {
       id: 'post-1',
       author_id: 'u-admin',
-      author_name: 'Admin Praiana',
-      content: 'Bem-vindas ao novo app da Praiana! 🌊 Reservem suas aulas pelo menu Aulas.',
+      author_name: 'Admin Raissa',
+      content: 'Bem-vindas ao novo app da Raissa Pole Dance Studio! 🌊 Reservem suas aulas pelo menu Aulas.',
       created_date: new Date(Date.now() - 86400000).toISOString(),
       likes: ['u-aluna'],
       image_url: '',
@@ -91,7 +91,7 @@ const seedData = () => ({
   WaitlistEntry: [],
 });
 
-const STORE_KEY = 'praiana_mock_store_v1';
+const STORE_KEY = 'raissa_mock_store_v1';
 
 let store;
 if (isBrowser) {
@@ -185,7 +185,7 @@ const entities = {
 };
 
 // Auth — uses localStorage to persist a fake session.
-const AUTH_KEY = 'praiana_mock_auth_v1';
+const AUTH_KEY = 'raissa_mock_auth_v1';
 const readAuth = () => {
   if (!isBrowser) return null;
   try { return JSON.parse(window.localStorage.getItem(AUTH_KEY) || 'null'); } catch { return null; }
@@ -204,8 +204,8 @@ const pickArgs = (a, b) => {
 
 // Seed an admin session on first load so all screens are visible without manual login.
 // Skip seeding if the user explicitly logged out.
-if (isBrowser && !window.localStorage.getItem(AUTH_KEY) && !window.localStorage.getItem('praiana_logged_out')) {
-  const admin = store.User.find((u) => u.email === 'admin@praiana.app');
+if (isBrowser && !window.localStorage.getItem(AUTH_KEY) && !window.localStorage.getItem('raissa_logged_out')) {
+  const admin = store.User.find((u) => u.email === 'admin@raissapoledance.com');
   if (admin) writeAuth(admin);
 }
 
@@ -224,15 +224,15 @@ const auth = {
     const { email } = pickArgs(a, b);
     if (!email) throw new Error('Email obrigatório');
     const match = store.User.find((u) => (u.email || '').toLowerCase() === email.toLowerCase());
-    const user = match || store.User.find((u) => u.email === 'admin@praiana.app') || store.User[0];
+    const user = match || store.User.find((u) => u.email === 'admin@raissapoledance.com') || store.User[0];
     writeAuth(user);
-    try { window.localStorage.removeItem('praiana_logged_out'); } catch {}
+    try { window.localStorage.removeItem('raissa_logged_out'); } catch {}
     return { user, token: 'mock-token' };
   },
   async register(a, b) {
     const { email, full_name } = pickArgs(a, b);
     if (!email) throw new Error('Email obrigatório');
-    const admin = store.User.find((u) => u.email === 'admin@praiana.app');
+    const admin = store.User.find((u) => u.email === 'admin@raissapoledance.com');
     const user = admin ? { ...admin, full_name: full_name || admin.full_name } : store.User[0];
     writeAuth(user);
     return { user, token: 'mock-token' };

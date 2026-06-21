@@ -1,4 +1,4 @@
-import logoPraiana from "@/assets/logo-praiana.png";
+import logoRaissa from "@/assets/logo-raissa.png.asset.json";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Bell } from "lucide-react";
@@ -66,7 +66,7 @@ export default function MobileHeader() {
           <>
             <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="Ir para Home">
               <span className="shrink-0 relative flex h-10 w-10 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white dark:bg-white shadow-sm ring-1 ring-primary/10">
-                <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
+                <img src={logoRaissa.url} alt="Raissa Pole Dance Studio" className="h-full w-full object-contain" />
               </span>
             </Link>
             <span className="flex-1 text-center font-heading italic text-primary font-semibold text-lg truncate">
@@ -76,13 +76,13 @@ export default function MobileHeader() {
           </>
         ) : (
           <>
-            <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="Praiana Pole Dance e Artes">
+            <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="Raissa Pole Dance Studio">
               <span className="shrink-0 relative flex h-10 w-10 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white dark:bg-white shadow-sm ring-1 ring-primary/10">
-                <img src={logoPraiana} alt="Praiana" className="h-full w-full object-contain" />
+                <img src={logoRaissa.url} alt="Raissa Pole Dance Studio" className="h-full w-full object-contain" />
               </span>
             </Link>
             <span className="flex-1 text-center font-heading italic text-primary font-semibold text-base sm:text-lg leading-tight truncate px-1">
-              Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>&amp; Artes</span>
+              Raissa <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>Studio</span>
             </span>
             <BellLink />
           </>
@@ -91,3 +91,4 @@ export default function MobileHeader() {
     </div>
   );
 }
+

@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem("praiana-theme") || "light");
+  const [theme, setTheme] = useState(() => localStorage.getItem("raissa-theme") || "light");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -12,13 +12,13 @@ export function ThemeProvider({ children }) {
     } else {
       root.classList.remove("dark");
     }
-    localStorage.setItem("praiana-theme", theme);
+    localStorage.setItem("raissa-theme", theme);
   }, [theme]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
-      const stored = localStorage.getItem("praiana-theme");
+      const stored = localStorage.getItem("raissa-theme");
       if (!stored) {
         setTheme(mediaQuery.matches ? "dark" : "light");
       }

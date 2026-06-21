@@ -90,7 +90,7 @@ export default function BottomTabs() {
             <button
               onClick={async () => {
                 setMoreOpen(false);
-                try { window.localStorage.setItem('praiana_logged_out', '1'); } catch {}
+              try { window.localStorage.setItem('raissa_logged_out', '1'); } catch {}
                 await base44.auth.logout();
                 window.location.assign('/login');
               }}

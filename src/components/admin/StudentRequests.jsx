@@ -34,10 +34,10 @@ export default function StudentRequests({ onApproved }) {
         user_email: u.email,
         type: "credits_added",
         title: "Cadastro aprovado! 🎉",
-        message: "Seu cadastro foi aprovado pelo estúdio. Bem-vinda à família Praiana! Entre em contato para escolher seu plano.",
+        message: "Seu cadastro foi aprovado pelo estúdio. Bem-vinda à família Raissa! Entre em contato para escolher seu plano.",
         link: "/planos",
         read: false,
-        actor_name: "Praiana Pole Dance"
+        actor_name: "Raissa Pole Dance Studio"
       });
       queryClient.invalidateQueries({ queryKey: ["pendingStudents"] });
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
