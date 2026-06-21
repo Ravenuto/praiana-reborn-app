@@ -91,7 +91,7 @@ const seedData = () => ({
   WaitlistEntry: [],
 });
 
-const STORE_KEY = 'praiana_mock_store_v1';
+const STORE_KEY = 'raissa_mock_store_v1';
 
 let store;
 if (isBrowser) {
@@ -185,7 +185,7 @@ const entities = {
 };
 
 // Auth — uses localStorage to persist a fake session.
-const AUTH_KEY = 'praiana_mock_auth_v1';
+const AUTH_KEY = 'raissa_mock_auth_v1';
 const readAuth = () => {
   if (!isBrowser) return null;
   try { return JSON.parse(window.localStorage.getItem(AUTH_KEY) || 'null'); } catch { return null; }
