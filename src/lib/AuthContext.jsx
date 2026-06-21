@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [appPublicSettings] = useState({ id: 'mock', public_settings: { name: 'Praiana' } });
+  const [appPublicSettings] = useState({ id: 'mock', public_settings: { name: 'Raissa' } });
 
   const checkUserAuth = useCallback(async () => {
     setIsLoadingAuth(true);
