@@ -89,11 +89,11 @@ export default function Register() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
           <div className="flex justify-center mb-6">
-            <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm">
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm grid place-items-center">
               <img
                 src={logoRaissa.url}
                 alt="Raissa Pole Dance Studio"
-                className="h-full w-full object-cover origin-top scale-[1.55]"
+                className="h-full w-full object-contain p-2"
               />
             </div>
           </div>
@@ -161,11 +161,11 @@ export default function Register() {
         {/* Header do estúdio */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm">
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm grid place-items-center">
               <img
                 src={logoRaissa.url}
                 alt="Raissa Pole Dance Studio"
-                className="h-full w-full object-cover origin-top scale-[1.55]"
+                className="h-full w-full object-contain p-2"
               />
             </div>
           </div>
