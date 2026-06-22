@@ -47,8 +47,8 @@ export default function Navbar() {
       >
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="Raissa Pole Dance Studio">
-          <span className="shrink-0 relative flex h-11 w-11 items-center justify-center rounded-full p-1 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white shadow-sm ring-1 ring-primary/10">
-            <img src={logoRaissa.url} alt="Raissa Pole Dance Studio" className="h-full w-full object-contain" />
+          <span className="shrink-0 relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white shadow-sm ring-1 ring-primary/10">
+            <img src={logoRaissa.url} alt="Raissa Pole Dance Studio" className="h-full w-full object-cover origin-top scale-[1.55]" />
           </span>
           <span className="hidden lg:inline font-heading italic text-primary text-lg leading-tight whitespace-nowrap">
             Raissa <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>Studio</span>

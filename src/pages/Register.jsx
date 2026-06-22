@@ -89,11 +89,13 @@ export default function Register() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
           <div className="flex justify-center mb-6">
-            <img
-              src={logoRaissa.url}
-              alt="Raissa Pole Dance Studio"
-              className="w-20 h-20 object-contain"
-            />
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm">
+              <img
+                src={logoRaissa.url}
+                alt="Raissa Pole Dance Studio"
+                className="h-full w-full object-cover origin-top scale-[1.55]"
+              />
+            </div>
           </div>
           <div className="bg-card rounded-2xl shadow-sm border border-border p-8">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -159,11 +161,13 @@ export default function Register() {
         {/* Header do estúdio */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img
-              src={logoRaissa.url}
-              alt="Raissa Pole Dance Studio"
-              className="w-20 h-20 object-contain"
-            />
+            <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm">
+              <img
+                src={logoRaissa.url}
+                alt="Raissa Pole Dance Studio"
+                className="h-full w-full object-cover origin-top scale-[1.55]"
+              />
+            </div>
           </div>
           <h1 className="font-heading text-2xl font-bold text-foreground">Raissa Pole Dance Studio</h1>
           <p className="text-muted-foreground mt-1 text-sm">Crie sua conta e faça parte da nossa família 💙</p>
