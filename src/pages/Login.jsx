@@ -42,11 +42,11 @@ export default function Login() {
           <div className="flex justify-center mb-4">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
-              <div className="relative h-28 w-28 rounded-full bg-background/90 dark:bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y">
+              <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
                 <img
                   src={logoRaissa.url}
                   alt="Raissa Pole Dance Studio"
-                  className="h-full w-full object-cover origin-top scale-[1.55]"
+                  className="h-full w-full object-contain p-3"
                 />
               </div>
             </div>
