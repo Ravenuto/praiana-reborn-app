@@ -52,7 +52,7 @@ export default function Navbar() {
 
           </span>
           <span className="hidden lg:inline font-heading italic text-primary text-lg leading-tight whitespace-nowrap">
-            Raissa <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>Studio</span>
+            Raissa <span className="italic">Venuto</span> <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>Studio</span>
           </span>
         </Link>
 
