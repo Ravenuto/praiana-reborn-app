@@ -45,13 +45,14 @@ export default function Login() {
               <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
                 <img
                   src={logoRaissa.url}
-                  alt="Raissa Pole Dance Studio"
-                  className="h-full w-full object-contain p-3"
+                  alt="Raissa Venuto Pole Dance Studio"
+                  className="h-full w-full object-contain p-1.5"
                 />
               </div>
             </div>
           </div>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Raissa Pole Dance Studio</h1>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Raissa Venuto Pole Dance Studio</h1>
+
           <p className="font-script text-2xl text-primary mt-1">bem-vinda de volta</p>
           <p className="text-muted-foreground mt-2 text-sm">Entre na sua conta</p>
         </div>
