@@ -35,7 +35,7 @@ export default function StudioRules() {
         </div>
         <div className="bg-muted/50 rounded-xl p-4 space-y-2">
           <p className="font-medium text-foreground">Pontualidade</p>
-          <p>Alunas com atraso superior a <strong className="text-foreground">{lateMins} minutos</strong> poderão não ser admitidas na aula.</p>
+          <p>Tolerância de atraso de até <strong className="text-foreground">{lateMins} minutos</strong>. Após esse período não será possível entrar na aula.</p>
         </div>
         <div className="bg-muted/50 rounded-xl p-4 space-y-2">
           <p className="font-medium text-foreground">Créditos</p>

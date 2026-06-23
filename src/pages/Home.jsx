@@ -50,7 +50,7 @@ export default function Home() {
                 <span className="italic">bem-vinda de volta.</span>
               </h1>
               <p className="mt-4 max-w-md mx-auto text-base text-muted-foreground leading-relaxed">
-                Veja sua agenda, gerencie reservas e acompanhe os recados do studio.
+                Marque as suas aulas, gerencie seu plano e acompanhe as novidades do studio.
               </p>
             </div>
 
@@ -73,30 +73,26 @@ export default function Home() {
       </section>
 
       {/* Socials */}
-      <section className="relative px-5 py-10">
-        <div className="max-w-md mx-auto text-center">
-          <span className="eyebrow">Conecte-se</span>
-          <h3 className="mt-3 font-heading italic text-primary text-3xl">Raissa nas redes</h3>
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <a
-              href="https://instagram.com/praianapoledance"
-              target="_blank" rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(225,48,108,0.6)] hover:-translate-y-0.5 transition-transform"
-              style={{ background: "linear-gradient(135deg,#f9ce34 0%,#ee2a7b 50%,#6228d7 100%)" }}
-            >
-              <Instagram className="h-6 w-6" />
-            </a>
-            <a
-              href="https://wa.me/5521999999999"
-              target="_blank" rel="noopener noreferrer"
-              aria-label="WhatsApp"
-              className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(37,211,102,0.65)] hover:-translate-y-0.5 transition-transform"
-              style={{ background: "#25D366" }}
-            >
-              <WhatsApp className="h-6 w-6" />
-            </a>
-          </div>
+      <section className="relative px-5 pt-2 pb-8">
+        <div className="max-w-md mx-auto flex items-center justify-center gap-4">
+          <a
+            href="https://instagram.com/praianapoledance"
+            target="_blank" rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(225,48,108,0.6)] hover:-translate-y-0.5 transition-transform"
+            style={{ background: "linear-gradient(135deg,#f9ce34 0%,#ee2a7b 50%,#6228d7 100%)" }}
+          >
+            <Instagram className="h-6 w-6" />
+          </a>
+          <a
+            href="https://wa.me/5521999999999"
+            target="_blank" rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(37,211,102,0.65)] hover:-translate-y-0.5 transition-transform"
+            style={{ background: "#25D366" }}
+          >
+            <WhatsApp className="h-6 w-6" />
+          </a>
         </div>
       </section>
     </div>

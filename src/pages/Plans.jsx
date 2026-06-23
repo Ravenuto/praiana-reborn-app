@@ -32,7 +32,7 @@ export default function Plans() {
           eyebrow="Invista em você"
           title="Planos & Valores"
           goldWord="Valores"
-          subtitle="Escolha o plano ideal e fale com a equipe pelo WhatsApp."
+          subtitle="Escolha o plano ideal para você"
           align="center"
           className="mx-auto text-center"
         />
