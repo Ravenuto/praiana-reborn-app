@@ -51,7 +51,10 @@ export default function Login() {
               </div>
             </div>
           </div>
-          <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">Raissa Venuto Pole Dance Studio</h1>
+          <h1 className="font-heading tracking-tight leading-tight">
+            <span className="block text-3xl font-semibold text-primary italic">Raissa Venuto</span>
+            <span className="block text-2xl font-medium text-accent mt-1">Pole Dance Studio</span>
+          </h1>
 
           <p className="font-script text-2xl text-primary mt-1">bem-vinda de volta</p>
           <p className="text-muted-foreground mt-2 text-sm">Entre na sua conta</p>
