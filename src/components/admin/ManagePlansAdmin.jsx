@@ -150,55 +150,87 @@ export default function ManagePlansAdmin() {
           </Button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {sorted.map((plan) => (
-            <div
-              key={plan.id}
-              className={`rounded-xl border-2 p-5 relative flex flex-col gap-3 ${
-                plan.highlight ? "border-primary bg-primary/5" : "border-border bg-card"
-              } ${!plan.is_active ? "opacity-50" : ""}`}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                  <Star className="h-3 w-3" /> Mais popular
-                </span>
-              )}
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-heading text-lg font-bold">{plan.label}</p>
-                  <p className="text-2xl font-bold text-primary font-heading">{plan.price}</p>
-                  <p className="text-xs text-muted-foreground">{plan.per_class}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <Badge variant="secondary" className="text-xs">{plan.credits || 0} créditos</Badge>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">{plan.is_active ? "Ativo" : "Inativo"}</span>
-                    <Switch checked={!!plan.is_active} onCheckedChange={() => handleToggleActive(plan)} />
-                  </div>
-                </div>
-              </div>
+        <>
+          <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1.5">
+            <GripVertical className="h-3.5 w-3.5" />
+            Arraste pelo ícone para reordenar os planos no app.
+          </p>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="plans-list">
+              {(dropProvided) => (
+                <div
+                  ref={dropProvided.innerRef}
+                  {...dropProvided.droppableProps}
+                  className="grid sm:grid-cols-2 gap-4"
+                >
+                  {displayPlans.map((plan, index) => (
+                    <Draggable key={plan.id} draggableId={String(plan.id)} index={index}>
+                      {(dragProvided, snapshot) => (
+                        <div
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          className={`rounded-xl border-2 p-5 relative flex flex-col gap-3 ${
+                            plan.highlight ? "border-primary bg-primary/5" : "border-border bg-card"
+                          } ${!plan.is_active ? "opacity-50" : ""} ${snapshot.isDragging ? "shadow-lg ring-2 ring-primary/40" : ""}`}
+                        >
+                          {plan.highlight && (
+                            <span className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                              <Star className="h-3 w-3" /> Mais popular
+                            </span>
+                          )}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2">
+                              <button
+                                {...dragProvided.dragHandleProps}
+                                className="mt-1 text-muted-foreground hover:text-primary cursor-grab active:cursor-grabbing"
+                                aria-label="Reordenar plano"
+                                type="button"
+                              >
+                                <GripVertical className="h-5 w-5" />
+                              </button>
+                              <div>
+                                <p className="font-heading text-lg font-bold">{plan.label}</p>
+                                <p className="text-2xl font-bold text-primary font-heading">{plan.price}</p>
+                                <p className="text-xs text-muted-foreground">{plan.per_class}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <Badge variant="secondary" className="text-xs">{plan.credits || 0} créditos</Badge>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">{plan.is_active ? "Ativo" : "Inativo"}</span>
+                                <Switch checked={!!plan.is_active} onCheckedChange={() => handleToggleActive(plan)} />
+                              </div>
+                            </div>
+                          </div>
 
-              {plan.benefits?.length > 0 && (
-                <ul className="space-y-1">
-                  {plan.benefits.map((b, i) => (
-                    <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <CheckCircle2 className="h-3 w-3 text-primary shrink-0" /> {b}
-                    </li>
+                          {plan.benefits?.length > 0 && (
+                            <ul className="space-y-1">
+                              {plan.benefits.map((b, i) => (
+                                <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <CheckCircle2 className="h-3 w-3 text-primary shrink-0" /> {b}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+
+                          <div className="flex gap-2 mt-auto pt-2">
+                            <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs h-8 rounded-full" onClick={() => openEdit(plan)}>
+                              <Pencil className="h-3 w-3" /> Editar
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0 rounded-full" onClick={() => handleDelete(plan.id)}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
                   ))}
-                </ul>
+                  {dropProvided.placeholder}
+                </div>
               )}
-
-              <div className="flex gap-2 mt-auto pt-2">
-                <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs h-8 rounded-full" onClick={() => openEdit(plan)}>
-                  <Pencil className="h-3 w-3" /> Editar
-                </Button>
-                <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0 rounded-full" onClick={() => handleDelete(plan.id)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+            </Droppable>
+          </DragDropContext>
+        </>
       )}
 
       {/* Dialog */}
