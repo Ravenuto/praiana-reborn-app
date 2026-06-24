@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pencil, Plus, Star, Trash2, Loader2, CheckCircle2 } from "lucide-react";
+import { Pencil, Plus, Star, Trash2, Loader2, CheckCircle2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const EMPTY = {
   label: "", price_value: 0, credits: 1, highlight: false, is_active: true, benefits: [""],
@@ -25,7 +26,47 @@ export default function ManagePlansAdmin() {
     queryFn: () => base44.entities.StudioPlan.list(),
   });
 
-  const sorted = [...plans].sort((a, b) => (a.credits || 0) - (b.credits || 0));
+  const sorted = [...plans].sort((a, b) => {
+    const ao = a.display_order ?? 9999;
+    const bo = b.display_order ?? 9999;
+    if (ao !== bo) return ao - bo;
+    return (a.credits || 0) - (b.credits || 0);
+  });
+
+  const [orderedIds, setOrderedIds] = useState([]);
+  useEffect(() => {
+    setOrderedIds(sorted.map((p) => p.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans]);
+
+  const displayPlans = orderedIds
+    .map((id) => plans.find((p) => p.id === id))
+    .filter(Boolean);
+
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+    const from = result.source.index;
+    const to = result.destination.index;
+    if (from === to) return;
+    const next = Array.from(orderedIds);
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setOrderedIds(next);
+    try {
+      await Promise.all(
+        next.map((id, idx) => {
+          const plan = plans.find((p) => p.id === id);
+          if (!plan) return null;
+          if (plan.display_order === idx) return null;
+          return base44.entities.StudioPlan.update(id, { display_order: idx });
+        }).filter(Boolean)
+      );
+      queryClient.invalidateQueries({ queryKey: ["studioPlans"] });
+      toast.success("Ordem atualizada!");
+    } catch (e) {
+      toast.error("Erro ao salvar a ordem.");
+    }
+  };
 
   // Gera chave automática a partir do label
   const autoKey = (label) => label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
@@ -109,55 +150,87 @@ export default function ManagePlansAdmin() {
           </Button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 gap-4">
-          {sorted.map((plan) => (
-            <div
-              key={plan.id}
-              className={`rounded-xl border-2 p-5 relative flex flex-col gap-3 ${
-                plan.highlight ? "border-primary bg-primary/5" : "border-border bg-card"
-              } ${!plan.is_active ? "opacity-50" : ""}`}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                  <Star className="h-3 w-3" /> Mais popular
-                </span>
-              )}
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-heading text-lg font-bold">{plan.label}</p>
-                  <p className="text-2xl font-bold text-primary font-heading">{plan.price}</p>
-                  <p className="text-xs text-muted-foreground">{plan.per_class}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <Badge variant="secondary" className="text-xs">{plan.credits || 0} créditos</Badge>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">{plan.is_active ? "Ativo" : "Inativo"}</span>
-                    <Switch checked={!!plan.is_active} onCheckedChange={() => handleToggleActive(plan)} />
-                  </div>
-                </div>
-              </div>
+        <>
+          <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1.5">
+            <GripVertical className="h-3.5 w-3.5" />
+            Arraste pelo ícone para reordenar os planos no app.
+          </p>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="plans-list">
+              {(dropProvided) => (
+                <div
+                  ref={dropProvided.innerRef}
+                  {...dropProvided.droppableProps}
+                  className="grid sm:grid-cols-2 gap-4"
+                >
+                  {displayPlans.map((plan, index) => (
+                    <Draggable key={plan.id} draggableId={String(plan.id)} index={index}>
+                      {(dragProvided, snapshot) => (
+                        <div
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          className={`rounded-xl border-2 p-5 relative flex flex-col gap-3 ${
+                            plan.highlight ? "border-primary bg-primary/5" : "border-border bg-card"
+                          } ${!plan.is_active ? "opacity-50" : ""} ${snapshot.isDragging ? "shadow-lg ring-2 ring-primary/40" : ""}`}
+                        >
+                          {plan.highlight && (
+                            <span className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                              <Star className="h-3 w-3" /> Mais popular
+                            </span>
+                          )}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2">
+                              <button
+                                {...dragProvided.dragHandleProps}
+                                className="mt-1 text-muted-foreground hover:text-primary cursor-grab active:cursor-grabbing"
+                                aria-label="Reordenar plano"
+                                type="button"
+                              >
+                                <GripVertical className="h-5 w-5" />
+                              </button>
+                              <div>
+                                <p className="font-heading text-lg font-bold">{plan.label}</p>
+                                <p className="text-2xl font-bold text-primary font-heading">{plan.price}</p>
+                                <p className="text-xs text-muted-foreground">{plan.per_class}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <Badge variant="secondary" className="text-xs">{plan.credits || 0} créditos</Badge>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">{plan.is_active ? "Ativo" : "Inativo"}</span>
+                                <Switch checked={!!plan.is_active} onCheckedChange={() => handleToggleActive(plan)} />
+                              </div>
+                            </div>
+                          </div>
 
-              {plan.benefits?.length > 0 && (
-                <ul className="space-y-1">
-                  {plan.benefits.map((b, i) => (
-                    <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <CheckCircle2 className="h-3 w-3 text-primary shrink-0" /> {b}
-                    </li>
+                          {plan.benefits?.length > 0 && (
+                            <ul className="space-y-1">
+                              {plan.benefits.map((b, i) => (
+                                <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <CheckCircle2 className="h-3 w-3 text-primary shrink-0" /> {b}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+
+                          <div className="flex gap-2 mt-auto pt-2">
+                            <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs h-8 rounded-full" onClick={() => openEdit(plan)}>
+                              <Pencil className="h-3 w-3" /> Editar
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0 rounded-full" onClick={() => handleDelete(plan.id)}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
                   ))}
-                </ul>
+                  {dropProvided.placeholder}
+                </div>
               )}
-
-              <div className="flex gap-2 mt-auto pt-2">
-                <Button size="sm" variant="outline" className="flex-1 gap-1 text-xs h-8 rounded-full" onClick={() => openEdit(plan)}>
-                  <Pencil className="h-3 w-3" /> Editar
-                </Button>
-                <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0 rounded-full" onClick={() => handleDelete(plan.id)}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+            </Droppable>
+          </DragDropContext>
+        </>
       )}
 
       {/* Dialog */}
