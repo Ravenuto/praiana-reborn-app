@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pencil, Plus, Star, Trash2, Loader2, CheckCircle2 } from "lucide-react";
+import { Pencil, Plus, Star, Trash2, Loader2, CheckCircle2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const EMPTY = {
   label: "", price_value: 0, credits: 1, highlight: false, is_active: true, benefits: [""],
@@ -25,7 +26,47 @@ export default function ManagePlansAdmin() {
     queryFn: () => base44.entities.StudioPlan.list(),
   });
 
-  const sorted = [...plans].sort((a, b) => (a.credits || 0) - (b.credits || 0));
+  const sorted = [...plans].sort((a, b) => {
+    const ao = a.display_order ?? 9999;
+    const bo = b.display_order ?? 9999;
+    if (ao !== bo) return ao - bo;
+    return (a.credits || 0) - (b.credits || 0);
+  });
+
+  const [orderedIds, setOrderedIds] = useState([]);
+  useEffect(() => {
+    setOrderedIds(sorted.map((p) => p.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans]);
+
+  const displayPlans = orderedIds
+    .map((id) => plans.find((p) => p.id === id))
+    .filter(Boolean);
+
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+    const from = result.source.index;
+    const to = result.destination.index;
+    if (from === to) return;
+    const next = Array.from(orderedIds);
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setOrderedIds(next);
+    try {
+      await Promise.all(
+        next.map((id, idx) => {
+          const plan = plans.find((p) => p.id === id);
+          if (!plan) return null;
+          if (plan.display_order === idx) return null;
+          return base44.entities.StudioPlan.update(id, { display_order: idx });
+        }).filter(Boolean)
+      );
+      queryClient.invalidateQueries({ queryKey: ["studioPlans"] });
+      toast.success("Ordem atualizada!");
+    } catch (e) {
+      toast.error("Erro ao salvar a ordem.");
+    }
+  };
 
   // Gera chave automática a partir do label
   const autoKey = (label) => label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");

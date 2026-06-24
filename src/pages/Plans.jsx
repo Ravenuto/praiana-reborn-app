@@ -21,7 +21,12 @@ export default function Plans() {
     queryFn: () => base44.entities.StudioPlan.filter({ is_active: true }),
   });
 
-  const sorted = [...plans].sort((a, b) => (a.price_value || 0) - (b.price_value || 0));
+  const sorted = [...plans].sort((a, b) => {
+    const ao = a.display_order ?? 9999;
+    const bo = b.display_order ?? 9999;
+    if (ao !== bo) return ao - bo;
+    return (a.price_value || 0) - (b.price_value || 0);
+  });
   useReveal([sorted.length]);
 
   return (
