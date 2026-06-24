@@ -22,8 +22,8 @@ export default function About() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <SectionHeader
             eyebrow="Conheça o estúdio"
-            title="Sobre Raissa Studio"
-            goldWord="Raissa"
+            title="Sobre Raissa Pole Studio"
+            goldWord="Pole"
             subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
             align="center"
             className="mx-auto text-center"
