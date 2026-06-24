@@ -23,7 +23,7 @@ export default function About() {
           <SectionHeader
             eyebrow="Conheça o estúdio"
             title="Sobre Raissa Pole Studio"
-            goldWord="Pole"
+            goldWord="Raissa Pole"
             subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
             align="center"
             className="mx-auto text-center"
