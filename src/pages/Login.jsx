@@ -51,11 +51,11 @@ export default function Login() {
               </div>
             </div>
           </div>
-          <h1 className="font-heading italic text-primary text-2xl sm:text-3xl leading-tight whitespace-nowrap">
+          <h1 className="font-heading italic text-primary text-3xl sm:text-4xl leading-tight whitespace-nowrap">
             Raissa <span className="text-accent not-italic font-semibold">Pole Dance</span> Studio
           </h1>
 
-          <p className="font-script text-2xl text-primary mt-1">bem-vinda de volta</p>
+          <p className="font-script text-lg text-primary mt-1">bem-vinda de volta</p>
           <p className="text-muted-foreground mt-2 text-sm">Entre na sua conta</p>
         </div>
 
