@@ -52,7 +52,7 @@ export default function Login() {
             </div>
           </div>
           <h1 className="font-heading italic text-primary text-3xl sm:text-4xl leading-tight whitespace-nowrap">
-            Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> Studio
+            <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance Studio
           </h1>
 
           <p className="font-script text-lg text-primary mt-1">bem-vinda de volta</p>

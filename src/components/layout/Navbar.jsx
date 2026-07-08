@@ -51,7 +51,7 @@ export default function Navbar() {
             <img src={logoRaissa.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain p-0.5" />
           </span>
           <span className="hidden lg:inline font-heading italic text-primary text-lg leading-tight whitespace-nowrap">
-            Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>Studio</span>
+            <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance Studio
           </span>
         </Link>
 

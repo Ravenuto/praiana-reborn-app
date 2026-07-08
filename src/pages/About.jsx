@@ -23,7 +23,7 @@ export default function About() {
           <SectionHeader
             eyebrow="Conheça o estúdio"
             title="Sobre Praiana Pole Studio"
-            goldWord="Praiana Pole"
+            goldWord="Praiana"
             subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
             align="center"
             className="mx-auto text-center"
