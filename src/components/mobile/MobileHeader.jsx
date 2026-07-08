@@ -83,7 +83,7 @@ export default function MobileHeader() {
               </span>
             </Link>
             <span className="flex-1 text-center font-heading italic text-primary font-semibold text-base sm:text-lg leading-tight truncate px-1">
-              Praiana <span className="text-accent not-italic font-semibold">Pole Dance</span> <span>Studio</span>
+              <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance Studio
             </span>
 
             <BellLink />
