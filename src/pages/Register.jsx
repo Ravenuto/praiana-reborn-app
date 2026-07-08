@@ -92,7 +92,7 @@ export default function Register() {
             <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm grid place-items-center">
               <img
                 src={logoRaissa.url}
-                alt="Raissa Pole Dance Studio"
+                alt="Praiana Pole Dance Studio"
                 className="h-full w-full object-contain p-2"
               />
             </div>
@@ -164,12 +164,12 @@ export default function Register() {
             <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm grid place-items-center">
               <img
                 src={logoRaissa.url}
-                alt="Raissa Pole Dance Studio"
+                alt="Praiana Pole Dance Studio"
                 className="h-full w-full object-contain p-2"
               />
             </div>
           </div>
-          <h1 className="font-heading text-2xl font-bold text-foreground">Raissa Pole Dance Studio</h1>
+          <h1 className="font-heading text-2xl font-bold text-foreground">Praiana Pole Dance Studio</h1>
           <p className="text-muted-foreground mt-1 text-sm">Crie sua conta e faça parte da nossa família 💙</p>
         </div>
 
