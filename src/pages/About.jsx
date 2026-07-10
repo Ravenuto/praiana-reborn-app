@@ -22,7 +22,7 @@ export default function About() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <SectionHeader
             eyebrow="Conheça o estúdio"
-            title="Sobre Praiana Pole Studio"
+            title="Sobre Studio Praiana Pole Dance"
             goldWord="Praiana"
             subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
             align="center"

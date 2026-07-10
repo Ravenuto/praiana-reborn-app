@@ -45,14 +45,14 @@ export default function Login() {
               <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
                 <img
                   src={praianaLogo.url}
-                  alt="Praiana Pole Dance Studio"
+                  alt="Studio Praiana Pole Dance"
                   className="h-full w-full object-contain scale-125"
                 />
               </div>
             </div>
           </div>
           <h1 className="font-heading italic text-primary text-3xl sm:text-4xl leading-tight whitespace-nowrap">
-            <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance Studio
+            Studio <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance
           </h1>
 
           <p className="font-script text-lg text-primary mt-1">bem-vinda de volta</p>
