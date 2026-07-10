@@ -1,4 +1,4 @@
-import logoRaissa from "@/assets/logo-raissa.png.asset.json";
+import praianaLogo from "@/assets/praiana-logo.png.asset.json";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -91,7 +91,7 @@ export default function Register() {
           <div className="flex justify-center mb-6">
             <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm grid place-items-center">
               <img
-                src={logoRaissa.url}
+                src={praianaLogo.url}
                 alt="Praiana Pole Dance Studio"
                 className="h-full w-full object-contain p-2"
               />
@@ -163,7 +163,7 @@ export default function Register() {
           <div className="flex justify-center mb-4">
             <div className="h-20 w-20 rounded-full overflow-hidden bg-white ring-2 ring-white/70 shadow-sm grid place-items-center">
               <img
-                src={logoRaissa.url}
+                src={praianaLogo.url}
                 alt="Praiana Pole Dance Studio"
                 className="h-full w-full object-contain p-2"
               />
