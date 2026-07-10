@@ -93,7 +93,7 @@ export default function Register() {
               <img
                 src={praianaLogo.url}
                 alt="Praiana Pole Dance Studio"
-                className="h-full w-full object-contain scale-110"
+                className="h-full w-full object-contain scale-125"
               />
             </div>
           </div>
