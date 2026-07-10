@@ -7,7 +7,7 @@ import useReveal from "@/hooks/useReveal";
  *
  * If `title` contains the `goldWord` substring, that word is highlighted in gold.
  */
-export default function SectionHeader({ eyebrow, title, goldWord, subtitle, align = "left", className = "" }) {
+export default function SectionHeader({ eyebrow, title, goldWord, subtitle, align = "left", className = "", titleClassName = "" }) {
   useReveal([title, eyebrow]);
   const alignCls = align === "center" ? "text-center mx-auto" : "";
 
