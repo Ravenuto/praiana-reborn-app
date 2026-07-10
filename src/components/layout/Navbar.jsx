@@ -1,4 +1,4 @@
-import logoRaissa from "@/assets/logo-raissa.png.asset.json";
+import praianaLogo from "@/assets/praiana-logo.png.asset.json";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
@@ -48,7 +48,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group shrink-0" aria-label="Praiana Pole Dance Studio">
           <span className="shrink-0 relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white shadow-sm ring-1 ring-primary/10">
-            <img src={logoRaissa.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain p-0.5" />
+            <img src={praianaLogo.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain p-0.5" />
           </span>
           <span className="hidden lg:inline font-heading italic text-primary text-lg leading-tight whitespace-nowrap">
             <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance Studio

@@ -1,4 +1,4 @@
-import logoRaissa from "@/assets/logo-raissa.png.asset.json";
+import praianaLogo from "@/assets/praiana-logo.png.asset.json";
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export default function Home() {
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
                 <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
-                  <img src={logoRaissa.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain p-1.5" />
+                  <img src={praianaLogo.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain p-1.5" />
                 </div>
               </div>
             </div>
