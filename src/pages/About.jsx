@@ -27,6 +27,7 @@ export default function About() {
             subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
             align="center"
             className="mx-auto text-center"
+            titleClassName="!text-2xl sm:!text-3xl md:!text-5xl"
           />
 
           {/* Contact Info Grid */}
