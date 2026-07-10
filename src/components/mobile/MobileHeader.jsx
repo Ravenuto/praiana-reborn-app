@@ -66,7 +66,7 @@ export default function MobileHeader() {
           <>
             <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="Ir para Home">
               <span className="shrink-0 relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white dark:bg-white shadow-sm ring-1 ring-primary/10">
-                <img src={praianaLogo.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain scale-[1.35]" />
+                <img src={praianaLogo.url} alt="Studio Praiana Pole Dance" className="h-full w-full object-contain scale-[1.35]" />
 
               </span>
             </Link>
@@ -77,13 +77,13 @@ export default function MobileHeader() {
           </>
         ) : (
           <>
-            <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="Praiana Pole Dance Studio">
+            <Link to="/" className="flex items-center gap-2 group shrink-0" aria-label="Studio Praiana Pole Dance">
               <span className="shrink-0 relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 bg-white dark:bg-white shadow-sm ring-1 ring-primary/10">
-                <img src={praianaLogo.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain scale-[1.35]" />
+                <img src={praianaLogo.url} alt="Studio Praiana Pole Dance" className="h-full w-full object-contain scale-[1.35]" />
               </span>
             </Link>
             <span className="flex-1 text-center font-heading italic text-primary font-semibold text-base sm:text-lg leading-tight truncate px-1">
-              <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance Studio
+              Studio <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance
             </span>
 
             <BellLink />

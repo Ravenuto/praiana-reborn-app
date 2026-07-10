@@ -12,7 +12,7 @@ export default function InactivePlanScreen() {
         </div>
         <div>
           <h1 className="font-heading text-2xl font-bold text-foreground mb-2">
-            Praiana Pole Dance Studio
+            Studio Praiana Pole Dance
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed">
             Oii! Seu acesso ainda está sendo liberado. 💙
