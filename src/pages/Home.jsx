@@ -31,7 +31,7 @@ export default function Home() {
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
                 <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
-                  <img src={praianaLogo.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain p-1.5" />
+                  <img src={praianaLogo.url} alt="Praiana Pole Dance Studio" className="h-full w-full object-contain scale-110" />
                 </div>
               </div>
             </div>
