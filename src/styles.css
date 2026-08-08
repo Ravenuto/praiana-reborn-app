@@ -67,39 +67,40 @@
   --font-body-value: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-script-value: 'Petit Formal Script', cursive;
 
-  /* Raissa brand — light */
-  --brand-ocean: #266aae;
-  --brand-mist: #5B8DB8;
-  --brand-gold: #F5A623;
-  --brand-sand: #FAF7F2;
-  --brand-ink: #1e4266;
-  --brand-deep: #11355c;
+  /* Raissa brand — light (cores vivas da logo) */
+  --brand-ocean: #0d84d1;
+  --brand-mist: #38a7e6;
+  --brand-gold: #ff7a18;
+  --brand-sand: #fdf8f1;
+  --brand-ink: #0b3a63;
+  --brand-deep: #062a4d;
 
   /* shadcn tokens mapped to Raissa brand (HSL) */
-  --background: 36 38% 97%;         /* sand */
-  --foreground: 211 55% 26%;        /* ink */
+  --background: 36 60% 97%;         /* sand */
+  --foreground: 209 80% 21%;        /* ink */
   --card: 0 0% 100%;
-  --card-foreground: 211 55% 26%;
+  --card-foreground: 209 80% 21%;
   --popover: 0 0% 100%;
-  --popover-foreground: 211 55% 26%;
-  --primary: 209 64% 41%;           /* ocean */
-  --primary-foreground: 36 38% 97%;
-  --secondary: 209 38% 92%;
-  --secondary-foreground: 211 55% 26%;
-  --muted: 209 30% 94%;
-  --muted-foreground: 211 25% 40%;
-  --accent: 37 91% 55%;             /* gold */
-  --accent-foreground: 211 60% 18%;
-  --destructive: 0 75% 52%;
-  --destructive-foreground: 36 38% 97%;
-  --border: 209 32% 85%;
-  --input: 209 32% 85%;
-  --ring: 209 64% 41%;
-  --chart-1: 209 64% 41%;
-  --chart-2: 209 38% 54%;
-  --chart-3: 37 91% 55%;
-  --chart-4: 209 55% 79%;
-  --chart-5: 209 57% 95%;
+  --popover-foreground: 209 80% 21%;
+  --primary: 204 88% 44%;           /* ocean vivo */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 202 78% 93%;
+  --secondary-foreground: 209 80% 21%;
+  --muted: 202 55% 94%;
+  --muted-foreground: 209 25% 42%;
+  --accent: 24 96% 54%;             /* sol laranja */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 6 90% 52%;
+  --destructive-foreground: 36 60% 97%;
+  --border: 202 55% 85%;
+  --input: 202 55% 85%;
+  --ring: 204 88% 44%;
+  --chart-1: 204 88% 44%;
+  --chart-2: 199 85% 58%;
+  --chart-3: 24 96% 54%;
+  --chart-4: 45 100% 55%;
+  --chart-5: 202 78% 93%;
+
   --radius: 0.75rem;
   --sidebar-background: 36 38% 97%;
   --sidebar-foreground: 211 55% 26%;
