@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Navigate } from "react-router-dom";
-import { BookOpen, Calendar, Users, CreditCard, UserPlus, ClipboardCheck, Settings2 } from "lucide-react";
+import { BookOpen, Calendar, Users, CreditCard, UserPlus, ClipboardCheck, Settings2, Bell } from "lucide-react";
 import ManageClassTypes from "@/components/admin/ManageClassTypes";
 import ManageSessions from "@/components/admin/ManageSessions";
 import ManageBookings from "@/components/admin/ManageBookingsMobile";
@@ -9,6 +9,7 @@ import ManagePlansAdmin from "@/components/admin/ManagePlansAdmin";
 import ManageStudents from "@/components/admin/ManageStudents";
 import AttendanceBySchedule from "@/components/admin/AttendanceBySchedule";
 import ManageStudioSettings from "@/components/admin/ManageStudioSettings";
+import ManageNotifPrefs from "@/components/admin/ManageNotifPrefs";
 
 const TABS = [
   { key: "sessions",    label: "Horários",    icon: Calendar },
@@ -18,6 +19,7 @@ const TABS = [
   { key: "students",    label: "Alunas",      icon: UserPlus },
   { key: "attendance",  label: "Presenças",   icon: ClipboardCheck },
   { key: "settings",    label: "Regras",      icon: Settings2 },
+  { key: "notifs",      label: "Notificações", icon: Bell },
 ];
 
 export default function AdminDashboard() {
