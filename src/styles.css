@@ -261,12 +261,12 @@
 /* Force light-mode Raissa brand vars inside this element */
 .theme-light-locked,
 .dark .theme-light-locked {
-  --brand-ocean: #0d84d1;
-  --brand-mist: #38a7e6;
-  --brand-gold: #ff7a18;
-  --brand-sand: #fdf8f1;
-  --brand-ink: #0b3a63;
-  --brand-deep: #062a4d;
+  --brand-ocean: #1268c4;
+  --brand-mist: #35a3f0;
+  --brand-gold: #f79021;
+  --brand-sand: #fdf7ee;
+  --brand-ink: #0b3566;
+  --brand-deep: #072a52;
 }
 
 @keyframes float-slow {
