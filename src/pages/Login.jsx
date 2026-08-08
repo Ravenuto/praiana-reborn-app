@@ -46,7 +46,7 @@ export default function Login() {
                 <img
                   src={praianaLogo.url}
                   alt="Studio Praiana Pole Dance"
-                  className="h-full w-full object-contain scale-125"
+                  className="h-full w-full object-contain scale-105"
                 />
               </div>
             </div>
