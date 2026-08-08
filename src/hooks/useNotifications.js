@@ -13,6 +13,15 @@ export function useUnreadCount(userEmail) {
 }
 
 export async function createNotification({ user_email, type, title, message, link, actor_name }) {
+  // Respeita as preferências de notificação da administração
+  try {
+    const users = await base44.entities.User.filter({ email: user_email });
+    const target = users?.[0];
+    if (target && (target.is_admin || target.role === "admin")) {
+      const prefs = await getAdminNotifPrefs();
+      if (type in prefs && prefs[type] === false) return;
+    }
+  } catch { /* noop */ }
   await base44.entities.Notification.create({ user_email, type, title, message, link, actor_name, read: false });
 }
 
