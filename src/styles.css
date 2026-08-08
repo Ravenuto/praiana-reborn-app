@@ -67,92 +67,93 @@
   --font-body-value: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-script-value: 'Petit Formal Script', cursive;
 
-  /* Raissa brand — light (cores vivas da logo) */
-  --brand-ocean: #0d84d1;
-  --brand-mist: #38a7e6;
-  --brand-gold: #ff7a18;
-  --brand-sand: #fdf8f1;
-  --brand-ink: #0b3a63;
-  --brand-deep: #062a4d;
+  /* Praiana brand — light (cores da logo: sol dourado + mar azul) */
+  --brand-ocean: #1268c4;
+  --brand-mist: #35a3f0;
+  --brand-gold: #f79021;
+  --brand-sand: #fdf7ee;
+  --brand-ink: #0b3566;
+  --brand-deep: #072a52;
 
-  /* shadcn tokens mapped to Raissa brand (HSL) */
-  --background: 36 60% 97%;         /* sand */
-  --foreground: 209 80% 21%;        /* ink */
+  /* shadcn tokens mapped to Praiana brand (HSL) */
+  --background: 36 65% 97%;         /* sand */
+  --foreground: 214 80% 22%;        /* ink */
   --card: 0 0% 100%;
-  --card-foreground: 209 80% 21%;
+  --card-foreground: 214 80% 22%;
   --popover: 0 0% 100%;
-  --popover-foreground: 209 80% 21%;
-  --primary: 204 88% 44%;           /* ocean vivo */
+  --popover-foreground: 214 80% 22%;
+  --primary: 211 83% 42%;           /* azul do mar */
   --primary-foreground: 0 0% 100%;
-  --secondary: 202 78% 93%;
-  --secondary-foreground: 209 80% 21%;
-  --muted: 202 55% 94%;
-  --muted-foreground: 209 25% 42%;
-  --accent: 24 96% 54%;             /* sol laranja */
+  --secondary: 204 80% 93%;
+  --secondary-foreground: 214 80% 22%;
+  --muted: 204 55% 94%;
+  --muted-foreground: 214 25% 42%;
+  --accent: 31 93% 55%;             /* sol dourado */
   --accent-foreground: 0 0% 100%;
-  --destructive: 6 90% 52%;
-  --destructive-foreground: 36 60% 97%;
-  --border: 202 55% 85%;
-  --input: 202 55% 85%;
-  --ring: 204 88% 44%;
-  --chart-1: 204 88% 44%;
-  --chart-2: 199 85% 58%;
-  --chart-3: 24 96% 54%;
-  --chart-4: 45 100% 55%;
-  --chart-5: 202 78% 93%;
+  --destructive: 6 78% 50%;
+  --destructive-foreground: 36 65% 97%;
+  --border: 204 55% 86%;
+  --input: 204 55% 86%;
+  --ring: 211 83% 42%;
+  --chart-1: 211 83% 42%;
+  --chart-2: 203 88% 57%;
+  --chart-3: 31 93% 55%;
+  --chart-4: 43 96% 55%;
+  --chart-5: 204 80% 93%;
+
 
   --radius: 0.75rem;
-  --sidebar-background: 36 60% 97%;
-  --sidebar-foreground: 209 80% 21%;
-  --sidebar-primary: 204 88% 44%;
+  --sidebar-background: 36 65% 97%;
+  --sidebar-foreground: 214 80% 22%;
+  --sidebar-primary: 211 83% 42%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 202 78% 93%;
-  --sidebar-accent-foreground: 209 80% 21%;
-  --sidebar-border: 202 55% 85%;
-  --sidebar-ring: 204 88% 44%;
+  --sidebar-accent: 204 80% 93%;
+  --sidebar-accent-foreground: 214 80% 22%;
+  --sidebar-border: 204 55% 86%;
+  --sidebar-ring: 211 83% 42%;
 }
 
 .dark {
-  /* Raissa brand — dark overrides */
-  --brand-sand: #071b2e;
+  /* Praiana brand — dark overrides */
+  --brand-sand: #06192c;
   --brand-ink: #eaf3fb;
   --brand-deep: #cfe6fa;
-  --brand-ocean: #34a6f0;
-  --brand-mist: #6cc2f7;
-  --brand-gold: #ff8c33;
+  --brand-ocean: #3aa6f2;
+  --brand-mist: #74c5f8;
+  --brand-gold: #ffa040;
 
-  --background: 209 60% 9%;
-  --foreground: 36 40% 96%;
-  --card: 209 52% 13%;
-  --card-foreground: 36 40% 96%;
-  --popover: 209 52% 13%;
-  --popover-foreground: 36 40% 96%;
-  --primary: 202 92% 58%;
-  --primary-foreground: 209 60% 9%;
-  --secondary: 209 38% 19%;
+  --background: 212 62% 9%;
+  --foreground: 36 45% 96%;
+  --card: 212 52% 13%;
+  --card-foreground: 36 45% 96%;
+  --popover: 212 52% 13%;
+  --popover-foreground: 36 45% 96%;
+  --primary: 205 90% 57%;
+  --primary-foreground: 212 62% 9%;
+  --secondary: 212 38% 19%;
   --secondary-foreground: 36 35% 93%;
-  --muted: 209 32% 17%;
-  --muted-foreground: 202 22% 68%;
-  --accent: 24 96% 58%;
-  --accent-foreground: 209 60% 10%;
-  --destructive: 6 75% 46%;
-  --destructive-foreground: 36 40% 96%;
-  --border: 209 28% 23%;
-  --input: 209 28% 23%;
-  --ring: 202 92% 58%;
-  --chart-1: 202 92% 58%;
-  --chart-2: 199 85% 66%;
-  --chart-3: 24 96% 58%;
-  --chart-4: 45 100% 60%;
-  --chart-5: 202 60% 85%;
-  --sidebar-background: 209 52% 13%;
+  --muted: 212 32% 17%;
+  --muted-foreground: 204 22% 68%;
+  --accent: 31 94% 58%;
+  --accent-foreground: 212 62% 10%;
+  --destructive: 6 72% 46%;
+  --destructive-foreground: 36 45% 96%;
+  --border: 212 28% 23%;
+  --input: 212 28% 23%;
+  --ring: 205 90% 57%;
+  --chart-1: 205 90% 57%;
+  --chart-2: 200 85% 66%;
+  --chart-3: 31 94% 58%;
+  --chart-4: 43 96% 60%;
+  --chart-5: 204 60% 85%;
+  --sidebar-background: 212 52% 13%;
   --sidebar-foreground: 36 35% 93%;
-  --sidebar-primary: 202 92% 58%;
-  --sidebar-primary-foreground: 209 60% 9%;
-  --sidebar-accent: 209 38% 19%;
+  --sidebar-primary: 205 90% 57%;
+  --sidebar-primary-foreground: 212 62% 9%;
+  --sidebar-accent: 212 38% 19%;
   --sidebar-accent-foreground: 36 35% 93%;
-  --sidebar-border: 209 28% 23%;
-  --sidebar-ring: 202 92% 58%;
+  --sidebar-border: 212 28% 23%;
+  --sidebar-ring: 205 90% 57%;
 }
 
 
