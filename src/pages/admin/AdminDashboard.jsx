@@ -76,6 +76,7 @@ export default function AdminDashboard() {
         {activeTab === "students"    && <ManageStudents />}
         {activeTab === "attendance"  && <AttendanceBySchedule initialDate={presencasDate} />}
         {activeTab === "settings"    && <ManageStudioSettings />}
+        {activeTab === "notifs"      && <ManageNotifPrefs />}
       </div>
     </div>
   );
