@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { getAdminNotifPrefs } from "@/lib/adminNotifPrefs";
 
 export function useUnreadCount(userEmail) {
   const { data = [] } = useQuery({
