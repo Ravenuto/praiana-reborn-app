@@ -322,7 +322,12 @@ export default function ManageStudentMoves() {
                                 <GripVertical className="h-4 w-4" />
                               </span>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{it.name}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-medium text-sm truncate">{it.name}</p>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${skillInfo(it.skill_level).badge}`}>
+                                    {skillInfo(it.skill_level).short}
+                                  </span>
+                                </div>
                                 <p className="text-xs text-muted-foreground mb-2">{it.category}</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   <SideSelect
