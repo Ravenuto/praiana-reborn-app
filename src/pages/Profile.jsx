@@ -13,6 +13,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getCredits } from "@/utils";
 import MyPaymentHistory from "@/components/profile/MyPaymentHistory";
+import MyMoves from "@/components/profile/MyMoves";
 import SectionHeader from "@/components/shared/SectionHeader";
 
 const planInfo = {
@@ -28,6 +29,7 @@ export default function Profile() {
   const fileRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [tab, setTab] = useState("dados");
   const [form, setForm] = useState(null);
 
   // Busca dados completos do User entity (inclui créditos atualizados pelo admin)
@@ -160,6 +162,27 @@ export default function Profile() {
         subtitle="Seus dados pessoais e informações do plano"
       />
 
+      {/* Abas */}
+      <div className="flex gap-1.5 mb-6">
+        {[{ key: "dados", label: "Dados" }, { key: "movimentos", label: "Meus movimentos" }].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-2 rounded-full text-xs font-medium transition-colors ${
+              tab === t.key
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "movimentos" ? (
+        <MyMoves email={user?.email} />
+      ) : (
+      <>
       {/* Foto + nome */}
       <div className="flex items-center gap-4 mb-6 p-5 rounded-2xl border border-border bg-card">
         <div className="relative shrink-0">
@@ -274,6 +297,8 @@ export default function Profile() {
 
       {/* Histórico de pagamentos */}
       {userData?.id && <MyPaymentHistory userId={userData.id} />}
+      </>
+      )}
     </div>
   );
 }

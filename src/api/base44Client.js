@@ -89,6 +89,18 @@ const seedData = () => ({
   StudioSettings: [],
   StudentInvitation: [],
   WaitlistEntry: [],
+  Move: [
+    { id: 'mv-1', name: 'Fireman Spin', category: 'Giros', bilateral: true, notes: '', display_order: 0 },
+    { id: 'mv-2', name: 'Chair Spin', category: 'Giros', bilateral: true, notes: '', display_order: 1 },
+    { id: 'mv-3', name: 'Pole Sit', category: 'Movimentos', bilateral: true, notes: '', display_order: 2 },
+    { id: 'mv-4', name: 'Gancho de joelho', category: 'Movimentos', bilateral: true, notes: '', display_order: 3 },
+    { id: 'mv-5', name: 'Caminhada para o giro', category: 'Transições', bilateral: true, notes: '', display_order: 4 },
+    { id: 'mv-6', name: 'Invertida básica', category: 'Invertidas', bilateral: true, notes: '', display_order: 5 },
+    { id: 'mv-7', name: 'Espacate', category: 'Flexibilidade', bilateral: true, notes: '', display_order: 6 },
+    { id: 'mv-8', name: 'Ponte', category: 'Flexibilidade', bilateral: false, notes: '', display_order: 7 },
+    { id: 'mv-9', name: 'Sequência coreográfica', category: 'Coreografia', bilateral: false, notes: '', display_order: 8 },
+  ],
+  StudentMovePlan: [],
 });
 
 const STORE_KEY = 'raissa_mock_store_v1';
@@ -104,6 +116,12 @@ if (isBrowser) {
 } else {
   store = seedData();
 }
+
+// Garante que coleções novas (adicionadas em versões posteriores) existam em stores antigos
+const defaults = seedData();
+Object.keys(defaults).forEach((k) => {
+  if (!Array.isArray(store[k])) store[k] = defaults[k];
+});
 
 const persist = () => {
   if (!isBrowser) return;
@@ -182,6 +200,8 @@ const entities = {
   StudioSettings: makeEntity('StudioSettings'),
   StudentInvitation: makeEntity('StudentInvitation'),
   WaitlistEntry: makeEntity('WaitlistEntry'),
+  Move: makeEntity('Move'),
+  StudentMovePlan: makeEntity('StudentMovePlan'),
 };
 
 // Auth — uses localStorage to persist a fake session.
