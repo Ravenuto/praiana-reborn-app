@@ -161,6 +161,27 @@ export default function Profile() {
         subtitle="Seus dados pessoais e informações do plano"
       />
 
+      {/* Abas */}
+      <div className="flex gap-1.5 mb-6">
+        {[{ key: "dados", label: "Dados" }, { key: "movimentos", label: "Meus movimentos" }].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-2 rounded-full text-xs font-medium transition-colors ${
+              tab === t.key
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "movimentos" ? (
+        <MyMoves email={user?.email} />
+      ) : (
+      <>
       {/* Foto + nome */}
       <div className="flex items-center gap-4 mb-6 p-5 rounded-2xl border border-border bg-card">
         <div className="relative shrink-0">
