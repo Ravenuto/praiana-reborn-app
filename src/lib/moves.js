@@ -1,0 +1,68 @@
+// Movimentos do mês — constantes e helpers compartilhados
+
+export const MOVE_CATEGORIES = [
+  "Movimentos",
+  "Giros",
+  "Transições",
+  "Invertidas",
+  "Flexibilidade",
+  "Coreografia",
+];
+
+export const LEVELS = [
+  { key: "a_treinar", label: "A treinar", short: "A treinar", badge: "bg-muted text-muted-foreground" },
+  { key: "em_progresso", label: "Em progresso", short: "Progresso", badge: "bg-accent/20 text-accent-foreground" },
+  { key: "dominado", label: "Dominado", short: "Dominado", badge: "bg-primary/15 text-primary" },
+];
+
+export const levelInfo = (key) => LEVELS.find((l) => l.key === key) || LEVELS[0];
+
+export const currentMonth = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+};
+
+export const prevMonth = (month) => {
+  const [y, m] = (month || currentMonth()).split("-").map(Number);
+  const d = new Date(y, m - 2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+};
+
+const MONTH_NAMES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
+export const monthLabel = (month) => {
+  if (!month) return "";
+  const [y, m] = month.split("-").map(Number);
+  return `${MONTH_NAMES[(m || 1) - 1]} de ${y}`;
+};
+
+// Últimos N meses (mais recente primeiro), incluindo o mês atual
+export const recentMonths = (n = 12) => {
+  const out = [];
+  let m = currentMonth();
+  for (let i = 0; i < n; i++) {
+    out.push(m);
+    m = prevMonth(m);
+  }
+  return out;
+};
+
+// Progresso: quantos "lados" já estão dominados
+export const planProgress = (items = []) => {
+  let total = 0;
+  let done = 0;
+  items.forEach((it) => {
+    if (it.bilateral === false) {
+      total += 1;
+      if (it.left_level === "dominado") done += 1;
+    } else {
+      total += 2;
+      if (it.left_level === "dominado") done += 1;
+      if (it.right_level === "dominado") done += 1;
+    }
+  });
+  return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
+};
