@@ -10,7 +10,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { GripVertical, Loader2, Plus, Save, Trash2, Copy, Search } from "lucide-react";
 import { toast } from "sonner";
 import { createNotification } from "@/hooks/useNotifications";
-import { LEVELS, MOVE_CATEGORIES, currentMonth, monthLabel, planProgress, prevMonth, recentMonths } from "@/lib/moves";
+import { LEVELS, MOVE_CATEGORIES, SKILL_LEVELS, currentMonth, monthLabel, planProgress, prevMonth, recentMonths, skillInfo } from "@/lib/moves";
+import { MoveForm } from "@/components/admin/ManageMoves";
 
 const MONTHS = recentMonths(12);
 
@@ -23,6 +24,17 @@ export default function ManageStudentMoves() {
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [creating, setCreating] = useState(false);
+  const [creatingSaving, setCreatingSaving] = useState(false);
+  const [newMove, setNewMove] = useState({
+    name: "",
+    category: MOVE_CATEGORIES[0],
+    skill_level: SKILL_LEVELS[0].key,
+    bilateral: true,
+    notes: "",
+  });
 
   const { data: users = [] } = useQuery({
     queryKey: ["moveStudents"],
@@ -122,16 +134,40 @@ export default function ManageStudentMoves() {
     setSaving(false);
   };
 
+  const handleCreateMove = async () => {
+    if (!newMove.name.trim()) return toast.error("Nome é obrigatório");
+    if (!newMove.category?.trim()) return toast.error("Escolha uma categoria");
+    setCreatingSaving(true);
+    try {
+      const created = await base44.entities.Move.create({ ...newMove, display_order: moves.length });
+      await queryClient.invalidateQueries({ queryKey: ["moves"] });
+      addMove(created);
+      setNewMove({ name: "", category: MOVE_CATEGORIES[0], skill_level: SKILL_LEVELS[0].key, bilateral: true, notes: "" });
+      setCreating(false);
+      toast.success("Movimento criado e adicionado");
+    } catch {
+      toast.error("Erro ao criar movimento");
+    }
+    setCreatingSaving(false);
+  };
+
   const term = search.trim().toLowerCase();
-  const available = moves.filter(
-    (m) =>
-      !items.some((it) => it.move_id === m.id) &&
-      (!term || (m.name || "").toLowerCase().includes(term) || (m.category || "").toLowerCase().includes(term))
-  );
-  const categories = [...new Set(available.map((m) => m.category).filter(Boolean))].sort(
-    (a, b) => MOVE_CATEGORIES.indexOf(a) - MOVE_CATEGORIES.indexOf(b)
+  const available = moves.filter((m) => {
+    if (items.some((it) => it.move_id === m.id)) return false;
+    if (term && !(m.name || "").toLowerCase().includes(term) && !(m.category || "").toLowerCase().includes(term)) return false;
+    if (catFilter !== "all" && (m.category || "Outros") !== catFilter) return false;
+    if (levelFilter !== "all" && (m.skill_level || "pole_base") !== levelFilter) return false;
+    return true;
+  });
+  const allCats = [
+    ...MOVE_CATEGORIES,
+    ...[...new Set(moves.map((m) => m.category).filter((c) => c && !MOVE_CATEGORIES.includes(c)))],
+  ];
+  const categories = [...new Set(available.map((m) => m.category || "Outros"))].sort(
+    (a, b) => allCats.indexOf(a) - allCats.indexOf(b)
   );
   const progress = planProgress(items);
+
 
   return (
     <div>
