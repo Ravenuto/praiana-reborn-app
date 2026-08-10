@@ -29,6 +29,7 @@ export default function Profile() {
   const fileRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [tab, setTab] = useState("dados");
   const [form, setForm] = useState(null);
 
   // Busca dados completos do User entity (inclui créditos atualizados pelo admin)
@@ -296,6 +297,8 @@ export default function Profile() {
 
       {/* Histórico de pagamentos */}
       {userData?.id && <MyPaymentHistory userId={userData.id} />}
+      </>
+      )}
     </div>
   );
 }
