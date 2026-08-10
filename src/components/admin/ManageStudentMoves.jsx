@@ -187,15 +187,31 @@ export default function ManageStudentMoves() {
                     className="pl-9 w-full min-w-0"
                   />
                 </div>
+
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <PickChip active={catFilter === "all"} onClick={() => setCatFilter("all")}>Todas</PickChip>
+                  {allCats.map((c) => (
+                    <PickChip key={c} active={catFilter === c} onClick={() => setCatFilter(c)}>{c}</PickChip>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  <PickChip active={levelFilter === "all"} onClick={() => setLevelFilter("all")}>Todos os níveis</PickChip>
+                  {SKILL_LEVELS.map((l) => (
+                    <PickChip key={l.key} active={levelFilter === l.key} onClick={() => setLevelFilter(l.key)}>
+                      {l.label}
+                    </PickChip>
+                  ))}
+                </div>
+
                 {categories.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nada para adicionar.</p>
+                  <p className="text-sm text-muted-foreground">Nada para adicionar com esses filtros.</p>
                 ) : (
                   <div className="space-y-4">
                     {categories.map((cat) => (
                       <div key={cat}>
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{cat}</p>
                         <div className="flex flex-wrap gap-2">
-                          {available.filter((m) => m.category === cat).map((m) => (
+                          {available.filter((m) => (m.category || "Outros") === cat).map((m) => (
                             <button
                               key={m.id}
                               type="button"
@@ -203,6 +219,7 @@ export default function ManageStudentMoves() {
                               className="px-3 py-1.5 rounded-full text-xs border border-border bg-muted/40 hover:bg-primary hover:text-primary-foreground transition-colors"
                             >
                               + {m.name}
+                              <span className="ml-1.5 opacity-60">{skillInfo(m.skill_level).short}</span>
                             </button>
                           ))}
                         </div>
@@ -210,6 +227,22 @@ export default function ManageStudentMoves() {
                     ))}
                   </div>
                 )}
+
+                <div className="mt-5 pt-4 border-t border-border">
+                  {creating ? (
+                    <MoveForm
+                      form={newMove}
+                      setForm={setNewMove}
+                      onSave={handleCreateMove}
+                      saving={creatingSaving}
+                      editing={false}
+                    />
+                  ) : (
+                    <Button variant="outline" size="sm" className="rounded-full gap-2 text-xs w-full" onClick={() => setCreating(true)}>
+                      <Plus className="h-4 w-4" /> Criar novo movimento na biblioteca
+                    </Button>
+                  )}
+                </div>
               </DialogContent>
             </Dialog>
 
