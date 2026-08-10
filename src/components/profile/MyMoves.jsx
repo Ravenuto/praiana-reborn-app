@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
-import { LEVELS, currentMonth, levelInfo, monthLabel, planProgress, recentMonths } from "@/lib/moves";
+import { LEVELS, currentMonth, levelInfo, monthLabel, planProgress, recentMonths, skillInfo } from "@/lib/moves";
 
 const MONTHS = recentMonths(12);
 
