@@ -13,6 +13,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getCredits } from "@/utils";
 import MyPaymentHistory from "@/components/profile/MyPaymentHistory";
+import MyMoves from "@/components/profile/MyMoves";
 import SectionHeader from "@/components/shared/SectionHeader";
 
 const planInfo = {
