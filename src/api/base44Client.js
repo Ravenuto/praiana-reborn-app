@@ -117,6 +117,12 @@ if (isBrowser) {
   store = seedData();
 }
 
+// Garante que coleções novas (adicionadas em versões posteriores) existam em stores antigos
+const defaults = seedData();
+Object.keys(defaults).forEach((k) => {
+  if (!Array.isArray(store[k])) store[k] = defaults[k];
+});
+
 const persist = () => {
   if (!isBrowser) return;
   try { window.localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch { /* noop */ }
