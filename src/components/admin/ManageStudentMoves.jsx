@@ -72,6 +72,7 @@ export default function ManageStudentMoves() {
         move_id: m.id,
         name: m.name,
         category: m.category,
+        skill_level: m.skill_level || "pole_base",
         bilateral: m.bilateral !== false,
         left_level: "a_treinar",
         right_level: "a_treinar",
@@ -368,6 +369,20 @@ export default function ManageStudentMoves() {
         </>
       )}
     </div>
+  );
+}
+
+function PickChip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
+        active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
