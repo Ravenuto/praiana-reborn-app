@@ -11,6 +11,7 @@ export const ADMIN_NOTIF_TYPES = [
   { type: "comment", label: "Comentários", description: "Comentários em posts e recados" },
   { type: "new_post", label: "Novas publicações", description: "Quando uma aluna publica no feed" },
   { type: "credits_added", label: "Pagamentos e créditos", description: "Confirmações de pagamento e créditos" },
+  { type: "moves_plan", label: "Movimentos do mês", description: "Quando o plano de movimentos de uma aluna é publicado" },
 ];
 
 export const DEFAULT_PREFS = ADMIN_NOTIF_TYPES.reduce((acc, t) => ({ ...acc, [t.type]: true }), {});

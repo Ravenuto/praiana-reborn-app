@@ -194,6 +194,8 @@ const entities = {
   StudioSettings: makeEntity('StudioSettings'),
   StudentInvitation: makeEntity('StudentInvitation'),
   WaitlistEntry: makeEntity('WaitlistEntry'),
+  Move: makeEntity('Move'),
+  StudentMovePlan: makeEntity('StudentMovePlan'),
 };
 
 // Auth — uses localStorage to persist a fake session.
