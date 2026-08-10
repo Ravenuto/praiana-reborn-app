@@ -10,7 +10,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { GripVertical, Loader2, Plus, Save, Trash2, Copy, Search } from "lucide-react";
 import { toast } from "sonner";
 import { createNotification } from "@/hooks/useNotifications";
-import { LEVELS, MOVE_CATEGORIES, currentMonth, monthLabel, planProgress, prevMonth, recentMonths } from "@/lib/moves";
+import { LEVELS, MOVE_CATEGORIES, SKILL_LEVELS, currentMonth, monthLabel, planProgress, prevMonth, recentMonths, skillInfo } from "@/lib/moves";
+import { MoveForm } from "@/components/admin/ManageMoves";
 
 const MONTHS = recentMonths(12);
 
@@ -23,6 +24,17 @@ export default function ManageStudentMoves() {
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [creating, setCreating] = useState(false);
+  const [creatingSaving, setCreatingSaving] = useState(false);
+  const [newMove, setNewMove] = useState({
+    name: "",
+    category: MOVE_CATEGORIES[0],
+    skill_level: SKILL_LEVELS[0].key,
+    bilateral: true,
+    notes: "",
+  });
 
   const { data: users = [] } = useQuery({
     queryKey: ["moveStudents"],
@@ -60,6 +72,7 @@ export default function ManageStudentMoves() {
         move_id: m.id,
         name: m.name,
         category: m.category,
+        skill_level: m.skill_level || "pole_base",
         bilateral: m.bilateral !== false,
         left_level: "a_treinar",
         right_level: "a_treinar",
@@ -122,16 +135,40 @@ export default function ManageStudentMoves() {
     setSaving(false);
   };
 
+  const handleCreateMove = async () => {
+    if (!newMove.name.trim()) return toast.error("Nome é obrigatório");
+    if (!newMove.category?.trim()) return toast.error("Escolha uma categoria");
+    setCreatingSaving(true);
+    try {
+      const created = await base44.entities.Move.create({ ...newMove, display_order: moves.length });
+      await queryClient.invalidateQueries({ queryKey: ["moves"] });
+      addMove(created);
+      setNewMove({ name: "", category: MOVE_CATEGORIES[0], skill_level: SKILL_LEVELS[0].key, bilateral: true, notes: "" });
+      setCreating(false);
+      toast.success("Movimento criado e adicionado");
+    } catch {
+      toast.error("Erro ao criar movimento");
+    }
+    setCreatingSaving(false);
+  };
+
   const term = search.trim().toLowerCase();
-  const available = moves.filter(
-    (m) =>
-      !items.some((it) => it.move_id === m.id) &&
-      (!term || (m.name || "").toLowerCase().includes(term) || (m.category || "").toLowerCase().includes(term))
-  );
-  const categories = [...new Set(available.map((m) => m.category).filter(Boolean))].sort(
-    (a, b) => MOVE_CATEGORIES.indexOf(a) - MOVE_CATEGORIES.indexOf(b)
+  const available = moves.filter((m) => {
+    if (items.some((it) => it.move_id === m.id)) return false;
+    if (term && !(m.name || "").toLowerCase().includes(term) && !(m.category || "").toLowerCase().includes(term)) return false;
+    if (catFilter !== "all" && (m.category || "Outros") !== catFilter) return false;
+    if (levelFilter !== "all" && (m.skill_level || "pole_base") !== levelFilter) return false;
+    return true;
+  });
+  const allCats = [
+    ...MOVE_CATEGORIES,
+    ...[...new Set(moves.map((m) => m.category).filter((c) => c && !MOVE_CATEGORIES.includes(c)))],
+  ];
+  const categories = [...new Set(available.map((m) => m.category || "Outros"))].sort(
+    (a, b) => allCats.indexOf(a) - allCats.indexOf(b)
   );
   const progress = planProgress(items);
+
 
   return (
     <div>
@@ -187,15 +224,31 @@ export default function ManageStudentMoves() {
                     className="pl-9 w-full min-w-0"
                   />
                 </div>
+
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <PickChip active={catFilter === "all"} onClick={() => setCatFilter("all")}>Todas</PickChip>
+                  {allCats.map((c) => (
+                    <PickChip key={c} active={catFilter === c} onClick={() => setCatFilter(c)}>{c}</PickChip>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  <PickChip active={levelFilter === "all"} onClick={() => setLevelFilter("all")}>Todos os níveis</PickChip>
+                  {SKILL_LEVELS.map((l) => (
+                    <PickChip key={l.key} active={levelFilter === l.key} onClick={() => setLevelFilter(l.key)}>
+                      {l.label}
+                    </PickChip>
+                  ))}
+                </div>
+
                 {categories.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nada para adicionar.</p>
+                  <p className="text-sm text-muted-foreground">Nada para adicionar com esses filtros.</p>
                 ) : (
                   <div className="space-y-4">
                     {categories.map((cat) => (
                       <div key={cat}>
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{cat}</p>
                         <div className="flex flex-wrap gap-2">
-                          {available.filter((m) => m.category === cat).map((m) => (
+                          {available.filter((m) => (m.category || "Outros") === cat).map((m) => (
                             <button
                               key={m.id}
                               type="button"
@@ -203,6 +256,7 @@ export default function ManageStudentMoves() {
                               className="px-3 py-1.5 rounded-full text-xs border border-border bg-muted/40 hover:bg-primary hover:text-primary-foreground transition-colors"
                             >
                               + {m.name}
+                              <span className="ml-1.5 opacity-60">{skillInfo(m.skill_level).short}</span>
                             </button>
                           ))}
                         </div>
@@ -210,6 +264,22 @@ export default function ManageStudentMoves() {
                     ))}
                   </div>
                 )}
+
+                <div className="mt-5 pt-4 border-t border-border">
+                  {creating ? (
+                    <MoveForm
+                      form={newMove}
+                      setForm={setNewMove}
+                      onSave={handleCreateMove}
+                      saving={creatingSaving}
+                      editing={false}
+                    />
+                  ) : (
+                    <Button variant="outline" size="sm" className="rounded-full gap-2 text-xs w-full" onClick={() => setCreating(true)}>
+                      <Plus className="h-4 w-4" /> Criar novo movimento na biblioteca
+                    </Button>
+                  )}
+                </div>
               </DialogContent>
             </Dialog>
 
@@ -252,7 +322,12 @@ export default function ManageStudentMoves() {
                                 <GripVertical className="h-4 w-4" />
                               </span>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate">{it.name}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-medium text-sm truncate">{it.name}</p>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${skillInfo(it.skill_level).badge}`}>
+                                    {skillInfo(it.skill_level).short}
+                                  </span>
+                                </div>
                                 <p className="text-xs text-muted-foreground mb-2">{it.category}</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   <SideSelect
@@ -299,6 +374,20 @@ export default function ManageStudentMoves() {
         </>
       )}
     </div>
+  );
+}
+
+function PickChip({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
+        active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 

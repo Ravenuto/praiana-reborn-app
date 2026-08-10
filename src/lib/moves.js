@@ -1,14 +1,23 @@
 // Movimentos do mês — constantes e helpers compartilhados
 
 export const MOVE_CATEGORIES = [
-  "Movimentos",
+  "Figuras",
   "Giros",
+  "Giratória",
   "Transições",
-  "Invertidas",
-  "Flexibilidade",
-  "Coreografia",
 ];
 
+// Níveis da biblioteca (dificuldade do movimento)
+export const SKILL_LEVELS = [
+  { key: "pole_base", label: "Pole Base", short: "Base", badge: "bg-primary/12 text-primary" },
+  { key: "pole_intermediario", label: "Pole Intermediário", short: "Intermediário", badge: "bg-accent/20 text-accent-foreground" },
+  { key: "pole_avancado", label: "Pole Avançado", short: "Avançado", badge: "bg-destructive/12 text-destructive" },
+];
+
+export const skillInfo = (key) =>
+  SKILL_LEVELS.find((l) => l.key === key) || SKILL_LEVELS[0];
+
+// Níveis de progresso da aluna em cada movimento
 export const LEVELS = [
   { key: "a_treinar", label: "A treinar", short: "A treinar", badge: "bg-muted text-muted-foreground" },
   { key: "em_progresso", label: "Em progresso", short: "Progresso", badge: "bg-accent/20 text-accent-foreground" },

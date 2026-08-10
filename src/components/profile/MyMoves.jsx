@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
-import { LEVELS, currentMonth, levelInfo, monthLabel, planProgress, recentMonths } from "@/lib/moves";
+import { LEVELS, currentMonth, levelInfo, monthLabel, planProgress, recentMonths, skillInfo } from "@/lib/moves";
 
 const MONTHS = recentMonths(12);
 
@@ -69,7 +69,12 @@ export default function MyMoves({ email }) {
           <div className="space-y-3">
             {items.filter((it) => (it.category || "Outros") === cat).map((it) => (
               <div key={it.move_id} className="border-b border-border last:border-0 pb-3 last:pb-0">
-                <p className="font-medium text-sm mb-1.5">{it.name}</p>
+                <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                  <p className="font-medium text-sm">{it.name}</p>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${skillInfo(it.skill_level).badge}`}>
+                    {skillInfo(it.skill_level).short}
+                  </span>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {it.bilateral === false ? (
                     <LevelBadge label="Nível" level={it.left_level} />
