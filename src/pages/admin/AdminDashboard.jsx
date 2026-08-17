@@ -10,7 +10,6 @@ import ManageStudents from "@/components/admin/ManageStudents";
 import AttendanceBySchedule from "@/components/admin/AttendanceBySchedule";
 import ManageStudioSettings from "@/components/admin/ManageStudioSettings";
 import ManageNotifPrefs from "@/components/admin/ManageNotifPrefs";
-import ManageMovesSection from "@/components/admin/ManageMovesSection";
 
 const TABS = [
   { key: "sessions",    label: "Horários",    icon: Calendar },
@@ -18,7 +17,6 @@ const TABS = [
   { key: "bookings",    label: "Reservas",    icon: Users },
   { key: "plans",       label: "Planos",      icon: CreditCard },
   { key: "students",    label: "Alunas",      icon: UserPlus },
-  { key: "moves",       label: "Movimentos",  icon: Sparkles },
   { key: "attendance",  label: "Presenças",   icon: ClipboardCheck },
   { key: "settings",    label: "Regras",      icon: Settings2 },
   { key: "notifs",      label: "Notificações", icon: Bell },
@@ -76,7 +74,6 @@ export default function AdminDashboard() {
         {activeTab === "bookings"    && <ManageBookings />}
         {activeTab === "plans"       && <ManagePlansAdmin />}
         {activeTab === "students"    && <ManageStudents />}
-        {activeTab === "moves"       && <ManageMovesSection />}
         {activeTab === "attendance"  && <AttendanceBySchedule initialDate={presencasDate} />}
         {activeTab === "settings"    && <ManageStudioSettings />}
         {activeTab === "notifs"      && <ManageNotifPrefs />}
