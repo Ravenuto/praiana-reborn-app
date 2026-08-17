@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Navigate } from "react-router-dom";
-import { BookOpen, Calendar, Users, CreditCard, UserPlus, ClipboardCheck, Settings2, Bell, Sparkles } from "lucide-react";
+import { BookOpen, Calendar, Users, CreditCard, UserPlus, ClipboardCheck, Settings2, Bell } from "lucide-react";
 import ManageClassTypes from "@/components/admin/ManageClassTypes";
 import ManageSessions from "@/components/admin/ManageSessions";
 import ManageBookings from "@/components/admin/ManageBookingsMobile";
