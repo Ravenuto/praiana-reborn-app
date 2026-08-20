@@ -5,8 +5,10 @@ import { MapPin, Phone, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import StudioRules from "@/components/settings/StudioRules";
 import SectionHeader from "@/components/shared/SectionHeader";
+import { useSiteContent } from "@/lib/siteContent";
 
 export default function About() {
+  const c = useSiteContent();
   const { data: classTypes = [] } = useQuery({
     queryKey: ["classTypes"],
     queryFn: async () => {
@@ -14,6 +16,7 @@ export default function About() {
       return list.filter((ct) => ct.show_in_app !== false);
     }
   });
+
 
   return (
     <div className="font-body">
