@@ -35,7 +35,7 @@ export default function Home() {
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
                 <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
-                  <img src={praianaLogo.url} alt="Studio Praiana Pole Dance" className="h-full w-full object-contain scale-[1.12]" />
+                  <img src={c.content_home_logo || praianaLogo.url} alt="Studio Praiana Pole Dance" className="h-full w-full object-contain scale-[1.12]" />
                 </div>
               </div>
             </div>
@@ -46,15 +46,15 @@ export default function Home() {
             <div className="text-center">
               <span className="eyebrow inline-flex items-center gap-2 justify-center">
                 <span className="h-px w-8 bg-accent" />
-                Área da aluna
+                {c.content_home_eyebrow}
               </span>
               <h1 className="mt-3 font-heading text-5xl md:text-6xl leading-[1.1] text-primary text-balance">
-                <span>Olá, <span className="gold-word">{firstName}</span>,</span>
+                <span>{c.content_home_greeting} <span className="gold-word">{firstName}</span>,</span>
                 <br />
-                <span className="italic">bem-vinda de volta.</span>
+                <span className="italic">{c.content_home_title_line2}</span>
               </h1>
               <p className="mt-4 max-w-md mx-auto text-base text-muted-foreground leading-relaxed">
-                Marque as suas aulas, gerencie seu plano e acompanhe as novidades do studio.
+                {c.content_home_subtitle}
               </p>
             </div>
 
@@ -62,16 +62,17 @@ export default function Home() {
             <div className="flex flex-wrap gap-3 justify-center mt-2">
               <Button asChild size="lg">
                 <Link to="/aulas">
-                  <Calendar className="h-4 w-4" /> Agendar aula
+                  <Calendar className="h-4 w-4" /> {c.content_home_cta_primary}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link to="/minhas-reservas">
-                  <Bookmark className="h-4 w-4" /> Minhas reservas
+                  <Bookmark className="h-4 w-4" /> {c.content_home_cta_secondary}
                 </Link>
               </Button>
             </div>
+
           </div>
         </div>
       </section>
