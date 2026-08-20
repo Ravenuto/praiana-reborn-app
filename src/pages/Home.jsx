@@ -6,6 +6,8 @@ import { ArrowRight, Calendar, Bookmark, Instagram } from "lucide-react";
 import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import useReveal from "@/hooks/useReveal";
 import { useAuth } from "@/lib/AuthContext";
+import { useSiteContent } from "@/lib/siteContent";
+
 
 // WhatsApp glyph (lucide doesn't ship one)
 const WhatsApp = (props) => (
@@ -16,8 +18,10 @@ const WhatsApp = (props) => (
 
 export default function Home() {
   const { user } = useAuth();
+  const c = useSiteContent();
   useReveal();
   const firstName = (user?.full_name || "aluna").split(" ")[0];
+
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -31,7 +35,7 @@ export default function Home() {
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
                 <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
-                  <img src={praianaLogo.url} alt="Studio Praiana Pole Dance" className="h-full w-full object-contain scale-[1.12]" />
+                  <img src={c.content_home_logo || praianaLogo.url} alt="Studio Praiana Pole Dance" className="h-full w-full object-contain scale-[1.12]" />
                 </div>
               </div>
             </div>
@@ -42,15 +46,15 @@ export default function Home() {
             <div className="text-center">
               <span className="eyebrow inline-flex items-center gap-2 justify-center">
                 <span className="h-px w-8 bg-accent" />
-                Área da aluna
+                {c.content_home_eyebrow}
               </span>
               <h1 className="mt-3 font-heading text-5xl md:text-6xl leading-[1.1] text-primary text-balance">
-                <span>Olá, <span className="gold-word">{firstName}</span>,</span>
+                <span>{c.content_home_greeting} <span className="gold-word">{firstName}</span>,</span>
                 <br />
-                <span className="italic">bem-vinda de volta.</span>
+                <span className="italic">{c.content_home_title_line2}</span>
               </h1>
               <p className="mt-4 max-w-md mx-auto text-base text-muted-foreground leading-relaxed">
-                Marque as suas aulas, gerencie seu plano e acompanhe as novidades do studio.
+                {c.content_home_subtitle}
               </p>
             </div>
 
@@ -58,16 +62,17 @@ export default function Home() {
             <div className="flex flex-wrap gap-3 justify-center mt-2">
               <Button asChild size="lg">
                 <Link to="/aulas">
-                  <Calendar className="h-4 w-4" /> Agendar aula
+                  <Calendar className="h-4 w-4" /> {c.content_home_cta_primary}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
                 <Link to="/minhas-reservas">
-                  <Bookmark className="h-4 w-4" /> Minhas reservas
+                  <Bookmark className="h-4 w-4" /> {c.content_home_cta_secondary}
                 </Link>
               </Button>
             </div>
+
           </div>
         </div>
       </section>
@@ -76,7 +81,7 @@ export default function Home() {
       <section className="relative px-5 pt-2 pb-8">
         <div className="max-w-md mx-auto flex items-center justify-center gap-4">
           <a
-            href="https://instagram.com/raissa.poledance"
+            href={c.content_home_instagram_url}
             target="_blank" rel="noopener noreferrer"
             aria-label="Instagram"
             className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(225,48,108,0.6)] hover:-translate-y-0.5 transition-transform"
@@ -85,7 +90,7 @@ export default function Home() {
             <Instagram className="h-6 w-6" />
           </a>
           <a
-            href="https://wa.me/5521999999999"
+            href={c.content_home_whatsapp_url}
             target="_blank" rel="noopener noreferrer"
             aria-label="WhatsApp"
             className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(37,211,102,0.65)] hover:-translate-y-0.5 transition-transform"
