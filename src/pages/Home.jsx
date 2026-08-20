@@ -6,6 +6,8 @@ import { ArrowRight, Calendar, Bookmark, Instagram } from "lucide-react";
 import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import useReveal from "@/hooks/useReveal";
 import { useAuth } from "@/lib/AuthContext";
+import { useSiteContent } from "@/lib/siteContent";
+
 
 // WhatsApp glyph (lucide doesn't ship one)
 const WhatsApp = (props) => (
