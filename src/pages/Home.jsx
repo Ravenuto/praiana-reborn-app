@@ -18,8 +18,10 @@ const WhatsApp = (props) => (
 
 export default function Home() {
   const { user } = useAuth();
+  const c = useSiteContent();
   useReveal();
   const firstName = (user?.full_name || "aluna").split(" ")[0];
+
 
   return (
     <div className="relative min-h-screen overflow-hidden">
