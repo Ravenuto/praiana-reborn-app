@@ -90,7 +90,7 @@ export default function Home() {
             <Instagram className="h-6 w-6" />
           </a>
           <a
-            href="https://wa.me/5521999999999"
+            href={c.content_home_whatsapp_url}
             target="_blank" rel="noopener noreferrer"
             aria-label="WhatsApp"
             className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(37,211,102,0.65)] hover:-translate-y-0.5 transition-transform"
