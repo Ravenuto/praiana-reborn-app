@@ -81,7 +81,7 @@ export default function Home() {
       <section className="relative px-5 pt-2 pb-8">
         <div className="max-w-md mx-auto flex items-center justify-center gap-4">
           <a
-            href="https://instagram.com/raissa.poledance"
+            href={c.content_home_instagram_url}
             target="_blank" rel="noopener noreferrer"
             aria-label="Instagram"
             className="h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_12px_30px_-10px_rgba(225,48,108,0.6)] hover:-translate-y-0.5 transition-transform"
