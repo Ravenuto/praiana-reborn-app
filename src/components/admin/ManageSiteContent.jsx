@@ -152,7 +152,10 @@ function SectionPreview({ preview, v, numbers }) {
       return (
         <div className="space-y-2 text-xs">
           {[
-            [v.content_rules_booking_title, [v.content_rules_booking_text, v.content_rules_cancel_text]],
+            [
+              v.content_rules_booking_title,
+              [v.content_rules_booking_text, v.content_rules_cancel_text],
+            ],
             [v.content_rules_late_title, [v.content_rules_late_text]],
             [v.content_rules_credits_title, [v.content_rules_credits_text]],
             [v.content_rules_waitlist_title, [v.content_rules_waitlist_text]],
@@ -215,8 +218,7 @@ export default function ManageSiteContent() {
   };
 
   const current = CONTENT_GROUPS.find((g) => g.id === group);
-  const activeSection =
-    current.sections.find((s) => s.id === openSection) || current.sections[0];
+  const activeSection = current.sections.find((s) => s.id === openSection) || current.sections[0];
 
   const dirtyKeys = useMemo(
     () => Object.keys(CONTENT_DEFAULTS).filter((k) => (values[k] ?? "") !== (saved[k] ?? "")),
