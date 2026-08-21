@@ -47,7 +47,7 @@ export default function Login() {
               <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
               <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
                 <img
-                  src={praianaLogo.url}
+                  src={c.content_login_logo || praianaLogo.url}
                   alt="Studio Praiana Pole Dance"
                   className="h-full w-full object-contain scale-[1.12]"
                 />
@@ -55,11 +55,12 @@ export default function Login() {
             </div>
           </div>
           <h1 className="font-heading italic text-primary text-3xl sm:text-4xl leading-tight whitespace-nowrap">
-            Studio <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance
+            {c.content_login_title_prefix} <span className="text-accent not-italic font-semibold">{c.content_login_title_highlight}</span> {c.content_login_title_suffix}
           </h1>
 
-          <p className="font-script text-lg text-primary mt-1">bem-vinda de volta</p>
-          <p className="text-muted-foreground mt-2 text-sm">Entre na sua conta</p>
+          <p className="font-script text-lg text-primary mt-1">{c.content_login_script}</p>
+          <p className="text-muted-foreground mt-2 text-sm">{c.content_login_subtitle}</p>
+
         </div>
 
 
