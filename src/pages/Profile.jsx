@@ -88,7 +88,8 @@ export default function Profile() {
   const planData = planFromDb
     ? { label: planFromDb.label, price: planFromDb.price || `R$ ${planFromDb.price_value || ""}`, color: "bg-primary/10 text-primary" }
     : (planInfo[plan] || { label: plan.replace(/_/g, " "), price: "", color: "bg-muted text-muted-foreground" });
-  const { isTeacher } = useRoles();
+  const { mode } = useRoles();
+  const isTeacher = mode === "professor";
   const credits = getCredits(userEntity || currentUser);
   const maxCredits = planFromDb?.credits || planMaxCreditsFallback[plan] || 4;
   const usedThisMonth = monthBookings.length;

@@ -39,6 +39,8 @@ export function useRoles() {
     isAdmin,
     isStaff: isTeacher || isAdmin,
     mode,
+    /** Navegando como aluna: mostra créditos, plano e botões de reserva */
+    viewAsStudent: mode === "aluna",
     showAdminTab: isAdmin && mode === "admin",
     showTeacherTab: (isTeacher || isAdmin) && mode === "professor",
   };
