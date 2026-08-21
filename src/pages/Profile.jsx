@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { formatSafe } from "@/lib/dates";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -213,7 +214,7 @@ export default function Profile() {
               <CalendarDays className="h-3 w-3" /> Início do plano
             </p>
             <p className="font-medium text-sm">
-              {format(new Date(entityData.plan_start_date + "T12:00:00"), "dd/MM/yyyy")}
+              {formatSafe(entityData.plan_start_date, "dd/MM/yyyy")}
             </p>
           </div>
         )}
@@ -223,7 +224,7 @@ export default function Profile() {
               <RefreshCw className="h-3 w-3" /> Última renovação
             </p>
             <p className="font-medium text-sm">
-              {format(new Date(entityData.last_payment_date + "T12:00:00"), "dd/MM/yyyy")}
+              {formatSafe(entityData.last_payment_date, "dd/MM/yyyy")}
             </p>
             {lastPayment?.payment_method && (
               <p className="text-xs text-primary mt-1 font-medium">

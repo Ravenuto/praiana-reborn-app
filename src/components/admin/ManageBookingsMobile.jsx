@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { formatSafe } from "@/lib/dates";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -157,7 +158,7 @@ export default function ManageBookings() {
                 <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
                   <span className="bg-muted px-2 py-0.5 rounded-full">{booking.class_type_name}</span>
                   <span className="bg-muted px-2 py-0.5 rounded-full">
-                    {booking.session_date ? format(new Date(booking.session_date + "T12:00:00"), "dd/MM", { locale: ptBR }) : "—"}
+                    {booking.session_date ? formatSafe(booking.session_date, "dd/MM", { locale: ptBR }) : "—"}
                   </span>
                   {booking.session_time && (
                     <span className="bg-muted px-2 py-0.5 rounded-full">{booking.session_time}</span>

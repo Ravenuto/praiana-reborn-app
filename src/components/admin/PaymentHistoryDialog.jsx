@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { formatSafe } from "@/lib/dates";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -243,7 +244,7 @@ export default function PaymentHistoryDialog({ student, onClose }) {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">
-                      {format(new Date(p.payment_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}
+                      {formatSafe(p.payment_date, "dd/MM/yyyy", { locale: ptBR })}
                       {p.amount ? ` — R$ ${p.amount.toFixed(2).replace(".", ",")}` : ""}
                     </p>
                     <p className="text-xs text-muted-foreground">

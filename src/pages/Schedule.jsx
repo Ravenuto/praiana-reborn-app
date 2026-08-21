@@ -18,6 +18,12 @@ import { getStudioSettings } from "@/lib/studioSettings";
 import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import { promoteFromWaitlist } from "@/lib/waitlist";
+import { parseDateSafe } from "@/lib/dates";
+
+function formatSafe(value, pattern, options) {
+  const d = parseDateSafe(value);
+  return d ? format(d, pattern, options) : "";
+}
 
 function getTodayDayKey() {
   const days = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
@@ -39,7 +45,7 @@ export default function Schedule() {
   const [loadingSession, setLoadingSession] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const selectedDay = useMemo(() => getDayKey(new Date(selectedDate + "T12:00:00")), [selectedDate]);
+  const selectedDay = useMemo(() => getDayKey(parseDateSafe(selectedDate) || new Date()), [selectedDate]);
 
   // Lógica de datas permitidas para a aluna (dentro do período do plano)
   // Mesma query key que CreditBanner para sincronizar créditos em tempo real
@@ -60,8 +66,8 @@ export default function Schedule() {
     const isAdmin = user?.role === "admin";
     if (isAdmin) return { min: null, max: null }; // admin sem restrição
     const startStr = userData?.data?.plan_start_date || userData?.plan_start_date;
-    if (!startStr) return { min: null, max: null };
-    const start = new Date(startStr + "T12:00:00");
+    const start = parseDateSafe(startStr);
+    if (!start) return { min: null, max: null };
     const end = addDays(start, 31); // 1 mês a partir do início do plano
     return { min: format(start, "yyyy-MM-dd"), max: format(end, "yyyy-MM-dd") };
   }, [userData, user]);
@@ -250,7 +256,7 @@ export default function Schedule() {
       invalidate();
       toast.success(`Aula reservada! Créditos restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
       // Notificar admins com data em formato brasileiro
-      const dataBR = format(new Date(selectedDate + "T12:00:00"), "dd/MM/yyyy");
+      const dataBR = formatSafe(selectedDate, "dd/MM/yyyy");
       const admins = await base44.entities.User.filter({ role: "admin" });
       for (const admin of admins) {
         createNotification({
@@ -326,7 +332,7 @@ export default function Schedule() {
       invalidate();
       toast.success("Reserva cancelada! Crédito devolvido.");
       // Notificar admins com data em formato brasileiro
-      const dataBR = format(new Date(selectedDate + "T12:00:00"), "dd/MM/yyyy");
+      const dataBR = formatSafe(selectedDate, "dd/MM/yyyy");
       const admins = await base44.entities.User.filter({ role: "admin" });
       for (const admin of admins) {
         createNotification({
@@ -447,14 +453,14 @@ export default function Schedule() {
         </div>
         {planDates.min &&
         <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            Plano válido: {format(new Date(planDates.min + "T12:00:00"), "dd/MM")} até {format(new Date(planDates.max + "T12:00:00"), "dd/MM")}
+            Plano válido: {formatSafe(planDates.min, "dd/MM")} até {formatSafe(planDates.max, "dd/MM")}
           </p>
         }
       </div>);
 
   };
 
-  const formattedDate = format(new Date(selectedDate + "T12:00:00"), "EEEE, d 'de' MMMM", { locale: ptBR });
+  const formattedDate = formatSafe(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR });
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

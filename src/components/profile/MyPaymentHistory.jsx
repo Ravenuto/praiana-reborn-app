@@ -1,4 +1,5 @@
 import React from "react";
+import { formatSafe } from "@/lib/dates";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -52,7 +53,7 @@ export default function MyPaymentHistory({ userId }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">
-                  {format(new Date(p.payment_date + "T12:00:00"), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  {formatSafe(p.payment_date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                   {p.amount ? ` — R$ ${p.amount.toFixed(2).replace(".", ",")}` : ""}
                 </p>
                 <p className="text-xs text-muted-foreground">
