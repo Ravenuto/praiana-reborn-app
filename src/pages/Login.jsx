@@ -133,7 +133,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  Entrar <span className="text-base">→</span>
+                  {c.content_login_submit} <span className="text-base">→</span>
                 </>
               )}
             </Button>
