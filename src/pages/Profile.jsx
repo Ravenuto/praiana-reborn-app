@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getCredits } from "@/utils";
+import { useRoles } from "@/lib/roles";
 import MyPaymentHistory from "@/components/profile/MyPaymentHistory";
 import SectionHeader from "@/components/shared/SectionHeader";
 
@@ -87,6 +88,7 @@ export default function Profile() {
   const planData = planFromDb
     ? { label: planFromDb.label, price: planFromDb.price || `R$ ${planFromDb.price_value || ""}`, color: "bg-primary/10 text-primary" }
     : (planInfo[plan] || { label: plan.replace(/_/g, " "), price: "", color: "bg-muted text-muted-foreground" });
+  const { isTeacher } = useRoles();
   const credits = getCredits(userEntity || currentUser);
   const maxCredits = planFromDb?.credits || planMaxCreditsFallback[plan] || 4;
   const usedThisMonth = monthBookings.length;
@@ -182,11 +184,12 @@ export default function Profile() {
         <div className="min-w-0">
           <p className="font-heading text-xl font-semibold truncate">{form.full_name || user?.email}</p>
           <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
-          <Badge className={`mt-1.5 border-0 text-xs ${planData.color}`}>{planData.label}</Badge>
+          <Badge className={`mt-1.5 border-0 text-xs ${isTeacher ? "bg-accent/15 text-accent-foreground" : planData.color}`}>{isTeacher ? "Professora" : planData.label}</Badge>
         </div>
       </div>
 
       {/* Plano e créditos */}
+      {!isTeacher && (
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <p className="text-xs text-muted-foreground mb-1">Plano</p>
@@ -205,10 +208,11 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Datas do plano */}
       <div className="grid grid-cols-2 gap-3 mb-6">
-        {entityData?.plan_start_date && (
+        {!isTeacher && entityData?.plan_start_date && (
           <div className="rounded-xl border border-border bg-card p-4 text-center">
             <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
               <CalendarDays className="h-3 w-3" /> Início do plano
@@ -218,7 +222,7 @@ export default function Profile() {
             </p>
           </div>
         )}
-        {entityData?.last_payment_date && (
+        {!isTeacher && entityData?.last_payment_date && (
           <div className="rounded-xl border border-border bg-card p-4 text-center">
             <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
               <RefreshCw className="h-3 w-3" /> Última renovação

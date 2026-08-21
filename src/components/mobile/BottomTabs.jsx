@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck, Sparkles, LogOut } from "lucide-react";
+import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck, ClipboardCheck, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -10,9 +10,13 @@ export default function BottomTabs() {
   const { user } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
 
+  const isTeacher = user?.role === "teacher" || user?.is_teacher === true;
+
   const primaryTabs = [
     { path: "/aulas", label: "Agenda", icon: Calendar },
-    { path: "/minhas-reservas", label: "Reservas", icon: Bookmark },
+    ...(isTeacher
+      ? [{ path: "/professor", label: "Professora", icon: ClipboardCheck }]
+      : [{ path: "/minhas-reservas", label: "Reservas", icon: Bookmark }]),
     { path: "/perfil", label: "Perfil", icon: User },
   ];
 
@@ -21,7 +25,7 @@ export default function BottomTabs() {
     { path: "/sobre", label: "Sobre", icon: Info },
     { path: "/configuracoes", label: "Configurações", icon: Settings },
     ...(user?.role === "admin" ? [{ path: "/admin", label: "Admin", icon: ShieldCheck }] : []),
-    ...((user?.role === "teacher" || user?.is_teacher) ? [{ path: "/professor", label: "Professora", icon: Sparkles }] : []),
+    ...(isTeacher ? [{ path: "/minhas-reservas", label: "Reservas", icon: Bookmark }] : []),
   ];
 
   const isActive = (path) => location.pathname === path;

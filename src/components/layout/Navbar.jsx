@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { useUnreadCount } from "@/hooks/useNotifications";
 import {
-  LogOut, Calendar, Bookmark, CreditCard, User, ShieldCheck, Settings, Info, Bell,
+  LogOut, Calendar, Bookmark, CreditCard, User, ShieldCheck, Settings, Info, Bell, ClipboardCheck,
 } from "lucide-react";
 
 const PRIMARY_TABS = [
@@ -23,7 +23,8 @@ const SECONDARY = [
 export default function Navbar() {
   const { user } = useAuth();
   const location = useLocation();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.is_admin === true;
+  const isTeacher = user?.role === "teacher" || user?.is_teacher === true;
   const unreadCount = useUnreadCount(user?.email);
   const [scrolled, setScrolled] = useState(false);
 
@@ -84,6 +85,19 @@ export default function Navbar() {
               {tab.label}
             </Link>
           ))}
+          {isTeacher && (
+            <Link
+              to="/professor"
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full transition-colors ${
+                isActive("/professor")
+                  ? "text-accent-foreground bg-accent shadow-sm"
+                  : "text-foreground/70 hover:text-accent-foreground hover:bg-accent/15"
+              }`}
+            >
+              <ClipboardCheck className="h-3.5 w-3.5" />
+              Professora
+            </Link>
+          )}
           {isAdmin && (
             <Link
               to="/admin"

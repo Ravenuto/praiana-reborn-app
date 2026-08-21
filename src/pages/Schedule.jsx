@@ -19,6 +19,7 @@ import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import { promoteFromWaitlist } from "@/lib/waitlist";
 import { parseDateSafe } from "@/lib/dates";
+import { useRoles } from "@/lib/roles";
 
 function formatSafe(value, pattern, options) {
   const d = parseDateSafe(value);
@@ -37,6 +38,7 @@ function getDayKey(date) {
 
 export default function Schedule() {
   const { user } = useAuth();
+  const { isTeacher } = useRoles();
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [weekAnchor, setWeekAnchor] = useState(new Date()); // início da semana exibida no DaySelector
@@ -495,11 +497,11 @@ export default function Schedule() {
           eyebrow="Sua semana"
           title="Agendar Aulas"
           goldWord="Aulas"
-          subtitle="Selecione o dia e reserve sua vaga."
+          subtitle={isTeacher ? "Veja as aulas do dia e as alunas inscritas." : "Selecione o dia e reserve sua vaga."}
         />
 
 
-      <CreditBanner />
+      {!isTeacher && <CreditBanner />}
 
       {/* Seletor de data com calendário */}
       <div className="relative mb-4">
@@ -561,6 +563,7 @@ export default function Schedule() {
           onJoinWaitlist={() => handleJoinWaitlist(session)}
           onLeaveWaitlist={() => handleLeaveWaitlist(session)}
           isLoading={loadingSession === session.id}
+          readOnly={isTeacher}
           hasCredits={hasCredits}
           bookingMinHours={bookingMinHours}
           cancelMinHours={cancelMinHours} />
