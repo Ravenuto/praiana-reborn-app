@@ -45,7 +45,7 @@ export default function Schedule() {
   const [loadingSession, setLoadingSession] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const selectedDay = useMemo(() => getDayKey(new Date(selectedDate + "T12:00:00")), [selectedDate]);
+  const selectedDay = useMemo(() => getDayKey(parseDateSafe(selectedDate) || new Date()), [selectedDate]);
 
   // Lógica de datas permitidas para a aluna (dentro do período do plano)
   // Mesma query key que CreditBanner para sincronizar créditos em tempo real
