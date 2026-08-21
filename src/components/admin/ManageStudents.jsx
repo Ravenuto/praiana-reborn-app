@@ -679,8 +679,6 @@ export default function ManageStudents() {
         </div>
       )}
 
-      {/* Dialog cadastro manual */}
-      {manualDialog && (
       {/* Administradores */}
       <div className="mt-10 p-4 rounded-xl border border-border bg-card">
         <div className="flex items-center justify-between gap-3 mb-3">
@@ -764,6 +762,8 @@ export default function ManageStudents() {
         </DialogContent>
       </Dialog>
 
+      {/* Dialog cadastro manual */}
+      {manualDialog && (
         <Dialog open={manualDialog} onOpenChange={() => { setManualDialog(false); setManualForm(EMPTY_MANUAL); }}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
