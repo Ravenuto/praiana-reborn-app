@@ -32,7 +32,11 @@ export default function InactivePlanScreen() {
           <Button
             variant="ghost"
             className="text-muted-foreground text-sm"
-            onClick={() => base44.auth.logout()}
+            onClick={async () => {
+              try { window.localStorage.setItem('raissa_logged_out', '1'); } catch {}
+              await base44.auth.logout();
+              window.location.assign('/login');
+            }}
           >
             Sair
           </Button>

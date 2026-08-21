@@ -128,7 +128,11 @@ export default function Navbar() {
             )}
           </Link>
           <button
-            onClick={() => base44.auth.logout()}
+            onClick={async () => {
+              try { window.localStorage.setItem('raissa_logged_out', '1'); } catch {}
+              await base44.auth.logout();
+              window.location.assign('/login');
+            }}
             aria-label="Sair"
             className="h-9 w-9 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
           >
