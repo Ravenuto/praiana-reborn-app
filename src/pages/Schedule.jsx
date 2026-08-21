@@ -38,7 +38,8 @@ function getDayKey(date) {
 
 export default function Schedule() {
   const { user } = useAuth();
-  const { isTeacher } = useRoles();
+  const { viewAsStudent } = useRoles();
+  const isTeacher = !viewAsStudent;
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [weekAnchor, setWeekAnchor] = useState(new Date()); // início da semana exibida no DaySelector
