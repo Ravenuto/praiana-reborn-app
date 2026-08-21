@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { formatSafe } from "@/lib/dates";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -81,7 +82,7 @@ export default function ManageBookings() {
         user_email: booking.student_email,
         type: "booking_cancelled",
         title: "Sua reserva foi cancelada",
-        message: `${booking.class_type_name || "Aula"}${booking.date ? ` de ${format(new Date(booking.date + "T12:00:00"), "dd/MM", { locale: ptBR })}` : ""} foi cancelada pela administração.`,
+        message: `${booking.class_type_name || "Aula"}${booking.date ? ` de ${formatSafe(booking.date, "dd/MM", { locale: ptBR })}` : ""} foi cancelada pela administração.`,
         link: "/minhas-reservas",
       });
     }
@@ -211,7 +212,7 @@ export default function ManageBookings() {
                     <TableCell className="text-sm">{booking.class_type_name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {booking.session_date
-                        ? format(new Date(booking.session_date + "T12:00:00"), "dd/MM/yyyy")
+                        ? formatSafe(booking.session_date, "dd/MM/yyyy")
                         : "—"}
                     </TableCell>
                     <TableCell className="text-sm">{booking.session_time || "—"}</TableCell>

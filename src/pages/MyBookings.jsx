@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { formatSafe } from "@/lib/dates";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -90,7 +91,7 @@ export default function MyBookings() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
-    return format(new Date(dateStr + "T12:00:00"), "EEE, d 'de' MMM", { locale: ptBR });
+    return formatSafe(dateStr, "EEE, d 'de' MMM", { locale: ptBR });
   };
 
   const filtered = filterStatus === "all" ? bookings : bookings.filter((b) => b.status === filterStatus);
