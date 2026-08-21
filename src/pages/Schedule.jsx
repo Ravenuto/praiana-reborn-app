@@ -66,8 +66,8 @@ export default function Schedule() {
     const isAdmin = user?.role === "admin";
     if (isAdmin) return { min: null, max: null }; // admin sem restrição
     const startStr = userData?.data?.plan_start_date || userData?.plan_start_date;
-    if (!startStr) return { min: null, max: null };
-    const start = new Date(startStr + "T12:00:00");
+    const start = parseDateSafe(startStr);
+    if (!start) return { min: null, max: null };
     const end = addDays(start, 31); // 1 mês a partir do início do plano
     return { min: format(start, "yyyy-MM-dd"), max: format(end, "yyyy-MM-dd") };
   }, [userData, user]);
