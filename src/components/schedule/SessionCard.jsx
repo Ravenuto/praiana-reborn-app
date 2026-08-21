@@ -22,7 +22,7 @@ function isPast(sessionDate, sessionTime) {
 export default function SessionCard({
   session, sessionDate, bookingCount, sessionBookings = [], sessionWaitlist = [],
   isBooked, waitlistPosition, onBook, onCancel, onJoinWaitlist, onLeaveWaitlist, isLoading,
-  hasCredits = true, bookingMinHours = 4, cancelMinHours = 4,
+  hasCredits = true, bookingMinHours = 4, cancelMinHours = 4, readOnly = false,
 }) {
   const [expanded, setExpanded] = useState(false);
   const spotsLeft = (session.max_students || 8) - bookingCount;
@@ -71,7 +71,11 @@ export default function SessionCard({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {past ? (
+            {readOnly ? (
+              <span className="text-xs text-muted-foreground">
+                {isFull ? "Turma cheia" : `${spotsLeft} vaga${spotsLeft !== 1 ? "s" : ""}`}
+              </span>
+            ) : past ? (
               <span className="text-xs text-muted-foreground">Encerrada</span>
             ) : isBooked ? (
               <>
