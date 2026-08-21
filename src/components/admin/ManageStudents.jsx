@@ -596,6 +596,16 @@ export default function ManageStudents() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      title="Resetar senha para a padrão"
+                      onClick={() => handleResetPassword(student)}
+                      disabled={student.is_invited}
+                    >
+                      <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
                       title="Deletar aluna"
                       onClick={() => handleDeleteStudent(student)}
                       disabled={deletingStudent === student.id}
@@ -671,6 +681,89 @@ export default function ManageStudents() {
 
       {/* Dialog cadastro manual */}
       {manualDialog && (
+      {/* Administradores */}
+      <div className="mt-10 p-4 rounded-xl border border-border bg-card">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h3 className="font-medium flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" /> Administradores
+          </h3>
+          <Button size="sm" variant="outline" className="gap-2" onClick={() => setAdminDialog(true)}>
+            <UserPlus className="h-4 w-4" /> Novo administrador
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          Quem estiver aqui entra pela opção "Sou administrador" no login, com a senha padrão "{getDefaultPassword()}" no primeiro acesso.
+        </p>
+        <div className="space-y-2">
+          {admins.map((a) => {
+            const isMain = (a.email || "").toLowerCase() === ADMIN_EMAIL;
+            return (
+              <div key={a.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{a.full_name || "—"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{a.email}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {isMain && <Badge variant="secondary" className="text-xs">Principal</Badge>}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title="Resetar senha"
+                    onClick={() => handleResetPassword(a)}
+                  >
+                    <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Button>
+                  {!isMain && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      title="Remover acesso admin"
+                      onClick={() => handleRemoveAdmin(a)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <Dialog open={adminDialog} onOpenChange={setAdminDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo administrador</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Nome</Label>
+              <Input
+                value={adminForm.name}
+                onChange={(e) => setAdminForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="Nome do professor(a) ou admin"
+                className="w-full min-w-0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={adminForm.email}
+                onChange={(e) => setAdminForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="email@exemplo.com"
+                className="w-full min-w-0"
+              />
+            </div>
+            <Button className="w-full" onClick={handleAddAdmin} disabled={savingAdmin}>
+              {savingAdmin ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar administrador"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
         <Dialog open={manualDialog} onOpenChange={() => { setManualDialog(false); setManualForm(EMPTY_MANUAL); }}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
