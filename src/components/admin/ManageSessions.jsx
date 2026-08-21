@@ -70,6 +70,14 @@ export default function ManageSessions() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
 
+  const { data: teachers = [] } = useQuery({
+    queryKey: ["teachersList"],
+    queryFn: async () => {
+      const all = await base44.entities.User.list();
+      return all.filter((u) => u.role === "teacher" || u.is_teacher === true);
+    },
+  });
+
   const { data: classTypes = [] } = useQuery({
     queryKey: ["classTypes"],
     queryFn: () => base44.entities.ClassType.filter({ is_active: true }),
