@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { base44, ADMIN_EMAIL, getDefaultPassword } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Send, Check } from "lucide-react";
+import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Send, Check } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -46,6 +46,9 @@ export default function ManageStudents() {
   const [creatingTestStudent, setCreatingTestStudent] = useState(false);
   const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
+  const [adminDialog, setAdminDialog] = useState(false);
+  const [adminForm, setAdminForm] = useState({ name: "", email: "" });
+  const [savingAdmin, setSavingAdmin] = useState(false);
 
   const TEST_EMAIL = "aluna.teste@raissapoledance.com";
 
@@ -149,6 +152,7 @@ export default function ManageStudents() {
   );
 
   const students = users.filter((u) => u.role !== "admin");
+  const admins = users.filter((u) => u.role === "admin" || u.is_admin === true);
 
   const filtered = students.filter((s) => {
     const q = search.toLowerCase();
@@ -191,29 +195,34 @@ export default function ManageStudents() {
     if (!manualForm.email.includes("@")) return toast.error("Email inválido");
     setSavingManual(true);
     try {
-      // Verifica se já existe convite ou usuária com este email
-      const existingInvites = await base44.entities.StudentInvitation.filter({ email: manualForm.email });
-      const existingUsers = await base44.entities.User.filter({ email: manualForm.email });
-      if (existingInvites.length > 0 || existingUsers.length > 0) {
-        toast.error("Já existe uma aluna ou convite com este email.");
+      const email = manualForm.email.trim().toLowerCase();
+      const existingUsers = await base44.entities.User.filter({ email });
+      if (existingUsers.length > 0) {
+        toast.error("Já existe uma aluna com este email.");
         setSavingManual(false);
         return;
       }
 
-      // Cria o registro de convite pendente
-      await base44.entities.StudentInvitation.create({
-        email: manualForm.email,
+      await base44.entities.User.create({
         full_name: manualForm.name,
-        phone: manualForm.phone,
-        birth_date: manualForm.birth_date,
-        plan: manualForm.plan,
-        credits: manualForm.credits,
-        status: "pending",
-        invited_date: new Date().toISOString(),
+        email,
+        role: "user",
+        is_admin: false,
+        must_change_password: true,
+        plan_status: "active",
+        data: {
+          full_name: manualForm.name,
+          phone: manualForm.phone,
+          birth_date: manualForm.birth_date,
+          plan: manualForm.plan,
+          credits: manualForm.credits,
+          is_active: true,
+          plan_start_date: new Date().toISOString().slice(0, 10),
+        },
       });
 
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success(`Convite enviado para ${manualForm.email}. A aluna aparecerá como "Email enviado" até ativar a conta.`);
+      toast.success(`Aluna cadastrada! Primeiro acesso com a senha padrão "${getDefaultPassword()}".`);
       setManualDialog(false);
       setManualForm(EMPTY_MANUAL);
     } catch (err) {
@@ -221,6 +230,58 @@ export default function ManageStudents() {
       toast.error("Erro ao cadastrar: " + (err?.message || "tente novamente"));
     }
     setSavingManual(false);
+  };
+
+  const handleResetPassword = async (student) => {
+    if (!window.confirm(`Resetar a senha de ${student.full_name || student.email} para a senha padrão?`)) return;
+    try {
+      await base44.auth.resetToDefaultPassword(student.id);
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      toast.success(`Senha resetada para "${getDefaultPassword()}". Ela criará uma nova no próximo login.`);
+    } catch {
+      toast.error("Erro ao resetar senha");
+    }
+  };
+
+  const handleAddAdmin = async () => {
+    const email = (adminForm.email || "").trim().toLowerCase();
+    if (!adminForm.name || !email.includes("@")) return toast.error("Nome e email válidos são obrigatórios");
+    setSavingAdmin(true);
+    try {
+      const existing = await base44.entities.User.filter({ email });
+      if (existing.length > 0) {
+        await base44.entities.User.update(existing[0].id, { role: "admin", is_admin: true });
+        toast.success("Acesso de administrador concedido.");
+      } else {
+        await base44.entities.User.create({
+          full_name: adminForm.name,
+          email,
+          role: "admin",
+          is_admin: true,
+          is_active: true,
+          must_change_password: true,
+        });
+        toast.success(`Administrador criado! Primeiro acesso com a senha padrão "${getDefaultPassword()}".`);
+      }
+      setAdminForm({ name: "", email: "" });
+      setAdminDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+    } catch (err) {
+      toast.error("Erro ao cadastrar administrador: " + (err?.message || ""));
+    }
+    setSavingAdmin(false);
+  };
+
+  const handleRemoveAdmin = async (admin) => {
+    if ((admin.email || "").toLowerCase() === ADMIN_EMAIL) return;
+    if (!window.confirm(`Remover o acesso de administrador de ${admin.full_name || admin.email}?`)) return;
+    try {
+      await base44.entities.User.update(admin.id, { role: "user", is_admin: false });
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      toast.success("Acesso de administrador removido.");
+    } catch {
+      toast.error("Erro ao remover acesso");
+    }
   };
 
   const handlePlanChange = async (student, plan) => {
