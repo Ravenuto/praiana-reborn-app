@@ -8,7 +8,7 @@ const seedData = () => ({
   User: [
     {
       id: 'u-admin',
-      full_name: 'Admin Raissa',
+      full_name: 'Raissa Venuto',
       email: 'ravenutto@gmail.com',
       role: 'admin',
       is_admin: true,
@@ -67,7 +67,7 @@ const seedData = () => ({
     {
       id: 'post-1',
       author_id: 'u-admin',
-      author_name: 'Admin Raissa',
+      author_name: 'Raissa Venuto',
       content: 'Bem-vindas ao novo app do Studio Praiana Pole Dance! 🌊 Reservem suas aulas pelo menu Aulas.',
       created_date: new Date(Date.now() - 86400000).toISOString(),
       likes: ['u-aluna'],
@@ -236,15 +236,21 @@ const pickArgs = (a, b) => {
 
 // Migração: garante que a conta de admin use o e-mail oficial e que alunas antigas fiquem ativas
 store.User = (store.User || []).map((u) => {
-  if (u.email === 'admin@raissapoledance.com' || u.role === 'admin' || u.is_admin) {
-    return { ...u, email: ADMIN_EMAIL, role: 'admin', is_admin: true, is_active: true };
+  let next = u;
+  if (u.email === 'admin@raissapoledance.com') {
+    next = { ...next, email: ADMIN_EMAIL, role: 'admin', is_admin: true, is_active: true };
   }
-  return u.is_active === undefined ? { ...u, is_active: true } : u;
+  if ((next.full_name || '').trim().toLowerCase() === 'admin raissa') {
+    next = { ...next, full_name: 'Raissa Venuto' };
+  }
+  if (next.is_active === undefined) next = { ...next, is_active: true };
+  return next;
 });
 persist();
 const cachedSession = readAuth();
-if (cachedSession && (cachedSession.role === 'admin' || cachedSession.is_admin)) {
-  writeAuth({ ...cachedSession, email: ADMIN_EMAIL, is_active: true });
+if (cachedSession) {
+  const freshCached = store.User.find((u) => u.id === cachedSession.id);
+  if (freshCached) writeAuth(freshCached);
 }
 
 // Seed an admin session on first load so all screens are visible without manual login.
@@ -319,7 +325,8 @@ const auth = {
     const fresh = store.User.find((u) => u.id === match.id);
     writeAuth(fresh);
     try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
-    return { user: fresh, token: 'mock-token', mustChangePassword: usingDefault, isAdmin: isAdminAccount, isTeacher: isTeacherAccount };
+    try { window.localStorage.setItem('raissa_login_mode', mode); } catch { /* noop */ }
+    return { user: fresh, token: 'mock-token', mustChangePassword: usingDefault, isAdmin: isAdminAccount, isTeacher: isTeacherAccount, mode };
   },
   async changePassword(newPassword) {
     const cached = readAuth();
