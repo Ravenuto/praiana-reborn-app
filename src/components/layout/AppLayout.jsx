@@ -19,13 +19,15 @@ const isPlanInactive = (u) => {
 
 export default function AppLayout() {
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.is_admin === true;
+  const isStaff =
+    user?.role === "admin" || user?.is_admin === true ||
+    user?.role === "teacher" || user?.is_teacher === true;
 
   if (user?.must_change_password) {
     return <Navigate to="/definir-senha" replace />;
   }
 
-  if (user && !isAdmin && isPlanInactive(user)) {
+  if (user && !isStaff && isPlanInactive(user)) {
     return <InactivePlanScreen />;
   }
 

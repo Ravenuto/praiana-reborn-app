@@ -70,6 +70,14 @@ export default function ManageSessions() {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
 
+  const { data: teachers = [] } = useQuery({
+    queryKey: ["teachersList"],
+    queryFn: async () => {
+      const all = await base44.entities.User.list();
+      return all.filter((u) => u.role === "teacher" || u.is_teacher === true);
+    },
+  });
+
   const { data: classTypes = [] } = useQuery({
     queryKey: ["classTypes"],
     queryFn: () => base44.entities.ClassType.filter({ is_active: true }),
@@ -497,8 +505,29 @@ export default function ManageSessions() {
             </div>
 
             <div>
-              <Label>Instrutora</Label>
-              <Input value={form.instructor} onChange={(e) => setForm({ ...form, instructor: e.target.value })} placeholder="Nome da instrutora" />
+              <Label>Professora</Label>
+              {teachers.length > 0 ? (
+                <Select
+                  value={form.instructor || "__none__"}
+                  onValueChange={(v) => setForm({ ...form, instructor: v === "__none__" ? "" : v })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Selecione a professora" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Sem professora definida</SelectItem>
+                    {teachers.map((t) => (
+                      <SelectItem key={t.id} value={t.full_name || t.email}>
+                        {t.full_name || t.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={form.instructor}
+                  onChange={(e) => setForm({ ...form, instructor: e.target.value })}
+                  placeholder="Cadastre professoras em Admin › Alunas"
+                />
+              )}
             </div>
 
             <div>

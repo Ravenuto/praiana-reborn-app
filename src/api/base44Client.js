@@ -295,8 +295,12 @@ const auth = {
     }
 
     const isAdminAccount = match.role === 'admin' || match.is_admin === true;
+    const isTeacherAccount = match.role === 'teacher' || match.is_teacher === true;
     if (mode === 'admin' && !isAdminAccount) {
       throw new Error('Este e-mail não tem acesso de administrador.');
+    }
+    if (mode === 'professor' && !isTeacherAccount && !isAdminAccount) {
+      throw new Error('Este e-mail não tem acesso de professora.');
     }
 
     // Senha: se a conta ainda não trocou a senha, aceita a senha padrão do estúdio
@@ -315,7 +319,7 @@ const auth = {
     const fresh = store.User.find((u) => u.id === match.id);
     writeAuth(fresh);
     try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
-    return { user: fresh, token: 'mock-token', mustChangePassword: usingDefault };
+    return { user: fresh, token: 'mock-token', mustChangePassword: usingDefault, isAdmin: isAdminAccount, isTeacher: isTeacherAccount };
   },
   async changePassword(newPassword) {
     const cached = readAuth();

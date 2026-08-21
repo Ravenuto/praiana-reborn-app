@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Loader2, Eye, EyeOff, GraduationCap, ShieldCheck } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff, GraduationCap, ShieldCheck, Sparkles } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useSiteContent } from "@/lib/siteContent";
 
@@ -28,7 +28,8 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await base44.auth.loginViaEmailPassword({ email, password, mode });
-      window.location.href = res?.mustChangePassword ? "/definir-senha" : "/";
+      const home = res?.isTeacher && !res?.isAdmin ? "/professor" : "/";
+      window.location.href = res?.mustChangePassword ? "/definir-senha" : home;
     } catch (err) {
       setError(err.message || "Email ou senha inválidos");
     } finally {
@@ -81,16 +82,17 @@ export default function Login() {
             </div>
           )}
 
-          <div className="mb-5 grid grid-cols-2 gap-2 p-1 rounded-full bg-muted">
+          <div className="mb-5 grid grid-cols-3 gap-1 p-1 rounded-full bg-muted">
             {[
               { key: "aluna", label: "SOU ALUNA", Icon: GraduationCap },
-              { key: "admin", label: "SOU ADMINISTRADOR", Icon: ShieldCheck },
+              { key: "professor", label: "SOU PROFESSORA", Icon: Sparkles },
+              { key: "admin", label: "SOU ADMIN", Icon: ShieldCheck },
             ].map(({ key, label, Icon }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => { setMode(key); setError(""); setInfo(""); }}
-                className={`flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-[11px] font-semibold tracking-wide transition-colors ${
+                className={`flex items-center justify-center gap-1 rounded-full px-1.5 py-2 text-[10px] font-semibold tracking-wide transition-colors ${
                   mode === key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"

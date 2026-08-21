@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Send, Check } from "lucide-react";
+import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Send, Check } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -43,75 +43,14 @@ export default function ManageStudents() {
   const [paymentDialog, setPaymentDialog] = useState(null);
   const [sendingWelcome, setSendingWelcome] = useState(null);
   const [welcomeSent, setWelcomeSent] = useState(() => new Set());
-  const [creatingTestStudent, setCreatingTestStudent] = useState(false);
   const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
   const [adminDialog, setAdminDialog] = useState(false);
   const [adminForm, setAdminForm] = useState({ name: "", email: "" });
   const [savingAdmin, setSavingAdmin] = useState(false);
-
-  const TEST_EMAIL = "aluna.teste@raissapoledance.com";
-
-  const handleCreateTestStudent = async () => {
-    setCreatingTestStudent(true);
-    try {
-      const existing = await base44.entities.User.filter({ email: TEST_EMAIL });
-      // Remove duplicatas (mantém apenas a primeira) para evitar leituras inconsistentes
-      if (existing.length > 1) {
-        for (const dup of existing.slice(1)) {
-          await base44.entities.User.delete(dup.id);
-        }
-      }
-      let student = existing[0];
-      const defaultPlan = plans.find((p) => p.key === "4_aulas") || plans[0];
-      const planKey = defaultPlan?.key || "4_aulas";
-      const planCredits = defaultPlan?.credits || 4;
-      if (!student) {
-        student = await base44.entities.User.create({
-          full_name: "Aluna Teste",
-          email: TEST_EMAIL,
-          role: "user",
-          is_admin: false,
-          plan_status: "active",
-          data: {
-            full_name: "Aluna Teste",
-            plan: planKey,
-            credits: planCredits,
-            is_active: true,
-            plan_start_date: new Date().toISOString().slice(0, 10),
-          },
-        });
-      } else {
-        // Reseta créditos para o valor do plano (garante teste limpo)
-        const cleanData = Object.fromEntries(Object.entries(student.data || {}).filter(([k]) => k !== 'data'));
-        await base44.entities.User.update(student.id, {
-          data: {
-            ...cleanData,
-            plan: cleanData.plan || planKey,
-            credits: planCredits,
-            is_active: true,
-            plan_start_date: cleanData.plan_start_date || new Date().toISOString().slice(0, 10),
-          },
-        });
-      }
-      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success(`Aluna teste pronta com ${planCredits} créditos: ${TEST_EMAIL}`);
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error(error?.message || "Erro ao criar aluna teste");
-    }
-    setCreatingTestStudent(false);
-  };
-
-  const handleLoginAsTestStudent = async () => {
-    const existing = await base44.entities.User.filter({ email: TEST_EMAIL });
-    if (!existing[0]) {
-      toast.error("Crie a aluna teste primeiro");
-      return;
-    }
-    await base44.auth.loginViaEmailPassword({ email: TEST_EMAIL });
-    window.location.assign("/");
-  };
+  const [teacherDialog, setTeacherDialog] = useState(false);
+  const [teacherForm, setTeacherForm] = useState({ name: "", email: "" });
+  const [savingTeacher, setSavingTeacher] = useState(false);
 
   const { data: plans = [] } = useQuery({
     queryKey: ["studioPlans"],
@@ -151,8 +90,9 @@ export default function ManageStudents() {
     plans.map((p) => [p.key, { label: p.label, credits: p.credits }])
   );
 
-  const students = users.filter((u) => u.role !== "admin");
+  const students = users.filter((u) => u.role !== "admin" && u.role !== "teacher" && u.is_teacher !== true);
   const admins = users.filter((u) => u.role === "admin" || u.is_admin === true);
+  const teachers = users.filter((u) => (u.role === "teacher" || u.is_teacher === true) && u.role !== "admin");
 
   const filtered = students.filter((s) => {
     const q = search.toLowerCase();
@@ -281,6 +221,49 @@ export default function ManageStudents() {
       toast.success("Acesso de administrador removido.");
     } catch {
       toast.error("Erro ao remover acesso");
+    }
+  };
+
+  const handleAddTeacher = async () => {
+    const email = (teacherForm.email || "").trim().toLowerCase();
+    if (!teacherForm.name || !email.includes("@")) return toast.error("Nome e email válidos são obrigatórios");
+    setSavingTeacher(true);
+    try {
+      const existing = await base44.entities.User.filter({ email });
+      if (existing.length > 0) {
+        await base44.entities.User.update(existing[0].id, { role: "teacher", is_teacher: true, is_active: true });
+        toast.success("Acesso de professora concedido.");
+      } else {
+        await base44.entities.User.create({
+          full_name: teacherForm.name,
+          email,
+          role: "teacher",
+          is_teacher: true,
+          is_active: true,
+          must_change_password: true,
+          data: { full_name: teacherForm.name },
+        });
+        toast.success(`Professora cadastrada! Primeiro acesso com a senha padrão "${getDefaultPassword()}".`);
+      }
+      setTeacherForm({ name: "", email: "" });
+      setTeacherDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["teachersList"] });
+    } catch (err) {
+      toast.error("Erro ao cadastrar professora: " + (err?.message || ""));
+    }
+    setSavingTeacher(false);
+  };
+
+  const handleRemoveTeacher = async (teacher) => {
+    if (!window.confirm(`Remover o acesso de professora de ${teacher.full_name || teacher.email}?`)) return;
+    try {
+      await base44.entities.User.delete(teacher.id);
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["teachersList"] });
+      toast.success("Professora removida.");
+    } catch {
+      toast.error("Erro ao remover professora");
     }
   };
 
@@ -446,13 +429,6 @@ export default function ManageStudents() {
         <div className="flex flex-wrap gap-2">
           <Button onClick={() => setManualDialog(true)} className="gap-2">
             <UserPlus className="h-4 w-4" /> Cadastro completo
-          </Button>
-          <Button variant="outline" onClick={handleCreateTestStudent} disabled={creatingTestStudent} className="gap-2">
-            {creatingTestStudent ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-            Criar aluna teste
-          </Button>
-          <Button variant="secondary" onClick={handleLoginAsTestStudent} className="gap-2">
-            Entrar como aluna teste
           </Button>
         </div>
       </div>
@@ -757,6 +733,75 @@ export default function ManageStudents() {
             </div>
             <Button className="w-full" onClick={handleAddAdmin} disabled={savingAdmin}>
               {savingAdmin ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar administrador"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Professores */}
+      <div className="mt-6 p-4 rounded-xl border border-border bg-card">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h3 className="font-medium flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-accent" /> Professores
+          </h3>
+          <Button size="sm" variant="outline" className="gap-2" onClick={() => setTeacherDialog(true)}>
+            <UserPlus className="h-4 w-4" /> Nova professora
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          A professora entra pela opção "Sou professora" no login (senha padrão "{getDefaultPassword()}" no primeiro acesso) e vê só a área de presenças. Ela também aparece para escolher em Horários › Professora.
+        </p>
+        {teachers.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Nenhuma professora cadastrada ainda.</p>
+        ) : (
+          <div className="space-y-2">
+            {teachers.map((t) => (
+              <div key={t.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{t.full_name || "—"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{t.email}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Resetar senha" onClick={() => handleResetPassword(t)}>
+                    <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Remover professora" onClick={() => handleRemoveTeacher(t)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={teacherDialog} onOpenChange={setTeacherDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nova professora</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Nome</Label>
+              <Input
+                value={teacherForm.name}
+                onChange={(e) => setTeacherForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="Nome da professora"
+                className="w-full min-w-0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={teacherForm.email}
+                onChange={(e) => setTeacherForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="email@exemplo.com"
+                className="w-full min-w-0"
+              />
+            </div>
+            <Button className="w-full" onClick={handleAddTeacher} disabled={savingTeacher}>
+              {savingTeacher ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar professora"}
             </Button>
           </div>
         </DialogContent>
