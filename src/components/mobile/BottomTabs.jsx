@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Calendar, User, MoreHorizontal, Bookmark, CreditCard, Settings, Info, ShieldCheck, ClipboardCheck, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { useRoles } from "@/lib/roles";
 import { base44 } from "@/api/base44Client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -10,11 +11,11 @@ export default function BottomTabs() {
   const { user } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
 
-  const isTeacher = user?.role === "teacher" || user?.is_teacher === true;
+  const { showAdminTab, showTeacherTab, isTeacher } = useRoles();
 
   const primaryTabs = [
     { path: "/aulas", label: "Agenda", icon: Calendar },
-    ...(isTeacher
+    ...(showTeacherTab
       ? [{ path: "/professor", label: "Professora", icon: ClipboardCheck }]
       : [{ path: "/minhas-reservas", label: "Reservas", icon: Bookmark }]),
     { path: "/perfil", label: "Perfil", icon: User },
@@ -24,8 +25,8 @@ export default function BottomTabs() {
     { path: "/planos", label: "Planos", icon: CreditCard },
     { path: "/sobre", label: "Sobre", icon: Info },
     { path: "/configuracoes", label: "Configurações", icon: Settings },
-    ...(user?.role === "admin" ? [{ path: "/admin", label: "Admin", icon: ShieldCheck }] : []),
-    ...(isTeacher ? [{ path: "/minhas-reservas", label: "Reservas", icon: Bookmark }] : []),
+    ...(showAdminTab ? [{ path: "/admin", label: "Admin", icon: ShieldCheck }] : []),
+    ...(showTeacherTab ? [{ path: "/minhas-reservas", label: "Reservas", icon: Bookmark }] : []),
   ];
 
   const isActive = (path) => location.pathname === path;
