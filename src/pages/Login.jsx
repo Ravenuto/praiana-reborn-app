@@ -142,16 +142,17 @@ export default function Login() {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Quer se matricular?{" "}
+          {c.content_login_signup_text}{" "}
           <a
-            href="https://wa.me/5500000000000"
+            href={c.content_login_signup_link_url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary font-medium hover:underline"
           >
-            Entre em contato pelo WhatsApp
+            {c.content_login_signup_link_label}
           </a>
         </p>
+
       </div>
     </div>
   );
