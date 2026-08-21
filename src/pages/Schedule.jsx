@@ -18,6 +18,12 @@ import { getStudioSettings } from "@/lib/studioSettings";
 import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import { promoteFromWaitlist } from "@/lib/waitlist";
+import { parseDateSafe } from "@/lib/dates";
+
+function formatSafe(value, pattern, options) {
+  const d = parseDateSafe(value);
+  return d ? format(d, pattern, options) : "";
+}
 
 function getTodayDayKey() {
   const days = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
