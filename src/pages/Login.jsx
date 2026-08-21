@@ -27,11 +27,10 @@ export default function Login() {
     setInfo("");
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword({ email, password, mode });
-      window.location.href = "/";
+      const res = await base44.auth.loginViaEmailPassword({ email, password, mode });
+      window.location.href = res?.mustChangePassword ? "/definir-senha" : "/";
     } catch (err) {
-      if (err?.code === "pending_approval") setInfo(err.message);
-      else setError(err.message || "Email ou senha inválidos");
+      setError(err.message || "Email ou senha inválidos");
     } finally {
       setLoading(false);
     }
