@@ -256,7 +256,7 @@ export default function Schedule() {
       invalidate();
       toast.success(`Aula reservada! Créditos restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
       // Notificar admins com data em formato brasileiro
-      const dataBR = format(new Date(selectedDate + "T12:00:00"), "dd/MM/yyyy");
+      const dataBR = formatSafe(selectedDate, "dd/MM/yyyy");
       const admins = await base44.entities.User.filter({ role: "admin" });
       for (const admin of admins) {
         createNotification({
@@ -332,7 +332,7 @@ export default function Schedule() {
       invalidate();
       toast.success("Reserva cancelada! Crédito devolvido.");
       // Notificar admins com data em formato brasileiro
-      const dataBR = format(new Date(selectedDate + "T12:00:00"), "dd/MM/yyyy");
+      const dataBR = formatSafe(selectedDate, "dd/MM/yyyy");
       const admins = await base44.entities.User.filter({ role: "admin" });
       for (const admin of admins) {
         createNotification({
@@ -453,14 +453,14 @@ export default function Schedule() {
         </div>
         {planDates.min &&
         <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            Plano válido: {format(new Date(planDates.min + "T12:00:00"), "dd/MM")} até {format(new Date(planDates.max + "T12:00:00"), "dd/MM")}
+            Plano válido: {formatSafe(planDates.min, "dd/MM")} até {formatSafe(planDates.max, "dd/MM")}
           </p>
         }
       </div>);
 
   };
 
-  const formattedDate = format(new Date(selectedDate + "T12:00:00"), "EEEE, d 'de' MMMM", { locale: ptBR });
+  const formattedDate = formatSafe(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR });
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
