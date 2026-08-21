@@ -14,6 +14,7 @@ import Login from '@/pages/Login';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import SetPassword from '@/pages/SetPassword';
+import TeacherDashboard from '@/pages/teacher/TeacherDashboard';
 import AppLayout from '@/components/layout/AppLayout';
 import Home from '@/pages/Home';
 import Schedule from '@/pages/Schedule';
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
               <Route path="/aulas" element={<AnimatedRoute><Schedule /></AnimatedRoute>} />
               <Route path="/minhas-reservas" element={<AnimatedRoute><MyBookings /></AnimatedRoute>} />
               <Route path="/admin" element={<AnimatedRoute><AdminDashboard /></AnimatedRoute>} />
+              <Route path="/professor" element={<AnimatedRoute><TeacherDashboard /></AnimatedRoute>} />
               <Route path="/perfil" element={<AnimatedRoute><Profile /></AnimatedRoute>} />
               <Route path="/planos" element={<AnimatedRoute><Plans /></AnimatedRoute>} />
               <Route path="/notificacoes" element={<AnimatedRoute><Notifications /></AnimatedRoute>} />
