@@ -1,3 +1,5 @@
+import { format as dateFnsFormat } from "date-fns";
+
 /**
  * Conversão segura de datas vindas de dados (banco, formulários, etc).
  * Aceita "YYYY-MM-DD", ISO completo (com hora) ou objeto Date.
@@ -20,3 +22,13 @@ export function parseDateSafe(value) {
 }
 
 export default parseDateSafe;
+
+/**
+ * format() do date-fns tolerante a datas inválidas: retorna "" em vez de lançar.
+ */
+export function formatSafe(value, pattern, options, fallback = "") {
+  const d = parseDateSafe(value);
+  if (!d) return fallback;
+  // eslint-disable-next-line no-undef
+  return dateFnsFormat(d, pattern, options);
+}
