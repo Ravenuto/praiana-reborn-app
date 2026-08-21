@@ -227,6 +227,19 @@ const pickArgs = (a, b) => {
   return { email: a, password: b };
 };
 
+// Migração: garante que a conta de admin use o e-mail oficial e que alunas antigas fiquem ativas
+store.User = (store.User || []).map((u) => {
+  if (u.email === 'admin@raissapoledance.com' || u.role === 'admin' || u.is_admin) {
+    return { ...u, email: ADMIN_EMAIL, role: 'admin', is_admin: true, is_active: true };
+  }
+  return u.is_active === undefined ? { ...u, is_active: true } : u;
+});
+persist();
+const cachedSession = readAuth();
+if (cachedSession && (cachedSession.role === 'admin' || cachedSession.is_admin)) {
+  writeAuth({ ...cachedSession, email: ADMIN_EMAIL, is_active: true });
+}
+
 // Seed an admin session on first load so all screens are visible without manual login.
 // Skip seeding if the user explicitly logged out.
 if (isBrowser && !window.localStorage.getItem(AUTH_KEY) && !window.localStorage.getItem('raissa_logged_out')) {
