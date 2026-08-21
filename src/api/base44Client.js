@@ -206,6 +206,13 @@ const entities = {
   StudentMovePlan: makeEntity('StudentMovePlan'),
 };
 
+// Senha padrão do primeiro acesso (editável em Regras do estúdio).
+export const FALLBACK_DEFAULT_PASSWORD = 'praiana';
+export const getDefaultPassword = () => {
+  const row = (store.StudioSettings || []).find((r) => r.key === 'default_password');
+  return (row && row.value) || FALLBACK_DEFAULT_PASSWORD;
+};
+
 // E-mail único de administradora do estúdio.
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
 
@@ -261,10 +268,11 @@ const auth = {
   async loginViaEmailPassword(a, b, c) {
     const args = pickArgs(a, b);
     const email = (args.email || '').trim().toLowerCase();
+    const password = args.password ?? b ?? '';
     const mode = args.mode || c || 'aluna';
     if (!email) throw new Error('Email obrigatório');
 
-    // Garante que a conta da administradora exista e esteja correta
+    // Garante que a conta da administradora principal exista
     let adminUser = store.User.find((u) => (u.email || '').toLowerCase() === ADMIN_EMAIL);
     if (!adminUser) {
       adminUser = {
@@ -279,74 +287,61 @@ const auth = {
       persist();
     }
 
-    if (mode === 'admin') {
-      if (email !== ADMIN_EMAIL) {
-        throw new Error('Este e-mail não tem acesso de administradora.');
-      }
-      writeAuth(adminUser);
-      try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
-      return { user: adminUser, token: 'mock-token' };
-    }
-
-    // Modo aluna
-    if (email === ADMIN_EMAIL) {
-      writeAuth(adminUser);
-      try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
-      return { user: adminUser, token: 'mock-token' };
-    }
-
-    let match = store.User.find((u) => (u.email || '').toLowerCase() === email);
-
+    const match = store.User.find((u) => (u.email || '').toLowerCase() === email);
     if (!match) {
-      // Novo pedido de acesso: cria cadastro pendente e avisa a administradora
-      match = {
-        id: uid('user'),
-        full_name: args.full_name || email.split('@')[0],
-        email,
-        role: 'user',
-        is_admin: false,
-        is_active: false,
-        created_date: new Date().toISOString(),
-      };
-      store.User = [...store.User, match];
-      store.Notification = [
-        ...(store.Notification || []),
-        {
-          id: uid('notification'),
-          created_date: new Date().toISOString(),
-          user_email: ADMIN_EMAIL,
-          type: 'access_request',
-          title: 'Nova solicitação de acesso',
-          message: `${match.full_name} (${email}) quer entrar no app. Aprove em Admin › Solicitações.`,
-          link: '/admin',
-          read: false,
-          actor_name: match.full_name,
-        },
-      ];
+      const err = new Error('Este e-mail não está cadastrado. Fale com o estúdio.');
+      err.code = 'not_registered';
+      throw err;
+    }
+
+    const isAdminAccount = match.role === 'admin' || match.is_admin === true;
+    if (mode === 'admin' && !isAdminAccount) {
+      throw new Error('Este e-mail não tem acesso de administrador.');
+    }
+
+    // Senha: se a conta ainda não trocou a senha, aceita a senha padrão do estúdio
+    const stored = match.password;
+    const usingDefault = !stored;
+    const expected = usingDefault ? getDefaultPassword() : stored;
+    if (String(password || '') !== String(expected)) {
+      throw new Error('Email ou senha inválidos');
+    }
+
+    if (usingDefault && match.must_change_password !== true) {
+      store.User = store.User.map((u) => (u.id === match.id ? { ...u, must_change_password: true } : u));
       persist();
-      const err = new Error('Cadastro enviado! Aguarde a aprovação da administradora para entrar.');
-      err.code = 'pending_approval';
-      throw err;
     }
 
-    if (match.is_active !== true || match.plan === 'rejected') {
-      const err = new Error(
-        match.plan === 'rejected'
-          ? 'Seu acesso foi recusado. Fale com o estúdio.'
-          : 'Seu cadastro ainda está aguardando aprovação da administradora.'
-      );
-      err.code = 'pending_approval';
-      throw err;
-    }
-
-    writeAuth(match);
+    const fresh = store.User.find((u) => u.id === match.id);
+    writeAuth(fresh);
     try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
-    return { user: match, token: 'mock-token' };
+    return { user: fresh, token: 'mock-token', mustChangePassword: usingDefault };
   },
-  async register(a, b) {
-    const { email, full_name } = pickArgs(a, b);
-    if (!email) throw new Error('Email obrigatório');
-    return auth.loginViaEmailPassword({ email, full_name, mode: 'aluna' });
+  async changePassword(newPassword) {
+    const cached = readAuth();
+    if (!cached) throw new Error('not authenticated');
+    if (!newPassword || String(newPassword).length < 6) {
+      throw new Error('A senha deve ter pelo menos 6 caracteres');
+    }
+    store.User = store.User.map((u) =>
+      u.id === cached.id ? { ...u, password: String(newPassword), must_change_password: false } : u
+    );
+    persist();
+    const updated = store.User.find((u) => u.id === cached.id);
+    writeAuth(updated);
+    return updated;
+  },
+  async resetToDefaultPassword(userId) {
+    store.User = store.User.map((u) =>
+      u.id === userId ? { ...u, password: undefined, must_change_password: true } : u
+    );
+    persist();
+    return { ok: true, password: getDefaultPassword() };
+  },
+  async register() {
+    const err = new Error('O cadastro é feito pelo estúdio. Fale com a administradora.');
+    err.code = 'not_registered';
+    throw err;
   },
   async updateMe(data) {
     const cached = readAuth();

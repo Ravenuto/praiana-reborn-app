@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { base44 } from "@/api/base44Client";
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -36,7 +37,7 @@ export default function ChangePassword() {
 
     setLoading(true);
     try {
-      // Implementar endpoint de change password quando disponível
+      await base44.auth.changePassword(newPassword);
       toast.success("Senha alterada com sucesso!");
       setCurrentPassword("");
       setNewPassword("");

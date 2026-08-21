@@ -13,6 +13,7 @@ import { Navigate } from 'react-router-dom';
 import Login from '@/pages/Login';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import SetPassword from '@/pages/SetPassword';
 import AppLayout from '@/components/layout/AppLayout';
 import Home from '@/pages/Home';
 import Schedule from '@/pages/Schedule';
@@ -36,7 +37,7 @@ const AnimatedRoute = ({ children }) => (
   </motion.div>
 );
 
-const HIDDEN_BOTTOM_TABS = ["/login", "/forgot-password", "/reset-password"];
+const HIDDEN_BOTTOM_TABS = ["/login", "/forgot-password", "/reset-password", "/definir-senha"];
 
 const AuthenticatedApp = () => {
   const location = useLocation();
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+            <Route path="/definir-senha" element={<SetPassword />} />
             <Route element={<AppLayout />}>
               <Route path="/" element={<AnimatedRoute><Home /></AnimatedRoute>} />
               <Route path="/aulas" element={<AnimatedRoute><Schedule /></AnimatedRoute>} />
