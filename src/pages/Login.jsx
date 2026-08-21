@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useSiteContent } from "@/lib/siteContent";
 
 export default function Login() {
+  const c = useSiteContent();
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -44,7 +47,7 @@ export default function Login() {
               <div className="absolute inset-0 rounded-full bg-accent/30 blur-2xl animate-pulse-ring" />
               <div className="relative h-28 w-28 rounded-full bg-white backdrop-blur ring-2 ring-white/70 shadow-[0_18px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden animate-float-y grid place-items-center">
                 <img
-                  src={praianaLogo.url}
+                  src={c.content_login_logo || praianaLogo.url}
                   alt="Studio Praiana Pole Dance"
                   className="h-full w-full object-contain scale-[1.12]"
                 />
@@ -52,11 +55,12 @@ export default function Login() {
             </div>
           </div>
           <h1 className="font-heading italic text-primary text-3xl sm:text-4xl leading-tight whitespace-nowrap">
-            Studio <span className="text-accent not-italic font-semibold">Praiana</span> Pole Dance
+            {c.content_login_title_prefix} <span className="text-accent not-italic font-semibold">{c.content_login_title_highlight}</span> {c.content_login_title_suffix}
           </h1>
 
-          <p className="font-script text-lg text-primary mt-1">bem-vinda de volta</p>
-          <p className="text-muted-foreground mt-2 text-sm">Entre na sua conta</p>
+          <p className="font-script text-lg text-primary mt-1">{c.content_login_script}</p>
+          <p className="text-muted-foreground mt-2 text-sm">{c.content_login_subtitle}</p>
+
         </div>
 
 
@@ -129,7 +133,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  Entrar <span className="text-base">→</span>
+                  {c.content_login_submit} <span className="text-base">→</span>
                 </>
               )}
             </Button>
@@ -138,16 +142,17 @@ export default function Login() {
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Quer se matricular?{" "}
+          {c.content_login_signup_text}{" "}
           <a
-            href="https://wa.me/5500000000000"
+            href={c.content_login_signup_link_url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary font-medium hover:underline"
           >
-            Entre em contato pelo WhatsApp
+            {c.content_login_signup_link_label}
           </a>
         </p>
+
       </div>
     </div>
   );

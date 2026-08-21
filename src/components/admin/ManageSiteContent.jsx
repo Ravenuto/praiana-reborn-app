@@ -15,7 +15,9 @@ export default function ManageSiteContent() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState("");
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -35,7 +37,8 @@ export default function ManageSiteContent() {
 
   const persist = async (key, value) => {
     const existing = rows.find((r) => r.key === key);
-    if (existing) await base44.entities.StudioSettings.update(existing.id, { value: String(value ?? "") });
+    if (existing)
+      await base44.entities.StudioSettings.update(existing.id, { value: String(value ?? "") });
     else await base44.entities.StudioSettings.create({ key, value: String(value ?? "") });
   };
 
@@ -84,7 +87,11 @@ export default function ManageSiteContent() {
   };
 
   if (loading) {
-    return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
@@ -142,7 +149,11 @@ export default function ManageSiteContent() {
                   </div>
                 )}
                 <label className="text-xs cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted hover:bg-muted/80">
-                  {uploading === field.key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+                  {uploading === field.key ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <ImagePlus className="h-3.5 w-3.5" />
+                  )}
                   Escolher imagem
                   <input
                     type="file"
