@@ -5,13 +5,15 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Loader2, Eye, EyeOff, GraduationCap, ShieldCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useSiteContent } from "@/lib/siteContent";
 
 export default function Login() {
   const c = useSiteContent();
   const [email, setEmail] = useState("");
+  const [mode, setMode] = useState("aluna");
+  const [info, setInfo] = useState("");
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,12 +24,14 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setInfo("");
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
+      await base44.auth.loginViaEmailPassword({ email, password, mode });
       window.location.href = "/";
     } catch (err) {
-      setError(err.message || "Email ou senha inválidos");
+      if (err?.code === "pending_approval") setInfo(err.message);
+      else setError(err.message || "Email ou senha inválidos");
     } finally {
       setLoading(false);
     }
@@ -71,6 +75,33 @@ export default function Login() {
               {error}
             </div>
           )}
+
+          {info && (
+            <div className="mb-4 p-3 rounded-lg bg-primary/10 text-primary text-sm">
+              {info}
+            </div>
+          )}
+
+          <div className="mb-5 grid grid-cols-2 gap-2 p-1 rounded-full bg-muted">
+            {[
+              { key: "aluna", label: "SOU ALUNA", Icon: GraduationCap },
+              { key: "admin", label: "SOU ADMINISTRADOR", Icon: ShieldCheck },
+            ].map(({ key, label, Icon }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => { setMode(key); setError(""); setInfo(""); }}
+                className={`flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-[11px] font-semibold tracking-wide transition-colors ${
+                  mode === key
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                {label}
+              </button>
+            ))}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
