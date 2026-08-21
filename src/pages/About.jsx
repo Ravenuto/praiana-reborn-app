@@ -24,10 +24,10 @@ export default function About() {
       <section className="relative overflow-hidden py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <SectionHeader
-            eyebrow="Conheça o estúdio"
-            title="Sobre Praiana Pole Dance"
-            goldWord="Praiana"
-            subtitle="Conheça nosso estúdio e as modalidades que oferecemos"
+            eyebrow={c.content_about_eyebrow}
+            title={c.content_about_title}
+            goldWord={c.content_about_gold_word}
+            subtitle={c.content_about_subtitle}
             align="center"
             className="mx-auto text-center"
             titleClassName="!text-2xl sm:!text-3xl md:!text-5xl"
@@ -44,10 +44,9 @@ export default function About() {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-sm mb-1">Endereço</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Rua da Praia, 123<br />
-                    Rio de Janeiro, RJ
+                  <h3 className="font-semibold text-sm mb-1">{c.content_about_address_title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {c.content_about_address}
                   </p>
                 </div>
               </div>
@@ -62,9 +61,9 @@ export default function About() {
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-sm mb-1">Telefone</h3>
-                  <a href="tel:+5521999999999" className="text-xs text-primary hover:text-primary/80">
-                    (21) 99999-9999
+                  <h3 className="font-semibold text-sm mb-1">{c.content_about_phone_title}</h3>
+                  <a href={`tel:${c.content_about_phone.replace(/\D/g, "")}`} className="text-xs text-primary hover:text-primary/80">
+                    {c.content_about_phone}
                   </a>
                 </div>
               </div>
@@ -79,9 +78,9 @@ export default function About() {
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-sm mb-1">Email</h3>
-                  <a href="mailto:contato@raissapoledance.com" className="text-xs text-primary hover:text-primary/80 break-all">
-                    contato@raissapoledance.com
+                  <h3 className="font-semibold text-sm mb-1">{c.content_about_email_title}</h3>
+                  <a href={`mailto:${c.content_about_email}`} className="text-xs text-primary hover:text-primary/80 break-all">
+                    {c.content_about_email}
                   </a>
                 </div>
               </div>
@@ -94,9 +93,10 @@ export default function About() {
       {classTypes.length > 0 && (
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
           <div className="text-center mb-12">
-            <h2 className="font-heading text-3xl font-bold">Modalidades</h2>
-            <p className="mt-3 text-muted-foreground">Aulas que oferecemos</p>
+            <h2 className="font-heading text-3xl font-bold">{c.content_about_modalities_title}</h2>
+            <p className="mt-3 text-muted-foreground">{c.content_about_modalities_subtitle}</p>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {classTypes.map((ct, i) =>
               <motion.div
