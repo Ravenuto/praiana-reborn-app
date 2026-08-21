@@ -28,7 +28,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await base44.auth.loginViaEmailPassword({ email, password, mode });
-      const home = res?.isTeacher && !res?.isAdmin ? "/professor" : "/";
+      const home = mode === "professor" ? "/professor" : mode === "admin" ? "/admin" : "/";
       window.location.href = res?.mustChangePassword ? "/definir-senha" : home;
     } catch (err) {
       setError(err.message || "Email ou senha inválidos");

@@ -51,6 +51,8 @@ export default function ManageStudents() {
   const [teacherDialog, setTeacherDialog] = useState(false);
   const [teacherForm, setTeacherForm] = useState({ name: "", email: "" });
   const [savingTeacher, setSavingTeacher] = useState(false);
+  const [staffEdit, setStaffEdit] = useState(null);
+  const [savingStaff, setSavingStaff] = useState(false);
 
   const { data: plans = [] } = useQuery({
     queryKey: ["studioPlans"],
@@ -265,6 +267,26 @@ export default function ManageStudents() {
     } catch {
       toast.error("Erro ao remover professora");
     }
+  };
+
+  const handleSaveStaff = async () => {
+    if (!staffEdit) return;
+    const name = (staffEdit.full_name || "").trim();
+    if (!name) return toast.error("Informe o nome");
+    setSavingStaff(true);
+    try {
+      await base44.entities.User.update(staffEdit.id, {
+        full_name: name,
+        data: { ...(staffEdit.data || {}), full_name: name },
+      });
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["teachersList"] });
+      setStaffEdit(null);
+      toast.success("Nome atualizado.");
+    } catch {
+      toast.error("Erro ao salvar nome");
+    }
+    setSavingStaff(false);
   };
 
   const handlePlanChange = async (student, plan) => {
@@ -683,6 +705,15 @@ export default function ManageStudents() {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
+                    title="Editar nome"
+                    onClick={() => setStaffEdit({ ...a, full_name: a.full_name || "" })}
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
                     title="Resetar senha"
                     onClick={() => handleResetPassword(a)}
                   >
@@ -762,6 +793,9 @@ export default function ManageStudents() {
                   <p className="text-xs text-muted-foreground truncate">{t.email}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Editar nome" onClick={() => setStaffEdit({ ...t, full_name: t.full_name || "" })}>
+                    <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Button>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Resetar senha" onClick={() => handleResetPassword(t)}>
                     <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
@@ -802,6 +836,29 @@ export default function ManageStudents() {
             </div>
             <Button className="w-full" onClick={handleAddTeacher} disabled={savingTeacher}>
               {savingTeacher ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar professora"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!staffEdit} onOpenChange={(o) => !o && setStaffEdit(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar nome</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Nome</Label>
+              <Input
+                value={staffEdit?.full_name || ""}
+                onChange={(e) => setStaffEdit((d) => ({ ...d, full_name: e.target.value }))}
+                placeholder="Nome completo"
+                className="w-full min-w-0"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">{staffEdit?.email}</p>
+            <Button className="w-full" onClick={handleSaveStaff} disabled={savingStaff}>
+              {savingStaff ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
             </Button>
           </div>
         </DialogContent>
