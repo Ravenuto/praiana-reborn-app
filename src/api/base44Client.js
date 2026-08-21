@@ -9,9 +9,10 @@ const seedData = () => ({
     {
       id: 'u-admin',
       full_name: 'Admin Raissa',
-      email: 'admin@raissapoledance.com',
+      email: 'ravenutto@gmail.com',
       role: 'admin',
       is_admin: true,
+      is_active: true,
       avatar_url: '',
       phone: '',
       active_plan_id: 'p-mensal',
@@ -26,6 +27,7 @@ const seedData = () => ({
       email: 'maria@raissapoledance.com',
       role: 'user',
       is_admin: false,
+      is_active: true,
       avatar_url: '',
       phone: '',
       active_plan_id: 'p-mensal',
@@ -204,6 +206,9 @@ const entities = {
   StudentMovePlan: makeEntity('StudentMovePlan'),
 };
 
+// E-mail único de administradora do estúdio.
+export const ADMIN_EMAIL = 'ravenutto@gmail.com';
+
 // Auth — uses localStorage to persist a fake session.
 const AUTH_KEY = 'raissa_mock_auth_v1';
 const readAuth = () => {
@@ -225,7 +230,7 @@ const pickArgs = (a, b) => {
 // Seed an admin session on first load so all screens are visible without manual login.
 // Skip seeding if the user explicitly logged out.
 if (isBrowser && !window.localStorage.getItem(AUTH_KEY) && !window.localStorage.getItem('raissa_logged_out')) {
-  const admin = store.User.find((u) => u.email === 'admin@raissapoledance.com');
+  const admin = store.User.find((u) => u.email === ADMIN_EMAIL);
   if (admin) writeAuth(admin);
 }
 
@@ -240,22 +245,95 @@ const auth = {
     const fresh = store.User.find((u) => u.id === cached.id);
     return fresh || cached;
   },
-  async loginViaEmailPassword(a, b) {
-    const { email } = pickArgs(a, b);
+  async loginViaEmailPassword(a, b, c) {
+    const args = pickArgs(a, b);
+    const email = (args.email || '').trim().toLowerCase();
+    const mode = args.mode || c || 'aluna';
     if (!email) throw new Error('Email obrigatório');
-    const match = store.User.find((u) => (u.email || '').toLowerCase() === email.toLowerCase());
-    const user = match || store.User.find((u) => u.email === 'admin@raissapoledance.com') || store.User[0];
-    writeAuth(user);
-    try { window.localStorage.removeItem('raissa_logged_out'); } catch {}
-    return { user, token: 'mock-token' };
+
+    // Garante que a conta da administradora exista e esteja correta
+    let adminUser = store.User.find((u) => (u.email || '').toLowerCase() === ADMIN_EMAIL);
+    if (!adminUser) {
+      adminUser = {
+        id: uid('user'),
+        full_name: 'Raissa Venuto',
+        email: ADMIN_EMAIL,
+        role: 'admin',
+        is_admin: true,
+        is_active: true,
+      };
+      store.User = [...store.User, adminUser];
+      persist();
+    }
+
+    if (mode === 'admin') {
+      if (email !== ADMIN_EMAIL) {
+        throw new Error('Este e-mail não tem acesso de administradora.');
+      }
+      writeAuth(adminUser);
+      try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
+      return { user: adminUser, token: 'mock-token' };
+    }
+
+    // Modo aluna
+    if (email === ADMIN_EMAIL) {
+      writeAuth(adminUser);
+      try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
+      return { user: adminUser, token: 'mock-token' };
+    }
+
+    let match = store.User.find((u) => (u.email || '').toLowerCase() === email);
+
+    if (!match) {
+      // Novo pedido de acesso: cria cadastro pendente e avisa a administradora
+      match = {
+        id: uid('user'),
+        full_name: args.full_name || email.split('@')[0],
+        email,
+        role: 'user',
+        is_admin: false,
+        is_active: false,
+        created_date: new Date().toISOString(),
+      };
+      store.User = [...store.User, match];
+      store.Notification = [
+        ...(store.Notification || []),
+        {
+          id: uid('notification'),
+          created_date: new Date().toISOString(),
+          user_email: ADMIN_EMAIL,
+          type: 'access_request',
+          title: 'Nova solicitação de acesso',
+          message: `${match.full_name} (${email}) quer entrar no app. Aprove em Admin › Solicitações.`,
+          link: '/admin',
+          read: false,
+          actor_name: match.full_name,
+        },
+      ];
+      persist();
+      const err = new Error('Cadastro enviado! Aguarde a aprovação da administradora para entrar.');
+      err.code = 'pending_approval';
+      throw err;
+    }
+
+    if (match.is_active !== true || match.plan === 'rejected') {
+      const err = new Error(
+        match.plan === 'rejected'
+          ? 'Seu acesso foi recusado. Fale com o estúdio.'
+          : 'Seu cadastro ainda está aguardando aprovação da administradora.'
+      );
+      err.code = 'pending_approval';
+      throw err;
+    }
+
+    writeAuth(match);
+    try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
+    return { user: match, token: 'mock-token' };
   },
   async register(a, b) {
     const { email, full_name } = pickArgs(a, b);
     if (!email) throw new Error('Email obrigatório');
-    const admin = store.User.find((u) => u.email === 'admin@raissapoledance.com');
-    const user = admin ? { ...admin, full_name: full_name || admin.full_name } : store.User[0];
-    writeAuth(user);
-    return { user, token: 'mock-token' };
+    return auth.loginViaEmailPassword({ email, full_name, mode: 'aluna' });
   },
   async updateMe(data) {
     const cached = readAuth();
