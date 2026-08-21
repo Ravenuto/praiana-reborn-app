@@ -18,7 +18,7 @@ const TABS = [
   { key: "classTypes",  label: "Modalidades", icon: BookOpen },
   { key: "bookings",    label: "Reservas",    icon: Users },
   { key: "plans",       label: "Planos",      icon: CreditCard },
-  { key: "students",    label: "Alunas",      icon: UserPlus },
+  { key: "students",    label: "Cadastros",      icon: UserPlus },
   { key: "attendance",  label: "Presenças",   icon: ClipboardCheck },
   { key: "settings",    label: "Regras",      icon: Settings2 },
   { key: "notifs",      label: "Notificações", icon: Bell },
