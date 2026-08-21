@@ -2,6 +2,7 @@ import praianaLogo from "@/assets/praiana-logo.png.asset.json";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
+import { useRoles } from "@/lib/roles";
 import { base44 } from "@/api/base44Client";
 import { useUnreadCount } from "@/hooks/useNotifications";
 import {
@@ -23,8 +24,7 @@ const SECONDARY = [
 export default function Navbar() {
   const { user } = useAuth();
   const location = useLocation();
-  const isAdmin = user?.role === "admin" || user?.is_admin === true;
-  const isTeacher = user?.role === "teacher" || user?.is_teacher === true;
+  const { showAdminTab, showTeacherTab } = useRoles();
   const unreadCount = useUnreadCount(user?.email);
   const [scrolled, setScrolled] = useState(false);
 
@@ -85,7 +85,7 @@ export default function Navbar() {
               {tab.label}
             </Link>
           ))}
-          {isTeacher && (
+          {showTeacherTab && (
             <Link
               to="/professor"
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full transition-colors ${
@@ -98,7 +98,7 @@ export default function Navbar() {
               Professora
             </Link>
           )}
-          {isAdmin && (
+          {showAdminTab && (
             <Link
               to="/admin"
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-full transition-colors ${
