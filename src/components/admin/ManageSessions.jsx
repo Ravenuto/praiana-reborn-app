@@ -57,7 +57,7 @@ const emptyForm = {
   session_type: "weekly", specific_date: "", override_notes: "",
 };
 
-export default function ManageSessions() {
+export default function ManageSessions({ instructorFilter = "", canCreate = true, title = "Horários de Aula" }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -124,8 +124,9 @@ export default function ManageSessions() {
         }
         return s.date === selectedDate && s.is_active !== false;
       })
+      .filter((s) => !instructorFilter || (s.instructor || "") === instructorFilter)
       .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
-  }, [sessions, selectedDate, selectedDayKey]);
+  }, [sessions, selectedDate, selectedDayKey, instructorFilter]);
 
   const bookingCountMap = useMemo(() => {
     const map = {};
@@ -311,10 +312,12 @@ export default function ManageSessions() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-         <h2 className="font-heading text-base font-semibold">Horários de Aula</h2>
-         <Button size="sm" className="rounded-full gap-2 text-xs" onClick={() => { setForm(emptyForm); setEditingId(null); setOpen(true); }}>
-           <Plus className="h-4 w-4" /> Novo Horário
-         </Button>
+         <h2 className="font-heading text-base font-semibold">{title}</h2>
+         {canCreate && (
+           <Button size="sm" className="rounded-full gap-2 text-xs" onClick={() => { setForm(emptyForm); setEditingId(null); setOpen(true); }}>
+             <Plus className="h-4 w-4" /> Novo Horário
+           </Button>
+         )}
        </div>
 
       {/* Seletor de data com calendário — igual ao das alunas */}
@@ -376,7 +379,7 @@ export default function ManageSessions() {
           <div className="text-center py-12 text-muted-foreground">
             <CalendarDays className="h-8 w-8 mx-auto mb-3 opacity-30" />
             <p className="font-medium">Nenhuma aula neste dia</p>
-            <p className="text-xs mt-1">Clique em "Novo Horário" para adicionar</p>
+            {canCreate && <p className="text-xs mt-1">Clique em "Novo Horário" para adicionar</p>}
           </div>
         ) : (
           filteredSessions.map((s) => {
