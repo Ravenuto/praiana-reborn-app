@@ -597,6 +597,7 @@ export default function ManageStudents() {
             const info = planInfo[plan] || planInfo["4_aulas"];
             const isActive = student.is_active !== false;
             const isExpanded = expandedId === student.id;
+            const isPaused = (student.data?.plan_paused ?? student.plan_paused) === true;
 
             return (
               <div key={student.id} className="rounded-xl border border-border bg-card overflow-hidden">
