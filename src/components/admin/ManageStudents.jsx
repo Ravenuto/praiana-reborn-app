@@ -708,6 +708,20 @@ export default function ManageStudents() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      title={isPaused ? "Retomar plano" : "Pausar plano"}
+                      onClick={() => handleTogglePause(student)}
+                      disabled={student.is_invited || pausingId === student.id}
+                    >
+                      {pausingId === student.id
+                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        : isPaused
+                          ? <Play className="h-3.5 w-3.5 text-green-600" />
+                          : <Pause className="h-3.5 w-3.5 text-amber-600" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
                       title="Deletar aluna"
                       onClick={() => handleDeleteStudent(student)}
                       disabled={deletingStudent === student.id}
