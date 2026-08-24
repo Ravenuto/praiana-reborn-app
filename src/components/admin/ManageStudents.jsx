@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign } from "lucide-react";
+import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Pause, Play } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { addDaysISO, getDurationDays, daysLeft, durationLabel } from "@/lib/planDuration";
+import { pausedDays, pauseToday } from "@/lib/planPause";
+import { promoteFromWaitlist } from "@/lib/waitlist";
 
 const safeFormat = (value, fmt, opts) => {
   if (!value) return "—";
