@@ -75,6 +75,9 @@ export default function Schedule() {
     return { min: format(start, "yyyy-MM-dd"), max: format(end, "yyyy-MM-dd") };
   }, [userData, user]);
 
+  const isPaused = (userData?.data?.plan_paused ?? userData?.plan_paused) === true && !isTeacher && user?.role !== "admin";
+  const pausedAt = userData?.data?.plan_paused_at || userData?.plan_paused_at || null;
+
   const isDateAllowed = (dateStr) => {
     if (!planDates.min && !planDates.max) return true;
     if (planDates.min && dateStr < planDates.min) return false;
