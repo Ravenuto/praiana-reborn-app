@@ -1042,7 +1042,12 @@ export default function ManageStudents() {
               </div>
               <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Início do plano atual</Label>
-                <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_start_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
+                <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => {
+                  const start = e.target.value;
+                  const p = plans.find((pl) => pl.key === d.student.plan);
+                  return { ...d, plan_start_date: start, plan_end_date: start ? addDaysISO(start, getDurationDays(p)) : d.plan_end_date };
+                })} className="mobile-native-field h-8 text-sm w-full block" />
+                <p className="text-[11px] text-muted-foreground mt-1">A validade é calculada automaticamente pela duração do plano.</p>
               </div>
               <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Válido até</Label>
