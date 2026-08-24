@@ -145,6 +145,9 @@ export default function ManageStudents() {
         return;
       }
 
+      const selectedPlan = plans.find((p) => p.key === manualForm.plan);
+      const startISO = new Date().toISOString().slice(0, 10);
+
       await base44.entities.User.create({
         full_name: manualForm.name,
         email,
@@ -159,7 +162,8 @@ export default function ManageStudents() {
           plan: manualForm.plan,
           credits: manualForm.credits,
           is_active: true,
-          plan_start_date: new Date().toISOString().slice(0, 10),
+          plan_start_date: startISO,
+          plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
         },
       });
 
