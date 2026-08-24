@@ -18,7 +18,7 @@ export const bootstrapAdmin = createServerFn({ method: 'POST' })
       profile: {
         full_name: 'Raissa Venuto',
         is_active: true,
-        must_change_password: false,
+        must_change_password: true,
         plan_status: 'active',
       },
     });
