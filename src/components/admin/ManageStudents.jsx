@@ -532,6 +532,12 @@ export default function ManageStudents() {
                             Plano desde {safeFormat(student.plan_start_date, "dd/MM/yyyy", { locale: ptBR })}
                           </p>
                         )}
+                        {student.plan_end_date && (
+                          <p className={`text-xs ${(daysLeft(student.plan_end_date) ?? 0) < 0 ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                            Válido até {safeFormat(student.plan_end_date, "dd/MM/yyyy", { locale: ptBR })}
+                            {(daysLeft(student.plan_end_date) ?? 0) < 0 ? " (vencido)" : ""}
+                          </p>
+                        )}
                         {(student.credits != null) && !student.is_invited && (
                           <p className="text-xs text-muted-foreground">{student.credits} crédito{student.credits !== 1 ? "s" : ""}</p>
                         )}
