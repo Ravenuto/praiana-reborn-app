@@ -406,8 +406,110 @@ export default function ManageStudents() {
   };
 
 
+  const handleTogglePause = async (student) => {
+    if (student.is_invited) return;
+    const data = student.data || {};
+    const isPaused = data.plan_paused === true || student.plan_paused === true;
+
+    if (isPaused) {
+      const startISO = data.plan_paused_at || student.plan_paused_at;
+      const days = pausedDays(startISO);
+      const input = window.prompt(
+        `Retomar o plano de ${student.full_name || student.email}.\nDias pausados: ${days}.\nQuantos dias somar à validade?`,
+        String(days)
+      );
+      if (input === null) return;
+      const add = Math.max(0, Number(input) || 0);
+      const currentEnd = data.plan_end_date || student.plan_end_date || new Date().toISOString().slice(0, 10);
+      setPausingId(student.id);
+      try {
+        await base44.entities.User.update(student.id, {
+          data: {
+            ...data,
+            plan_paused: false,
+            plan_paused_at: "",
+            plan_paused_days: (Number(data.plan_paused_days) || 0) + add,
+            plan_end_date: add > 0 ? addDaysISO(currentEnd, add) : currentEnd,
+          },
+        });
+        try {
+          await base44.entities.Notification.create({
+            user_email: student.email,
+            type: "plan_resumed",
+            title: "Plano reativado 💙",
+            message: add > 0
+              ? `Seu plano voltou! Somamos ${add} dia${add !== 1 ? "s" : ""} na validade.`
+              : "Seu plano voltou! Já pode reservar suas aulas.",
+            link: "/agenda",
+            read: false,
+          });
+        } catch { /* noop */ }
+        queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+        queryClient.invalidateQueries({ queryKey: ["userCredits"] });
+        queryClient.invalidateQueries({ queryKey: ["myProfile"] });
+        toast.success(add > 0 ? `Plano retomado. +${add} dia(s) na validade.` : "Plano retomado.");
+      } catch {
+        toast.error("Erro ao retomar o plano");
+      }
+      setPausingId(null);
+      return;
+    }
+
+    const startInput = window.prompt(
+      `Pausar o plano de ${student.full_name || student.email}.\nA partir de qual data? (AAAA-MM-DD)`,
+      pauseToday()
+    );
+    if (startInput === null) return;
+    const startISO = /^\d{4}-\d{2}-\d{2}$/.test(startInput.trim()) ? startInput.trim() : pauseToday();
+
+    setPausingId(student.id);
+    try {
+      await base44.entities.User.update(student.id, {
+        data: { ...data, plan_paused: true, plan_paused_at: startISO },
+      });
+
+      // Cancela reservas futuras e libera as vagas (fila de espera)
+      let cancelled = 0;
+      try {
+        const bookings = await base44.entities.Booking.filter({ student_email: student.email });
+        const today = new Date().toISOString().slice(0, 10);
+        const future = bookings.filter((b) => (b.session_date || "") >= today && b.status !== "cancelada");
+        for (const b of future) {
+          await base44.entities.Booking.delete(b.id);
+          cancelled += 1;
+          await promoteFromWaitlist({
+            session_id: b.session_id,
+            session_date: b.session_date,
+            session_time: b.session_time,
+            class_type_name: b.class_type_name,
+          });
+        }
+      } catch { /* noop */ }
+
+      try {
+        await base44.entities.Notification.create({
+          user_email: student.email,
+          type: "plan_paused",
+          title: "Plano pausado",
+          message: "Seu plano está pausado. Quando voltar, os dias parados serão somados na validade.",
+          link: "/perfil",
+          read: false,
+        });
+      } catch { /* noop */ }
+
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["myBookings"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      toast.success(cancelled > 0 ? `Plano pausado. ${cancelled} reserva(s) futura(s) cancelada(s).` : "Plano pausado.");
+    } catch {
+      toast.error("Erro ao pausar o plano");
+    }
+    setPausingId(null);
+  };
+
   const handleSaveEdit = async () => {
     if (!editDialog) return;
+
     if (editDialog.student.is_invited) {
       return toast.error("Não é possível editar convites pendentes");
     }
