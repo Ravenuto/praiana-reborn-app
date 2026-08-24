@@ -556,7 +556,7 @@ export default function ManageStudents() {
                       size="sm"
                       className="h-8 w-8 p-0"
                       title="Editar detalhes"
-                      onClick={() => setEditDialog({ student, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "", plan_end_date: student.plan_end_date || "" })}
+                      onClick={() => setEditDialog({ student, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "", plan_end_date: student.plan_end_date || "", daysToAdd: "" })}
                       disabled={student.is_invited}
                     >
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1026,16 +1026,14 @@ export default function ManageStudents() {
               <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Válido até</Label>
                 <Input type="date" value={editDialog.plan_end_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_end_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Button type="button" size="sm" variant="outline" className="h-7 text-xs rounded-full"
-                    onClick={() => setEditDialog((d) => ({ ...d, plan_end_date: addDaysISO(d.plan_end_date || d.plan_start_date || new Date().toISOString().slice(0, 10), 30) }))}>
-                    +30 dias
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <Input type="number" min="0" placeholder="Dias" value={editDialog.daysToAdd} onChange={(e) => setEditDialog((d) => ({ ...d, daysToAdd: e.target.value }))} className="mobile-native-field h-8 text-sm w-24" />
+                  <Button type="button" size="sm" variant="outline" className="h-8 text-xs rounded-full"
+                    onClick={() => setEditDialog((d) => ({ ...d, plan_end_date: addDaysISO(d.plan_end_date || d.plan_start_date || new Date().toISOString().slice(0, 10), Number(d.daysToAdd) || 0) }))}
+                    disabled={!Number(editDialog.daysToAdd)}>
+                    +Adicionar
                   </Button>
-                  <Button type="button" size="sm" variant="outline" className="h-7 text-xs rounded-full"
-                    onClick={() => setEditDialog((d) => ({ ...d, plan_end_date: addDaysISO(d.plan_end_date || d.plan_start_date || new Date().toISOString().slice(0, 10), 90) }))}>
-                    +90 dias
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost" className="h-7 text-xs rounded-full"
+                  <Button type="button" size="sm" variant="ghost" className="h-8 text-xs rounded-full"
                     onClick={() => setEditDialog((d) => {
                       const p = plans.find((pl) => pl.key === d.student.plan);
                       return { ...d, plan_end_date: addDaysISO(d.plan_start_date || new Date().toISOString().slice(0, 10), getDurationDays(p)) };
