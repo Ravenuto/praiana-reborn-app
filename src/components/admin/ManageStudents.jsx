@@ -15,7 +15,7 @@ import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { addDaysISO, getDurationDays, daysLeft, durationLabel } from "@/lib/planDuration";
-import { pausedDays, pauseToday } from "@/lib/planPause";
+import { pausedDays, pauseToday, daysBetweenISO } from "@/lib/planPause";
 import { promoteFromWaitlist } from "@/lib/waitlist";
 
 const safeFormat = (value, fmt, opts) => {
@@ -414,19 +414,25 @@ export default function ManageStudents() {
   const doResume = async (student, { silent = false } = {}) => {
     const data = student.data || {};
     const startISO = data.plan_paused_at || student.plan_paused_at;
-    const add = pausedDays(startISO);
-    const currentEnd = data.plan_end_date || student.plan_end_date || new Date().toISOString().slice(0, 10);
+    const real = pausedDays(startISO);
+    const credited = Number(data.plan_pause_credited_days ?? student.plan_pause_credited_days) || 0;
+    const delta = real - credited;
+    const currentEnd = student.plan_end_date || data.plan_end_date || new Date().toISOString().slice(0, 10);
+    const nextEnd = delta !== 0 ? addDaysISO(currentEnd, delta) : currentEnd;
+    const add = real;
+    const pauseFields = {
+      plan_paused: false,
+      plan_paused_at: "",
+      plan_pause_until: "",
+      plan_pause_credited_days: 0,
+      plan_paused_days: (Number(data.plan_paused_days ?? student.plan_paused_days) || 0) + real,
+      plan_end_date: nextEnd,
+    };
     setPausingId(student.id);
     try {
       await base44.entities.User.update(student.id, {
-        data: {
-          ...data,
-          plan_paused: false,
-          plan_paused_at: "",
-          plan_pause_until: "",
-          plan_paused_days: (Number(data.plan_paused_days) || 0) + add,
-          plan_end_date: add > 0 ? addDaysISO(currentEnd, add) : currentEnd,
-        },
+        ...pauseFields,
+        data: { ...data, ...pauseFields },
       });
       try {
         await base44.entities.Notification.create({
@@ -452,10 +458,21 @@ export default function ManageStudents() {
 
   const doPause = async (student, startISO, untilISO) => {
     const data = student.data || {};
+    const expected = untilISO ? daysBetweenISO(startISO, untilISO) : 0;
+    const currentEnd = student.plan_end_date || data.plan_end_date || "";
+    const nextEnd = expected > 0 && currentEnd ? addDaysISO(currentEnd, expected) : currentEnd;
+    const pauseFields = {
+      plan_paused: true,
+      plan_paused_at: startISO,
+      plan_pause_until: untilISO || "",
+      plan_pause_credited_days: expected,
+      ...(nextEnd ? { plan_end_date: nextEnd } : {}),
+    };
     setPausingId(student.id);
     try {
       await base44.entities.User.update(student.id, {
-        data: { ...data, plan_paused: true, plan_paused_at: startISO, plan_pause_until: untilISO || "" },
+        ...pauseFields,
+        data: { ...data, ...pauseFields },
       });
 
       // Cancela reservas futuras e libera as vagas (fila de espera)
@@ -490,7 +507,12 @@ export default function ManageStudents() {
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["myBookings"] });
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
-      toast.success(cancelled > 0 ? `Plano pausado. ${cancelled} reserva(s) futura(s) cancelada(s).` : "Plano pausado.");
+      const extra = expected > 0 && nextEnd
+        ? ` +${expected} dia(s) na validade (até ${safeFormat(nextEnd, "dd/MM")}).`
+        : "";
+      toast.success(
+        (cancelled > 0 ? `Plano pausado. ${cancelled} reserva(s) futura(s) cancelada(s).` : "Plano pausado.") + extra
+      );
     } catch {
       toast.error("Erro ao pausar o plano");
     }

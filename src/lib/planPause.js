@@ -25,4 +25,13 @@ export function pausedDays(startISO) {
   return Math.max(0, Math.round((now - start) / 86400000));
 }
 
+// Dias completos entre duas datas (mínimo 0).
+export function daysBetweenISO(aISO, bISO) {
+  if (!aISO || !bISO) return 0;
+  const a = new Date(`${String(aISO).slice(0, 10)}T12:00:00`);
+  const b = new Date(`${String(bISO).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return 0;
+  return Math.max(0, Math.round((b - a) / 86400000));
+}
+
 export const pauseToday = todayISO;
