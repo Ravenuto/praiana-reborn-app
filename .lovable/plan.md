@@ -6,11 +6,13 @@ Além disso, todo o login e os dados de hoje ficam guardados dentro do navegador
 
 ## Etapa 1 — Correção imediata (hoje)
 
-- Remover a criação automática de sessão. Sem login feito, o site sempre abre em `/login`.
-- Qualquer rota protegida (home, agenda, reservas, perfil, professora, admin) redireciona para o login quando não há sessão.
+- Remover a criação automática de sessão.
+- Sem sessão válida, qualquer endereço do site (home, agenda, reservas, perfil, professora, admin) leva direto para a tela de login — nenhuma dessas páginas chega a aparecer, nem por um instante.
+- Só continua logado quem fez login e marcou "Manter conectado". Sem essa opção marcada, ao fechar o navegador/aba a sessão acaba e o próximo acesso volta para o login.
 - A rota `/admin` só abre para conta com papel de administradora; qualquer outra pessoa é mandada para fora.
 - Limpar a sessão "fantasma" já salva nos navegadores (mudança da chave de sessão), forçando um login limpo para todo mundo.
 - Publicar em seguida para o link ficar seguro.
+
 
 ## Etapa 2 — Login e dados de verdade no servidor (Lovable Cloud)
 
@@ -33,7 +35,7 @@ Objetivo: senha validada no servidor, admin protegido no banco, e os mesmos dado
 
 ## Detalhes técnicos
 
-- Etapa 1: remover o bloco de auto-seed da sessão em `src/api/base44Client.js` (o `if (isBrowser && !localStorage.getItem(AUTH_KEY) ...) writeAuth(admin)`), versionar `AUTH_KEY` para `..._v2`, garantir redirecionamento em `ProtectedRoute`/`AppLayout` e travar `/admin` por `isAdminUser`.
+- Etapa 1: remover o bloco de auto-seed da sessão em `src/api/base44Client.js` (o `if (isBrowser && !localStorage.getItem(AUTH_KEY) ...) writeAuth(admin)`) e versionar `AUTH_KEY` para `..._v2`. Enquanto a sessão está sendo verificada, `ProtectedRoute` não renderiza rota nenhuma (só o loader) e, sem usuário, faz `Navigate to="/login" replace` — nada de home/agenda piscando. "Manter conectado" define onde a sessão é gravada: `localStorage` (persistente) quando marcado, `sessionStorage` (some ao fechar) quando não. `/admin` travado por `isAdminUser`.
 - Etapa 2: migrations com `profiles`, `user_roles` + função `has_role` (security definer), GRANTs e políticas RLS; leituras/escritas sensíveis via `createServerFn`; `AuthContext` passa a usar `supabase.auth` com `onAuthStateChange`; adaptador em `src/api/base44Client.js` mapeando entidades para tabelas.
 - Migração de dados: tela única de importação que lê o `localStorage` atual e envia para o banco.
 
