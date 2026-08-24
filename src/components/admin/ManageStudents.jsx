@@ -305,8 +305,15 @@ export default function ManageStudents() {
         const cleanData = Object.fromEntries(
           Object.entries(freshUser.data || {}).filter(([k]) => k !== 'data')
         );
+        const startISO = format(new Date(), "yyyy-MM-dd");
         await base44.entities.User.update(freshUser.id, {
-          data: { ...cleanData, plan, credits, plan_start_date: format(new Date(), "yyyy-MM-dd") }
+          data: {
+            ...cleanData,
+            plan,
+            credits,
+            plan_start_date: startISO,
+            plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
+          }
         });
       }
     }
