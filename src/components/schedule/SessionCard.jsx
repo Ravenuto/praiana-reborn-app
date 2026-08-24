@@ -22,7 +22,7 @@ function isPast(sessionDate, sessionTime) {
 export default function SessionCard({
   session, sessionDate, bookingCount, sessionBookings = [], sessionWaitlist = [],
   isBooked, waitlistPosition, onBook, onCancel, onJoinWaitlist, onLeaveWaitlist, isLoading,
-  hasCredits = true, bookingMinHours = 4, cancelMinHours = 4, readOnly = false,
+  hasCredits = true, bookingMinHours = 4, cancelMinHours = 4, readOnly = false, paused = false,
 }) {
   const [expanded, setExpanded] = useState(false);
   const spotsLeft = (session.max_students || 8) - bookingCount;
