@@ -180,7 +180,7 @@ export default function Login() {
         <p className="text-center text-sm text-muted-foreground mt-6">
           {c.content_login_signup_text}{" "}
           <a
-            href={c.content_login_signup_link_url}
+            href={c.content_home_whatsapp_url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary font-medium hover:underline"

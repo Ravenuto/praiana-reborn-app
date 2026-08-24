@@ -144,6 +144,9 @@ function SectionPreview({ preview, v, numbers }) {
           <span className="text-primary font-medium underline">
             {v.content_login_signup_link_label}
           </span>
+          <span className="block text-[10px] text-muted-foreground mt-1 break-all">
+            Link: {v.content_home_whatsapp_url}
+          </span>
         </p>
       );
     case "rules_header":

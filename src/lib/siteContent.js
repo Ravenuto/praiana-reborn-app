@@ -86,7 +86,7 @@ export const CONTENT_GROUPS = [
             label: "Link do WhatsApp",
             type: "text",
             default: "https://wa.me/5521999999999",
-            help: "Use o formato https://wa.me/55DDNÚMERO.",
+            help: "Use o formato https://wa.me/55DDNÚMERO. Este link também aparece no rodapé da tela de login.",
           },
         ],
       },
@@ -301,12 +301,7 @@ export const CONTENT_GROUPS = [
             label: "Texto do link",
             type: "text",
             default: "Entre em contato pelo WhatsApp",
-          },
-          {
-            key: "content_login_signup_link_url",
-            label: "Endereço do link",
-            type: "text",
-            default: "https://wa.me/5500000000000",
+            help: "O endereço do link é o mesmo WhatsApp configurado na aba Home.",
           },
         ],
       },
@@ -498,6 +493,13 @@ export async function getSiteContent({ fresh = false } = {}) {
         map[r.key] = r.value;
       }
     });
+    // Migração: o WhatsApp do login agora usa o mesmo campo da Home.
+    if (
+      map.content_home_whatsapp_url === CONTENT_DEFAULTS.content_home_whatsapp_url &&
+      map.content_login_signup_link_url !== CONTENT_DEFAULTS.content_login_signup_link_url
+    ) {
+      map.content_home_whatsapp_url = map.content_login_signup_link_url;
+    }
   } catch {
     /* usa defaults */
   }
