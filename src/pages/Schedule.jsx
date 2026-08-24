@@ -182,6 +182,10 @@ export default function Schedule() {
   };
 
   const handleBook = async (session) => {
+    if (isPaused) {
+      toast.error("Seu plano está pausado. Fale com o estúdio para reativar.", { duration: 5000 });
+      return;
+    }
     setLoadingSession(session.id);
     try {
       // Buscar créditos FRESCOS do banco antes de qualquer operação
