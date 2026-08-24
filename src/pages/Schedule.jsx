@@ -362,6 +362,10 @@ export default function Schedule() {
   };
 
   const handleJoinWaitlist = async (session) => {
+    if (isPaused) {
+      toast.error("Seu plano está pausado. Fale com o estúdio para reativar.", { duration: 5000 });
+      return;
+    }
     setLoadingSession(session.id);
     try {
       const allWaiting = await base44.entities.WaitlistEntry.filter({ session_id: session.id, session_date: selectedDate });
