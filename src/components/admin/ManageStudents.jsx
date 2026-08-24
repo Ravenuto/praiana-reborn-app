@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Send, Check } from "lucide-react";
+import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -42,8 +42,6 @@ export default function ManageStudents() {
   const [filterStatus, setFilterStatus] = useState("todas");
   const [expandedId, setExpandedId] = useState(null);
   const [paymentDialog, setPaymentDialog] = useState(null);
-  const [sendingWelcome, setSendingWelcome] = useState(null);
-  const [welcomeSent, setWelcomeSent] = useState(() => new Set());
   const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
   const [adminDialog, setAdminDialog] = useState(false);
@@ -363,20 +361,6 @@ export default function ManageStudents() {
     toast.success(newStatus ? "Aluna ativada" : "Aluna desativada");
   };
 
-  const handleSendWelcomeEmail = async (student) => {
-    setSendingWelcome(student.id);
-    try {
-      await base44.functions.invoke("sendWelcomeEmail", {
-        studentEmail: student.email,
-        studentName: student.full_name || "",
-      });
-      setWelcomeSent((prev) => new Set(prev).add(student.id));
-      toast.success("Email de boas-vindas enviado");
-    } catch {
-      toast.error("Erro ao enviar email");
-    }
-    setSendingWelcome(null);
-  };
 
   const handleResendInvite = async (student) => {
     setResendingInvite(student.id);
@@ -585,16 +569,6 @@ export default function ManageStudents() {
                       onClick={() => setPaymentDialog(student)}
                     >
                       <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      title="Enviar email de boas-vindas"
-                      onClick={() => handleSendWelcomeEmail(student)}
-                      disabled={sendingWelcome === student.id}
-                    >
-                      {sendingWelcome === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5 text-muted-foreground" />}
                     </Button>
                     {student.is_invited && (
                       <Button
@@ -1009,10 +983,15 @@ export default function ManageStudents() {
                   value={editDialog.student.plan || "4_aulas"} 
                   onValueChange={(v) => {
                     const selectedPlan = plans.find((p) => p.key === v);
-                    setEditDialog((d) => ({ 
-                      ...d, 
-                      student: { ...d.student, plan: v, credits: selectedPlan?.credits || 4 }
-                    }));
+                    setEditDialog((d) => {
+                      const start = d.plan_start_date || new Date().toISOString().slice(0, 10);
+                      return {
+                        ...d,
+                        plan_start_date: start,
+                        plan_end_date: addDaysISO(start, getDurationDays(selectedPlan)),
+                        student: { ...d.student, plan: v, credits: selectedPlan?.credits || 4 },
+                      };
+                    });
                   }}
                 >
                   <SelectTrigger className="h-8 text-sm">
@@ -1037,7 +1016,12 @@ export default function ManageStudents() {
               </div>
               <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Início do plano atual</Label>
-                <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_start_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
+                <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => {
+                  const start = e.target.value;
+                  const p = plans.find((pl) => pl.key === d.student.plan);
+                  return { ...d, plan_start_date: start, plan_end_date: start ? addDaysISO(start, getDurationDays(p)) : d.plan_end_date };
+                })} className="mobile-native-field h-8 text-sm w-full block" />
+                <p className="text-[11px] text-muted-foreground mt-1">A validade é calculada automaticamente pela duração do plano.</p>
               </div>
               <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Válido até</Label>
