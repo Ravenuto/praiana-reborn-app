@@ -586,16 +586,6 @@ export default function ManageStudents() {
                     >
                       <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      title="Enviar email de boas-vindas"
-                      onClick={() => handleSendWelcomeEmail(student)}
-                      disabled={sendingWelcome === student.id}
-                    >
-                      {sendingWelcome === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5 text-muted-foreground" />}
-                    </Button>
                     {student.is_invited && (
                       <Button
                         type="button"
