@@ -74,7 +74,7 @@ export default function ManagePlansAdmin() {
   const autoKey = (label) => label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
 
   const openNew = () => setDialog({ form: { ...EMPTY, benefits: [""] } });
-  const openEdit = (plan) => setDialog({ plan, form: { ...plan, key: plan.key || "", benefits: plan.benefits?.length ? [...plan.benefits] : [""] } });
+  const openEdit = (plan) => setDialog({ plan, form: { ...plan, key: plan.key || "", duration_days: getDurationDays(plan), benefits: plan.benefits?.length ? [...plan.benefits] : [""] } });
   const closeDialog = () => setDialog(null);
 
   const setField = (field, value) =>
