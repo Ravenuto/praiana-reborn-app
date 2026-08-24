@@ -28,6 +28,10 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await base44.auth.loginViaEmailPassword({ email, password, mode, remember: rememberMe });
+      if (res?.isAdmin) {
+        const { importLocalStoreOnce } = await import("@/lib/importLocalStore");
+        await importLocalStoreOnce();
+      }
       const home = mode === "professor" ? "/professor" : mode === "admin" ? "/admin" : "/";
       window.location.href = res?.mustChangePassword ? "/definir-senha" : home;
     } catch (err) {
