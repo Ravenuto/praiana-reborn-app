@@ -114,8 +114,9 @@ export default function SessionCard({
                   size="sm"
                   variant="outline"
                   onClick={onJoinWaitlist}
-                  disabled={isLoading || locked}
+                  disabled={isLoading || locked || paused}
                   className="rounded-full text-xs h-8"
+                  title={paused ? "Plano pausado" : ""}
                 >
                   {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Fila de espera"}
                 </Button>
@@ -124,11 +125,11 @@ export default function SessionCard({
               <Button
                 size="sm"
                 onClick={onBook}
-                disabled={isLoading || locked}
+                disabled={isLoading || locked || paused}
                 className="rounded-full px-5 text-sm h-8"
-                title={locked ? `Fora do horário de marcação (menos de ${bookingMinHours}h)` : ""}
+                title={paused ? "Plano pausado" : locked ? `Fora do horário de marcação (menos de ${bookingMinHours}h)` : ""}
               >
-                {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Reservar"}
+                {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : paused ? "Pausado" : "Reservar"}
               </Button>
             )}
 
