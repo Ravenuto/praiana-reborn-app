@@ -27,7 +27,7 @@ export default function Login() {
     setInfo("");
     setLoading(true);
     try {
-      const res = await base44.auth.loginViaEmailPassword({ email, password, mode });
+      const res = await base44.auth.loginViaEmailPassword({ email, password, mode, remember: rememberMe });
       const home = mode === "professor" ? "/professor" : mode === "admin" ? "/admin" : "/";
       window.location.href = res?.mustChangePassword ? "/definir-senha" : home;
     } catch (err) {
