@@ -54,6 +54,7 @@ export default function ManageStudents() {
   const [savingTeacher, setSavingTeacher] = useState(false);
   const [staffEdit, setStaffEdit] = useState(null);
   const [savingStaff, setSavingStaff] = useState(false);
+  const [pausingId, setPausingId] = useState(null);
 
   const { data: plans = [] } = useQuery({
     queryKey: ["studioPlans"],
