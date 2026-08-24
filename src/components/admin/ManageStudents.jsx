@@ -14,6 +14,7 @@ import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, 
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { addDaysISO, getDurationDays, daysLeft, durationLabel } from "@/lib/planDuration";
 
 const safeFormat = (value, fmt, opts) => {
   if (!value) return "—";
