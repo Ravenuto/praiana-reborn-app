@@ -12,7 +12,7 @@ import {
 const isBrowser = typeof window !== 'undefined';
 
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
-export const FALLBACK_DEFAULT_PASSWORD = 'praiana';
+export const FALLBACK_DEFAULT_PASSWORD = 'praiana2026';
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */

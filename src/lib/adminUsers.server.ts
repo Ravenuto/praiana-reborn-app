@@ -2,7 +2,7 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
-export const FALLBACK_DEFAULT_PASSWORD = 'praiana';
+export const FALLBACK_DEFAULT_PASSWORD = 'praiana2026';
 
 export type StudioRole = 'admin' | 'teacher' | 'student';
 
