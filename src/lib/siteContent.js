@@ -86,7 +86,7 @@ export const CONTENT_GROUPS = [
             label: "Link do WhatsApp",
             type: "text",
             default: "https://wa.me/5521999999999",
-            help: "Use o formato https://wa.me/55DDNÚMERO.",
+            help: "Use o formato https://wa.me/55DDNÚMERO. Este link também aparece no rodapé da tela de login.",
           },
         ],
       },
