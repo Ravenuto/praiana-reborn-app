@@ -75,6 +75,9 @@ export default function Schedule() {
     return { min: format(start, "yyyy-MM-dd"), max: format(end, "yyyy-MM-dd") };
   }, [userData, user]);
 
+  const isPaused = (userData?.data?.plan_paused ?? userData?.plan_paused) === true && !isTeacher && user?.role !== "admin";
+  const pausedAt = userData?.data?.plan_paused_at || userData?.plan_paused_at || null;
+
   const isDateAllowed = (dateStr) => {
     if (!planDates.min && !planDates.max) return true;
     if (planDates.min && dateStr < planDates.min) return false;
@@ -182,6 +185,10 @@ export default function Schedule() {
   };
 
   const handleBook = async (session) => {
+    if (isPaused) {
+      toast.error("Seu plano está pausado. Fale com o estúdio para reativar.", { duration: 5000 });
+      return;
+    }
     setLoadingSession(session.id);
     try {
       // Buscar créditos FRESCOS do banco antes de qualquer operação
@@ -355,6 +362,10 @@ export default function Schedule() {
   };
 
   const handleJoinWaitlist = async (session) => {
+    if (isPaused) {
+      toast.error("Seu plano está pausado. Fale com o estúdio para reativar.", { duration: 5000 });
+      return;
+    }
     setLoadingSession(session.id);
     try {
       const allWaiting = await base44.entities.WaitlistEntry.filter({ session_id: session.id, session_date: selectedDate });
@@ -502,6 +513,15 @@ export default function Schedule() {
         />
 
 
+      {isPaused && (
+        <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800 p-4 text-center">
+          <p className="font-heading font-bold text-amber-700 dark:text-amber-400">Plano pausado</p>
+          <p className="text-sm text-amber-600/90 mt-1">
+            Suas reservas estão bloqueadas{pausedAt ? ` desde ${formatSafe(pausedAt, "dd/MM/yyyy")}` : ""}. Os dias pausados serão somados na validade quando o plano voltar.
+          </p>
+        </div>
+      )}
+
       {!isTeacher && <CreditBanner />}
 
       {/* Seletor de data com calendário */}
@@ -567,7 +587,8 @@ export default function Schedule() {
           readOnly={isTeacher}
           hasCredits={hasCredits}
           bookingMinHours={bookingMinHours}
-          cancelMinHours={cancelMinHours} />
+          cancelMinHours={cancelMinHours}
+          paused={isPaused} />
 
           )
         }

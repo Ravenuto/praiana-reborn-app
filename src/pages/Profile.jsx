@@ -190,6 +190,17 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Plano pausado */}
+      {!isTeacher && entityData?.plan_paused === true && (
+        <div className="mb-3 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800 p-4 text-center">
+          <p className="font-heading font-bold text-amber-700 dark:text-amber-400">Plano pausado</p>
+          <p className="text-sm text-amber-600/90 mt-1">
+            {entityData.plan_paused_at ? `Pausado desde ${formatSafe(entityData.plan_paused_at, "dd/MM/yyyy")}. ` : ""}
+            Os dias parados serão somados na validade quando o plano voltar.
+          </p>
+        </div>
+      )}
+
       {/* Plano e créditos */}
       {!isTeacher && (
       <div className="grid grid-cols-2 gap-3 mb-3">

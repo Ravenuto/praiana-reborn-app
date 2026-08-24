@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign } from "lucide-react";
+import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Pause, Play } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { addDaysISO, getDurationDays, daysLeft, durationLabel } from "@/lib/planDuration";
+import { pausedDays, pauseToday } from "@/lib/planPause";
+import { promoteFromWaitlist } from "@/lib/waitlist";
 
 const safeFormat = (value, fmt, opts) => {
   if (!value) return "—";
@@ -52,6 +54,7 @@ export default function ManageStudents() {
   const [savingTeacher, setSavingTeacher] = useState(false);
   const [staffEdit, setStaffEdit] = useState(null);
   const [savingStaff, setSavingStaff] = useState(false);
+  const [pausingId, setPausingId] = useState(null);
 
   const { data: plans = [] } = useQuery({
     queryKey: ["studioPlans"],
@@ -404,8 +407,110 @@ export default function ManageStudents() {
   };
 
 
+  const handleTogglePause = async (student) => {
+    if (student.is_invited) return;
+    const data = student.data || {};
+    const isPaused = data.plan_paused === true || student.plan_paused === true;
+
+    if (isPaused) {
+      const startISO = data.plan_paused_at || student.plan_paused_at;
+      const days = pausedDays(startISO);
+      const input = window.prompt(
+        `Retomar o plano de ${student.full_name || student.email}.\nDias pausados: ${days}.\nQuantos dias somar à validade?`,
+        String(days)
+      );
+      if (input === null) return;
+      const add = Math.max(0, Number(input) || 0);
+      const currentEnd = data.plan_end_date || student.plan_end_date || new Date().toISOString().slice(0, 10);
+      setPausingId(student.id);
+      try {
+        await base44.entities.User.update(student.id, {
+          data: {
+            ...data,
+            plan_paused: false,
+            plan_paused_at: "",
+            plan_paused_days: (Number(data.plan_paused_days) || 0) + add,
+            plan_end_date: add > 0 ? addDaysISO(currentEnd, add) : currentEnd,
+          },
+        });
+        try {
+          await base44.entities.Notification.create({
+            user_email: student.email,
+            type: "plan_resumed",
+            title: "Plano reativado 💙",
+            message: add > 0
+              ? `Seu plano voltou! Somamos ${add} dia${add !== 1 ? "s" : ""} na validade.`
+              : "Seu plano voltou! Já pode reservar suas aulas.",
+            link: "/agenda",
+            read: false,
+          });
+        } catch { /* noop */ }
+        queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+        queryClient.invalidateQueries({ queryKey: ["userCredits"] });
+        queryClient.invalidateQueries({ queryKey: ["myProfile"] });
+        toast.success(add > 0 ? `Plano retomado. +${add} dia(s) na validade.` : "Plano retomado.");
+      } catch {
+        toast.error("Erro ao retomar o plano");
+      }
+      setPausingId(null);
+      return;
+    }
+
+    const startInput = window.prompt(
+      `Pausar o plano de ${student.full_name || student.email}.\nA partir de qual data? (AAAA-MM-DD)`,
+      pauseToday()
+    );
+    if (startInput === null) return;
+    const startISO = /^\d{4}-\d{2}-\d{2}$/.test(startInput.trim()) ? startInput.trim() : pauseToday();
+
+    setPausingId(student.id);
+    try {
+      await base44.entities.User.update(student.id, {
+        data: { ...data, plan_paused: true, plan_paused_at: startISO },
+      });
+
+      // Cancela reservas futuras e libera as vagas (fila de espera)
+      let cancelled = 0;
+      try {
+        const bookings = await base44.entities.Booking.filter({ student_email: student.email });
+        const today = new Date().toISOString().slice(0, 10);
+        const future = bookings.filter((b) => (b.session_date || "") >= today && b.status !== "cancelada");
+        for (const b of future) {
+          await base44.entities.Booking.delete(b.id);
+          cancelled += 1;
+          await promoteFromWaitlist({
+            session_id: b.session_id,
+            session_date: b.session_date,
+            session_time: b.session_time,
+            class_type_name: b.class_type_name,
+          });
+        }
+      } catch { /* noop */ }
+
+      try {
+        await base44.entities.Notification.create({
+          user_email: student.email,
+          type: "plan_paused",
+          title: "Plano pausado",
+          message: "Seu plano está pausado. Quando voltar, os dias parados serão somados na validade.",
+          link: "/perfil",
+          read: false,
+        });
+      } catch { /* noop */ }
+
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["myBookings"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      toast.success(cancelled > 0 ? `Plano pausado. ${cancelled} reserva(s) futura(s) cancelada(s).` : "Plano pausado.");
+    } catch {
+      toast.error("Erro ao pausar o plano");
+    }
+    setPausingId(null);
+  };
+
   const handleSaveEdit = async () => {
     if (!editDialog) return;
+
     if (editDialog.student.is_invited) {
       return toast.error("Não é possível editar convites pendentes");
     }
@@ -492,6 +597,7 @@ export default function ManageStudents() {
             const info = planInfo[plan] || planInfo["4_aulas"];
             const isActive = student.is_active !== false;
             const isExpanded = expandedId === student.id;
+            const isPaused = (student.data?.plan_paused ?? student.plan_paused) === true;
 
             return (
               <div key={student.id} className="rounded-xl border border-border bg-card overflow-hidden">
@@ -507,6 +613,11 @@ export default function ManageStudents() {
                         {student.is_invited && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1"><Mail className="h-3 w-3" /> Email enviado</Badge>}
                         {isActive && !student.is_invited && <Badge className="bg-green-100 text-green-700 border-0 text-xs">Ativa</Badge>}
                         {!isActive && !student.is_invited && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Inativa</Badge>}
+                        {isPaused && !student.is_invited && (
+                          <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1">
+                            <Pause className="h-3 w-3" /> Pausado{pausedDays(student.data?.plan_paused_at || student.plan_paused_at) > 0 ? ` · ${pausedDays(student.data?.plan_paused_at || student.plan_paused_at)}d` : ""}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">{student.email}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0 mt-0.5">
@@ -592,6 +703,20 @@ export default function ManageStudents() {
                       disabled={student.is_invited}
                     >
                       <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      title={isPaused ? "Retomar plano" : "Pausar plano"}
+                      onClick={() => handleTogglePause(student)}
+                      disabled={student.is_invited || pausingId === student.id}
+                    >
+                      {pausingId === student.id
+                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        : isPaused
+                          ? <Play className="h-3.5 w-3.5 text-green-600" />
+                          : <Pause className="h-3.5 w-3.5 text-amber-600" />}
                     </Button>
                     <Button
                       variant="ghost"
