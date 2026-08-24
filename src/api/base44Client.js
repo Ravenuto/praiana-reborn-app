@@ -250,7 +250,16 @@ const userEntity = {
     throwIf(upErr);
 
     const roles = rolesFromPatch(patch, null);
-    if (roles) await adminSetRoles({ data: { userId: id, roles } });
+    if (roles) {
+      // A administradora principal nunca perde o acesso de admin.
+      const email = String(columns.email || current?.email || '').toLowerCase();
+      const isMainAdmin =
+        email === ADMIN_EMAIL ||
+        (await supabase.from('profiles').select('email').eq('id', id).maybeSingle()).data?.email?.toLowerCase() ===
+          ADMIN_EMAIL;
+      const finalRoles = isMainAdmin && !roles.includes('admin') ? [...roles, 'admin'] : roles;
+      await adminSetRoles({ data: { userId: id, roles: finalRoles } });
+    }
     return userEntity.get(id);
   },
   async delete(id) {
