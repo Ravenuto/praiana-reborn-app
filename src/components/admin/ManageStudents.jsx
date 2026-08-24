@@ -507,7 +507,12 @@ export default function ManageStudents() {
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["myBookings"] });
       queryClient.invalidateQueries({ queryKey: ["sessions"] });
-      toast.success(cancelled > 0 ? `Plano pausado. ${cancelled} reserva(s) futura(s) cancelada(s).` : "Plano pausado.");
+      const extra = expected > 0 && nextEnd
+        ? ` +${expected} dia(s) na validade (até ${safeFormat(nextEnd, "dd/MM")}).`
+        : "";
+      toast.success(
+        (cancelled > 0 ? `Plano pausado. ${cancelled} reserva(s) futura(s) cancelada(s).` : "Plano pausado.") + extra
+      );
     } catch {
       toast.error("Erro ao pausar o plano");
     }
