@@ -284,6 +284,45 @@ export default function ManagePlansAdmin() {
               )}
 
               <div>
+                <Label className="text-xs mb-1 block">Duração do plano *</Label>
+                <div className="flex flex-wrap gap-2">
+                  {DURATION_PRESETS.map((p) => (
+                    <Button
+                      key={p.value}
+                      type="button"
+                      size="sm"
+                      variant={Number(dialog.form.duration_days) === p.value ? "default" : "outline"}
+                      className="h-7 text-xs rounded-full"
+                      onClick={() => setField("duration_days", p.value)}
+                    >
+                      {p.label}
+                    </Button>
+                  ))}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={DURATION_PRESETS.some((p) => p.value === Number(dialog.form.duration_days)) ? "outline" : "default"}
+                    className="h-7 text-xs rounded-full"
+                    onClick={() => setField("duration_days", 45)}
+                  >
+                    Personalizado
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Input
+                    type="number" min={1}
+                    value={dialog.form.duration_days ?? DEFAULT_DURATION_DAYS}
+                    onChange={(e) => setField("duration_days", Number(e.target.value))}
+                    className="h-8 text-sm w-24"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    dias de validade ({durationLabel(dialog.form.duration_days)})
+                  </span>
+                </div>
+              </div>
+
+
+              <div>
                 <Label className="text-xs mb-2 block">Benefícios</Label>
                 <div className="space-y-2">
                   {dialog.form.benefits.map((b, i) => (
