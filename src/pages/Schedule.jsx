@@ -587,7 +587,8 @@ export default function Schedule() {
           readOnly={isTeacher}
           hasCredits={hasCredits}
           bookingMinHours={bookingMinHours}
-          cancelMinHours={cancelMinHours} />
+          cancelMinHours={cancelMinHours}
+          paused={isPaused} />
 
           )
         }
