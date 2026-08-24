@@ -108,7 +108,8 @@ export default function ManagePlansAdmin() {
     const per_class = credits === 1 ? "por aula" : `R$ ${perClassValue}/aula`;
     const price = `R$ ${String(priceValue).replace(".", ",")}`;
     const key = form.key || autoKey(form.label) || `plano_${Date.now()}`;
-    const data = { ...form, key, price, price_value: priceValue, per_class, credits, benefits: form.benefits.filter(Boolean) };
+    const duration_days = Math.max(1, Number(form.duration_days) || DEFAULT_DURATION_DAYS);
+    const data = { ...form, key, price, price_value: priceValue, per_class, credits, duration_days, benefits: form.benefits.filter(Boolean) };
     if (plan?.id) {
       await base44.entities.StudioPlan.update(plan.id, data);
       toast.success("Plano atualizado!");
