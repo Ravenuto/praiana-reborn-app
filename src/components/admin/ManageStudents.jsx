@@ -458,10 +458,21 @@ export default function ManageStudents() {
 
   const doPause = async (student, startISO, untilISO) => {
     const data = student.data || {};
+    const expected = untilISO ? daysBetweenISO(startISO, untilISO) : 0;
+    const currentEnd = student.plan_end_date || data.plan_end_date || "";
+    const nextEnd = expected > 0 && currentEnd ? addDaysISO(currentEnd, expected) : currentEnd;
+    const pauseFields = {
+      plan_paused: true,
+      plan_paused_at: startISO,
+      plan_pause_until: untilISO || "",
+      plan_pause_credited_days: expected,
+      ...(nextEnd ? { plan_end_date: nextEnd } : {}),
+    };
     setPausingId(student.id);
     try {
       await base44.entities.User.update(student.id, {
-        data: { ...data, plan_paused: true, plan_paused_at: startISO, plan_pause_until: untilISO || "" },
+        ...pauseFields,
+        data: { ...data, ...pauseFields },
       });
 
       // Cancela reservas futuras e libera as vagas (fila de espera)
