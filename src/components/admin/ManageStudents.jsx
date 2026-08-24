@@ -1009,10 +1009,15 @@ export default function ManageStudents() {
                   value={editDialog.student.plan || "4_aulas"} 
                   onValueChange={(v) => {
                     const selectedPlan = plans.find((p) => p.key === v);
-                    setEditDialog((d) => ({ 
-                      ...d, 
-                      student: { ...d.student, plan: v, credits: selectedPlan?.credits || 4 }
-                    }));
+                    setEditDialog((d) => {
+                      const start = d.plan_start_date || new Date().toISOString().slice(0, 10);
+                      return {
+                        ...d,
+                        plan_start_date: start,
+                        plan_end_date: addDaysISO(start, getDurationDays(selectedPlan)),
+                        student: { ...d.student, plan: v, credits: selectedPlan?.credits || 4 },
+                      };
+                    });
                   }}
                 >
                   <SelectTrigger className="h-8 text-sm">
