@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { formatSafe } from "@/lib/dates";
+import { daysLeft } from "@/lib/planDuration";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
