@@ -216,17 +216,45 @@ export const getDefaultPassword = () => {
 // E-mail único de administradora do estúdio.
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
 
-// Auth — uses localStorage to persist a fake session.
-const AUTH_KEY = 'raissa_mock_auth_v1';
+// Auth — sessão local. "Manter conectado" grava em localStorage; senão, sessionStorage.
+const AUTH_KEY = 'raissa_mock_auth_v2';
+const LEGACY_AUTH_KEYS = ['raissa_mock_auth_v1'];
 const readAuth = () => {
   if (!isBrowser) return null;
-  try { return JSON.parse(window.localStorage.getItem(AUTH_KEY) || 'null'); } catch { return null; }
+  try {
+    const raw =
+      window.sessionStorage.getItem(AUTH_KEY) || window.localStorage.getItem(AUTH_KEY) || 'null';
+    return JSON.parse(raw);
+  } catch { return null; }
 };
-const writeAuth = (u) => {
+const writeAuth = (u, remember) => {
   if (!isBrowser) return;
-  if (u) window.localStorage.setItem(AUTH_KEY, JSON.stringify(u));
-  else window.localStorage.removeItem(AUTH_KEY);
+  try {
+    if (!u) {
+      window.localStorage.removeItem(AUTH_KEY);
+      window.sessionStorage.removeItem(AUTH_KEY);
+      return;
+    }
+    const value = JSON.stringify(u);
+    // Mantém a sessão onde ela já está, a menos que o login diga o contrário.
+    const persistent =
+      remember === undefined
+        ? window.localStorage.getItem(AUTH_KEY) !== null
+        : Boolean(remember);
+    if (persistent) {
+      window.localStorage.setItem(AUTH_KEY, value);
+      window.sessionStorage.removeItem(AUTH_KEY);
+    } else {
+      window.sessionStorage.setItem(AUTH_KEY, value);
+      window.localStorage.removeItem(AUTH_KEY);
+    }
+  } catch { /* noop */ }
 };
+
+// Limpa sessões antigas criadas automaticamente (nunca houve login de verdade nelas).
+if (isBrowser) {
+  try { LEGACY_AUTH_KEYS.forEach((k) => window.localStorage.removeItem(k)); } catch { /* noop */ }
+}
 
 // Normalize args: accept either (email, password) or ({ email, password, full_name })
 const pickArgs = (a, b) => {
@@ -253,12 +281,6 @@ if (cachedSession) {
   if (freshCached) writeAuth(freshCached);
 }
 
-// Seed an admin session on first load so all screens are visible without manual login.
-// Skip seeding if the user explicitly logged out.
-if (isBrowser && !window.localStorage.getItem(AUTH_KEY) && !window.localStorage.getItem('raissa_logged_out')) {
-  const admin = store.User.find((u) => u.email === ADMIN_EMAIL);
-  if (admin) writeAuth(admin);
-}
 
 const auth = {
   async me() {
