@@ -414,19 +414,25 @@ export default function ManageStudents() {
   const doResume = async (student, { silent = false } = {}) => {
     const data = student.data || {};
     const startISO = data.plan_paused_at || student.plan_paused_at;
-    const add = pausedDays(startISO);
-    const currentEnd = data.plan_end_date || student.plan_end_date || new Date().toISOString().slice(0, 10);
+    const real = pausedDays(startISO);
+    const credited = Number(data.plan_pause_credited_days ?? student.plan_pause_credited_days) || 0;
+    const delta = real - credited;
+    const currentEnd = student.plan_end_date || data.plan_end_date || new Date().toISOString().slice(0, 10);
+    const nextEnd = delta !== 0 ? addDaysISO(currentEnd, delta) : currentEnd;
+    const add = real;
+    const pauseFields = {
+      plan_paused: false,
+      plan_paused_at: "",
+      plan_pause_until: "",
+      plan_pause_credited_days: 0,
+      plan_paused_days: (Number(data.plan_paused_days ?? student.plan_paused_days) || 0) + real,
+      plan_end_date: nextEnd,
+    };
     setPausingId(student.id);
     try {
       await base44.entities.User.update(student.id, {
-        data: {
-          ...data,
-          plan_paused: false,
-          plan_paused_at: "",
-          plan_pause_until: "",
-          plan_paused_days: (Number(data.plan_paused_days) || 0) + add,
-          plan_end_date: add > 0 ? addDaysISO(currentEnd, add) : currentEnd,
-        },
+        ...pauseFields,
+        data: { ...data, ...pauseFields },
       });
       try {
         await base44.entities.Notification.create({
