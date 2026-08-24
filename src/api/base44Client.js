@@ -347,7 +347,7 @@ const auth = {
     }
 
     const fresh = store.User.find((u) => u.id === match.id);
-    writeAuth(fresh);
+    writeAuth(fresh, remember);
     try { window.localStorage.removeItem('raissa_logged_out'); } catch { /* noop */ }
     try { window.localStorage.setItem('raissa_login_mode', mode); } catch { /* noop */ }
     return { user: fresh, token: 'mock-token', mustChangePassword: usingDefault, isAdmin: isAdminAccount, isTeacher: isTeacherAccount, mode };
