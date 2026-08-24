@@ -513,6 +513,15 @@ export default function Schedule() {
         />
 
 
+      {isPaused && (
+        <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-800 p-4 text-center">
+          <p className="font-heading font-bold text-amber-700 dark:text-amber-400">Plano pausado</p>
+          <p className="text-sm text-amber-600/90 mt-1">
+            Suas reservas estão bloqueadas{pausedAt ? ` desde ${formatSafe(pausedAt, "dd/MM/yyyy")}` : ""}. Os dias pausados serão somados na validade quando o plano voltar.
+          </p>
+        </div>
+      )}
+
       {!isTeacher && <CreditBanner />}
 
       {/* Seletor de data com calendário */}
