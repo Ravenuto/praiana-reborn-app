@@ -11,9 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pencil, Plus, Star, Trash2, Loader2, CheckCircle2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DURATION_PRESETS, DEFAULT_DURATION_DAYS, getDurationDays, durationLabel } from "@/lib/planDuration";
 
 const EMPTY = {
-  label: "", price_value: 0, credits: 1, highlight: false, is_active: true, benefits: [""],
+  label: "", price_value: 0, credits: 1, duration_days: DEFAULT_DURATION_DAYS,
+  highlight: false, is_active: true, benefits: [""],
 };
 
 export default function ManagePlansAdmin() {
