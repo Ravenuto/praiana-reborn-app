@@ -17,8 +17,12 @@ No formulário de plano, além de nome, preço, créditos e benefícios, entra u
 ### 3. Perfil da aluna
 - O texto fixo "Válido por 30 dias" é substituído pela validade real do plano dela ("Válido até 12/11/2026" e "faltam X dias").
 
+### 4. Página Sobre / Regras do estúdio
+- O texto "Os créditos têm validade de 1 mês a partir da data de início do plano" passa a dizer que a validade acompanha a duração do plano contratado (mensal, trimestral, semestral ou anual).
+
 ## Detalhes técnicos
 - Novo campo `duration_days` em `StudioPlan` (default 30) usado em `ManagePlansAdmin.jsx` e exibido em `src/pages/Plans.jsx`.
 - Novo campo `plan_end_date` no usuário, gravado em `ManageStudents.jsx` no momento de atribuir plano (`plan_start_date + duration_days`) e editável no diálogo de edição.
+- Ajuste do texto padrão de regras em `src/lib/siteContent.js`.
 - Datas formatadas com os helpers seguros de `src/lib/dates.js`.
 - Nenhuma mudança na lógica de créditos nem no bloqueio por plano inativo nesta etapa (o campo fica pronto para isso).
