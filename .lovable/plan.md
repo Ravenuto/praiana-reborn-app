@@ -35,7 +35,7 @@ Objetivo: senha validada no servidor, admin protegido no banco, e os mesmos dado
 
 ## Detalhes técnicos
 
-- Etapa 1: remover o bloco de auto-seed da sessão em `src/api/base44Client.js` (o `if (isBrowser && !localStorage.getItem(AUTH_KEY) ...) writeAuth(admin)`), versionar `AUTH_KEY` para `..._v2`, garantir redirecionamento em `ProtectedRoute`/`AppLayout` e travar `/admin` por `isAdminUser`.
+- Etapa 1: remover o bloco de auto-seed da sessão em `src/api/base44Client.js` (o `if (isBrowser && !localStorage.getItem(AUTH_KEY) ...) writeAuth(admin)`) e versionar `AUTH_KEY` para `..._v2`. Enquanto a sessão está sendo verificada, `ProtectedRoute` não renderiza rota nenhuma (só o loader) e, sem usuário, faz `Navigate to="/login" replace` — nada de home/agenda piscando. "Manter conectado" define onde a sessão é gravada: `localStorage` (persistente) quando marcado, `sessionStorage` (some ao fechar) quando não. `/admin` travado por `isAdminUser`.
 - Etapa 2: migrations com `profiles`, `user_roles` + função `has_role` (security definer), GRANTs e políticas RLS; leituras/escritas sensíveis via `createServerFn`; `AuthContext` passa a usar `supabase.auth` com `onAuthStateChange`; adaptador em `src/api/base44Client.js` mapeando entidades para tabelas.
 - Migração de dados: tela única de importação que lê o `localStorage` atual e envia para o banco.
 
