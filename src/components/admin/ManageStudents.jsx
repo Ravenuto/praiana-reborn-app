@@ -666,6 +666,12 @@ export default function ManageStudents() {
                       </p>
                     </div>
                     <div>
+                      <p className="text-xs text-muted-foreground mb-0.5">Válido até</p>
+                      <p className={`font-medium ${student.plan_end_date && (daysLeft(student.plan_end_date) ?? 0) < 0 ? "text-red-600" : ""}`}>
+                        {safeFormat(student.plan_end_date, "dd/MM/yyyy")}
+                      </p>
+                    </div>
+                    <div>
                       <p className="text-xs text-muted-foreground mb-0.5">Último pagamento</p>
                       <p className="font-medium">
                         {safeFormat(student.last_payment_date, "dd/MM/yyyy")}
