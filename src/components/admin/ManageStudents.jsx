@@ -55,6 +55,10 @@ export default function ManageStudents() {
   const [staffEdit, setStaffEdit] = useState(null);
   const [savingStaff, setSavingStaff] = useState(false);
   const [pausingId, setPausingId] = useState(null);
+  const [pauseTarget, setPauseTarget] = useState(null);
+  const [pauseStart, setPauseStart] = useState("");
+  const [pauseUntil, setPauseUntil] = useState("");
+
 
   const { data: plans = [] } = useQuery({
     queryKey: ["studioPlans"],
