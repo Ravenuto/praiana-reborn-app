@@ -438,6 +438,7 @@ export default function ManageStudents() {
         birth_date: editDialog.birth_date,
         notes: editDialog.notes,
         plan_start_date: editDialog.plan_start_date,
+        plan_end_date: editDialog.plan_end_date,
       }
     });
     queryClient.invalidateQueries({ queryKey: ["allUsers"] });
