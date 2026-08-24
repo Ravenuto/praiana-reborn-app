@@ -298,6 +298,8 @@ const auth = {
     const email = (args.email || '').trim().toLowerCase();
     const password = args.password ?? b ?? '';
     const mode = args.mode || c || 'aluna';
+    const remember = Boolean(args.remember);
+
     if (!email) throw new Error('Email obrigatório');
 
     // Garante que a conta da administradora principal exista
