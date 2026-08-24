@@ -6,11 +6,13 @@ Além disso, todo o login e os dados de hoje ficam guardados dentro do navegador
 
 ## Etapa 1 — Correção imediata (hoje)
 
-- Remover a criação automática de sessão. Sem login feito, o site sempre abre em `/login`.
-- Qualquer rota protegida (home, agenda, reservas, perfil, professora, admin) redireciona para o login quando não há sessão.
+- Remover a criação automática de sessão.
+- Sem sessão válida, qualquer endereço do site (home, agenda, reservas, perfil, professora, admin) leva direto para a tela de login — nenhuma dessas páginas chega a aparecer, nem por um instante.
+- Só continua logado quem fez login e marcou "Manter conectado". Sem essa opção marcada, ao fechar o navegador/aba a sessão acaba e o próximo acesso volta para o login.
 - A rota `/admin` só abre para conta com papel de administradora; qualquer outra pessoa é mandada para fora.
 - Limpar a sessão "fantasma" já salva nos navegadores (mudança da chave de sessão), forçando um login limpo para todo mundo.
 - Publicar em seguida para o link ficar seguro.
+
 
 ## Etapa 2 — Login e dados de verdade no servidor (Lovable Cloud)
 
