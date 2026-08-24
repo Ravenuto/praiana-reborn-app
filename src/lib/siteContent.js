@@ -414,7 +414,7 @@ export const CONTENT_GROUPS = [
             label: "Texto",
             type: "textarea",
             default:
-              "Os créditos têm validade de 1 mês a partir da data de início do plano. Créditos não utilizados dentro do período não são transferidos.",
+              "Os créditos têm validade igual à duração do plano contratado (mensal, trimestral, semestral ou anual), contada a partir da data de início. Créditos não utilizados dentro do período não são transferidos.",
           },
         ],
       },

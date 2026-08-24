@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import useReveal from "@/hooks/useReveal";
+import { durationShort, getDurationDays } from "@/lib/planDuration";
 
 const WHATSAPP_NUMBER = "5521999999999";
 
@@ -72,7 +73,9 @@ export default function Plans() {
                 <div>
                   <p className={`eyebrow ${plan.highlight ? "!text-primary-foreground/70" : ""}`}>{plan.label}</p>
                   <p className={`font-heading italic text-4xl mt-2 ${plan.highlight ? "text-accent" : "text-primary"}`}>{plan.price}</p>
-                  <p className={`text-xs mt-1 ${plan.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{plan.per_class}</p>
+                  <p className={`text-xs mt-1 ${plan.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                    {plan.per_class} · {durationShort(getDurationDays(plan))}
+                  </p>
                 </div>
                 {plan.benefits?.length > 0 && (
                   <ul className="space-y-2 flex-1">

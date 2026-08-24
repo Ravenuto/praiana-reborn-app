@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { formatSafe } from "@/lib/dates";
+import { daysLeft } from "@/lib/planDuration";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -236,7 +237,13 @@ export default function Profile() {
                 {lastPayment.payment_method === "pix" ? "PIX" : lastPayment.payment_method === "cartao_credito" ? "Cartão de crédito" : lastPayment.payment_method}
               </p>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Válido por 30 dias</p>
+            {entityData?.plan_end_date ? (
+              <p className={`text-xs mt-1 ${(daysLeft(entityData.plan_end_date) ?? 0) < 0 ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                {(daysLeft(entityData.plan_end_date) ?? 0) < 0
+                  ? `Plano vencido em ${formatSafe(entityData.plan_end_date, "dd/MM/yyyy")}`
+                  : `Válido até ${formatSafe(entityData.plan_end_date, "dd/MM/yyyy")} · faltam ${daysLeft(entityData.plan_end_date)} dias`}
+              </p>
+            ) : null}
           </div>
         )}
       </div>

@@ -11,9 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pencil, Plus, Star, Trash2, Loader2, CheckCircle2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DURATION_PRESETS, DEFAULT_DURATION_DAYS, getDurationDays, durationLabel } from "@/lib/planDuration";
 
 const EMPTY = {
-  label: "", price_value: 0, credits: 1, highlight: false, is_active: true, benefits: [""],
+  label: "", price_value: 0, credits: 1, duration_days: DEFAULT_DURATION_DAYS,
+  highlight: false, is_active: true, benefits: [""],
 };
 
 export default function ManagePlansAdmin() {
@@ -72,7 +74,7 @@ export default function ManagePlansAdmin() {
   const autoKey = (label) => label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
 
   const openNew = () => setDialog({ form: { ...EMPTY, benefits: [""] } });
-  const openEdit = (plan) => setDialog({ plan, form: { ...plan, key: plan.key || "", benefits: plan.benefits?.length ? [...plan.benefits] : [""] } });
+  const openEdit = (plan) => setDialog({ plan, form: { ...plan, key: plan.key || "", duration_days: getDurationDays(plan), benefits: plan.benefits?.length ? [...plan.benefits] : [""] } });
   const closeDialog = () => setDialog(null);
 
   const setField = (field, value) =>
@@ -106,7 +108,8 @@ export default function ManagePlansAdmin() {
     const per_class = credits === 1 ? "por aula" : `R$ ${perClassValue}/aula`;
     const price = `R$ ${String(priceValue).replace(".", ",")}`;
     const key = form.key || autoKey(form.label) || `plano_${Date.now()}`;
-    const data = { ...form, key, price, price_value: priceValue, per_class, credits, benefits: form.benefits.filter(Boolean) };
+    const duration_days = Math.max(1, Number(form.duration_days) || DEFAULT_DURATION_DAYS);
+    const data = { ...form, key, price, price_value: priceValue, per_class, credits, duration_days, benefits: form.benefits.filter(Boolean) };
     if (plan?.id) {
       await base44.entities.StudioPlan.update(plan.id, data);
       toast.success("Plano atualizado!");
@@ -196,6 +199,9 @@ export default function ManagePlansAdmin() {
                             </div>
                             <div className="flex flex-col items-end gap-2">
                               <Badge variant="secondary" className="text-xs">{plan.credits || 0} créditos</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {durationLabel(getDurationDays(plan))} · {getDurationDays(plan)} dias
+                              </Badge>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">{plan.is_active ? "Ativo" : "Inativo"}</span>
                                 <Switch checked={!!plan.is_active} onCheckedChange={() => handleToggleActive(plan)} />
@@ -276,6 +282,45 @@ export default function ManagePlansAdmin() {
                   </strong>
                 </p>
               )}
+
+              <div>
+                <Label className="text-xs mb-1 block">Duração do plano *</Label>
+                <div className="flex flex-wrap gap-2">
+                  {DURATION_PRESETS.map((p) => (
+                    <Button
+                      key={p.value}
+                      type="button"
+                      size="sm"
+                      variant={Number(dialog.form.duration_days) === p.value ? "default" : "outline"}
+                      className="h-7 text-xs rounded-full"
+                      onClick={() => setField("duration_days", p.value)}
+                    >
+                      {p.label}
+                    </Button>
+                  ))}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={DURATION_PRESETS.some((p) => p.value === Number(dialog.form.duration_days)) ? "outline" : "default"}
+                    className="h-7 text-xs rounded-full"
+                    onClick={() => setField("duration_days", 45)}
+                  >
+                    Personalizado
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <Input
+                    type="number" min={1}
+                    value={dialog.form.duration_days ?? DEFAULT_DURATION_DAYS}
+                    onChange={(e) => setField("duration_days", Number(e.target.value))}
+                    className="h-8 text-sm w-24"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    dias de validade ({durationLabel(dialog.form.duration_days)})
+                  </span>
+                </div>
+              </div>
+
 
               <div>
                 <Label className="text-xs mb-2 block">Benefícios</Label>

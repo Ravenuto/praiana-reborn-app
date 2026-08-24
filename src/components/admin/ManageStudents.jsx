@@ -14,6 +14,7 @@ import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, 
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { addDaysISO, getDurationDays, daysLeft, durationLabel } from "@/lib/planDuration";
 
 const safeFormat = (value, fmt, opts) => {
   if (!value) return "—";
@@ -145,6 +146,9 @@ export default function ManageStudents() {
         return;
       }
 
+      const selectedPlan = plans.find((p) => p.key === manualForm.plan);
+      const startISO = new Date().toISOString().slice(0, 10);
+
       await base44.entities.User.create({
         full_name: manualForm.name,
         email,
@@ -159,7 +163,8 @@ export default function ManageStudents() {
           plan: manualForm.plan,
           credits: manualForm.credits,
           is_active: true,
-          plan_start_date: new Date().toISOString().slice(0, 10),
+          plan_start_date: startISO,
+          plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
         },
       });
 
@@ -300,8 +305,15 @@ export default function ManageStudents() {
         const cleanData = Object.fromEntries(
           Object.entries(freshUser.data || {}).filter(([k]) => k !== 'data')
         );
+        const startISO = format(new Date(), "yyyy-MM-dd");
         await base44.entities.User.update(freshUser.id, {
-          data: { ...cleanData, plan, credits, plan_start_date: format(new Date(), "yyyy-MM-dd") }
+          data: {
+            ...cleanData,
+            plan,
+            credits,
+            plan_start_date: startISO,
+            plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
+          }
         });
       }
     }
@@ -426,6 +438,7 @@ export default function ManageStudents() {
         birth_date: editDialog.birth_date,
         notes: editDialog.notes,
         plan_start_date: editDialog.plan_start_date,
+        plan_end_date: editDialog.plan_end_date,
       }
     });
     queryClient.invalidateQueries({ queryKey: ["allUsers"] });
@@ -519,6 +532,12 @@ export default function ManageStudents() {
                             Plano desde {safeFormat(student.plan_start_date, "dd/MM/yyyy", { locale: ptBR })}
                           </p>
                         )}
+                        {student.plan_end_date && (
+                          <p className={`text-xs ${(daysLeft(student.plan_end_date) ?? 0) < 0 ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                            Válido até {safeFormat(student.plan_end_date, "dd/MM/yyyy", { locale: ptBR })}
+                            {(daysLeft(student.plan_end_date) ?? 0) < 0 ? " (vencido)" : ""}
+                          </p>
+                        )}
                         {(student.credits != null) && !student.is_invited && (
                           <p className="text-xs text-muted-foreground">{student.credits} crédito{student.credits !== 1 ? "s" : ""}</p>
                         )}
@@ -553,7 +572,7 @@ export default function ManageStudents() {
                       size="sm"
                       className="h-8 w-8 p-0"
                       title="Editar detalhes"
-                      onClick={() => setEditDialog({ student, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "" })}
+                      onClick={() => setEditDialog({ student, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "", plan_end_date: student.plan_end_date || "" })}
                       disabled={student.is_invited}
                     >
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
@@ -644,6 +663,12 @@ export default function ManageStudents() {
                       <p className="text-xs text-muted-foreground mb-0.5">Início do plano</p>
                       <p className="font-medium">
                         {safeFormat(student.plan_start_date, "dd/MM/yyyy")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-0.5">Válido até</p>
+                      <p className={`font-medium ${student.plan_end_date && (daysLeft(student.plan_end_date) ?? 0) < 0 ? "text-red-600" : ""}`}>
+                        {safeFormat(student.plan_end_date, "dd/MM/yyyy")}
                       </p>
                     </div>
                     <div>
@@ -1013,6 +1038,27 @@ export default function ManageStudents() {
               <div className="min-w-0">
                 <Label className="text-xs mb-1 block">Início do plano atual</Label>
                 <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_start_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
+              </div>
+              <div className="min-w-0">
+                <Label className="text-xs mb-1 block">Válido até</Label>
+                <Input type="date" value={editDialog.plan_end_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_end_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Button type="button" size="sm" variant="outline" className="h-7 text-xs rounded-full"
+                    onClick={() => setEditDialog((d) => ({ ...d, plan_end_date: addDaysISO(d.plan_end_date || d.plan_start_date || new Date().toISOString().slice(0, 10), 30) }))}>
+                    +30 dias
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" className="h-7 text-xs rounded-full"
+                    onClick={() => setEditDialog((d) => ({ ...d, plan_end_date: addDaysISO(d.plan_end_date || d.plan_start_date || new Date().toISOString().slice(0, 10), 90) }))}>
+                    +90 dias
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-7 text-xs rounded-full"
+                    onClick={() => setEditDialog((d) => {
+                      const p = plans.find((pl) => pl.key === d.student.plan);
+                      return { ...d, plan_end_date: addDaysISO(d.plan_start_date || new Date().toISOString().slice(0, 10), getDurationDays(p)) };
+                    })}>
+                    Recalcular pelo plano ({durationLabel(getDurationDays(plans.find((pl) => pl.key === editDialog.student.plan)))})
+                  </Button>
+                </div>
               </div>
               <div>
                 <Label className="text-xs mb-1 block">Observações</Label>
