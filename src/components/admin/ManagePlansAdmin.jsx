@@ -199,6 +199,9 @@ export default function ManagePlansAdmin() {
                             </div>
                             <div className="flex flex-col items-end gap-2">
                               <Badge variant="secondary" className="text-xs">{plan.credits || 0} créditos</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {durationLabel(getDurationDays(plan))} · {getDurationDays(plan)} dias
+                              </Badge>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground">{plan.is_active ? "Ativo" : "Inativo"}</span>
                                 <Switch checked={!!plan.is_active} onCheckedChange={() => handleToggleActive(plan)} />
