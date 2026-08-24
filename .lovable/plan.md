@@ -4,7 +4,7 @@
 
 ### 1. Cadastro/edição de plano (Admin > Planos)
 No formulário de plano, além de nome, preço, créditos e benefícios, entra um campo **Duração**:
-- Opções rápidas: Mensal (30 dias), Bimestral (60), Trimestral (90), Semestral (180), Anual (365), Personalizado (digitar dias).
+- Opções rápidas: Mensal (30 dias), Trimestral (90), Semestral (180), Anual (365) e Personalizado (digitar dias).
 - O card do plano na lista do admin passa a mostrar a duração ("Trimestral · 90 dias").
 - Na página pública de Planos, a duração aparece junto do preço (ex.: "R$ 480 · trimestral"), e o cálculo de "por aula" continua igual.
 
