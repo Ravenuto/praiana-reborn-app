@@ -1039,6 +1039,27 @@ export default function ManageStudents() {
                 <Label className="text-xs mb-1 block">Início do plano atual</Label>
                 <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_start_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
               </div>
+              <div className="min-w-0">
+                <Label className="text-xs mb-1 block">Válido até</Label>
+                <Input type="date" value={editDialog.plan_end_date} onChange={(e) => setEditDialog((d) => ({ ...d, plan_end_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Button type="button" size="sm" variant="outline" className="h-7 text-xs rounded-full"
+                    onClick={() => setEditDialog((d) => ({ ...d, plan_end_date: addDaysISO(d.plan_end_date || d.plan_start_date || new Date().toISOString().slice(0, 10), 30) }))}>
+                    +30 dias
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" className="h-7 text-xs rounded-full"
+                    onClick={() => setEditDialog((d) => ({ ...d, plan_end_date: addDaysISO(d.plan_end_date || d.plan_start_date || new Date().toISOString().slice(0, 10), 90) }))}>
+                    +90 dias
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" className="h-7 text-xs rounded-full"
+                    onClick={() => setEditDialog((d) => {
+                      const p = plans.find((pl) => pl.key === d.student.plan);
+                      return { ...d, plan_end_date: addDaysISO(d.plan_start_date || new Date().toISOString().slice(0, 10), getDurationDays(p)) };
+                    })}>
+                    Recalcular pelo plano ({durationLabel(getDurationDays(plans.find((pl) => pl.key === editDialog.student.plan)))})
+                  </Button>
+                </div>
+              </div>
               <div>
                 <Label className="text-xs mb-1 block">Observações</Label>
                 <Input value={editDialog.notes} onChange={(e) => setEditDialog((d) => ({ ...d, notes: e.target.value }))} className="h-8 text-sm" placeholder="Ex: lesão no joelho..." />
