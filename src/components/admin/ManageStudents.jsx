@@ -1116,6 +1116,47 @@ export default function ManageStudents() {
         <PaymentHistoryDialog student={paymentDialog} onClose={() => setPaymentDialog(null)} />
       )}
 
+      {/* Dialog pausar plano */}
+      <Dialog open={!!pauseTarget} onOpenChange={(o) => { if (!o) setPauseTarget(null); }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Pausar plano</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {pauseTarget?.full_name || pauseTarget?.email}
+            </p>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Início da pausa</Label>
+              <Input type="date" value={pauseStart} onChange={(e) => setPauseStart(e.target.value)} className="h-9 w-[160px]" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Previsão de retorno (opcional)</Label>
+              <Input type="date" value={pauseUntil} onChange={(e) => setPauseUntil(e.target.value)} className="h-9 w-[160px]" />
+              <p className="text-[11px] text-muted-foreground">
+                Deixe em branco para pausa sem data definida. Os dias parados são somados na validade automaticamente.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setPauseTarget(null)}>Cancelar</Button>
+              <Button
+                disabled={pausingId === pauseTarget?.id}
+                onClick={async () => {
+                  const student = pauseTarget;
+                  const startISO = /^\d{4}-\d{2}-\d{2}$/.test(pauseStart) ? pauseStart : pauseToday();
+                  setPauseTarget(null);
+                  await doPause(student, startISO, pauseUntil);
+                }}
+              >
+                {pausingId === pauseTarget?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Pausar plano"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
+
       {/* Dialog editar detalhes */}
       {editDialog && (
         <Dialog open={!!editDialog} onOpenChange={() => setEditDialog(null)}>
