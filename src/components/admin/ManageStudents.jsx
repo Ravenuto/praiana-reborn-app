@@ -510,6 +510,29 @@ export default function ManageStudents() {
     setPauseTarget(student);
   };
 
+  // Retorno automático: se a previsão de retorno já chegou, retoma sozinho.
+  const autoResumedRef = useRef(new Set());
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const due = (users || []).filter((u) => {
+      const d = { ...(u || {}), ...(u?.data || {}) };
+      return d.plan_paused === true && d.plan_pause_until && String(d.plan_pause_until).slice(0, 10) <= today
+        && !autoResumedRef.current.has(u.id);
+    });
+    if (!due.length) return;
+    (async () => {
+      for (const u of due) {
+        autoResumedRef.current.add(u.id);
+        // eslint-disable-next-line no-await-in-loop
+        await doResume(u, { silent: true });
+      }
+      toast.success(`Plano retomado automaticamente para ${due.length} aluna(s).`);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users]);
+
+
+
 
   const handleSaveEdit = async () => {
     if (!editDialog) return;
