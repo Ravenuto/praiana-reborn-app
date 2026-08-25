@@ -57,11 +57,12 @@ export default function Plans() {
               <article
                 key={plan.id}
                 style={{ animationDelay: `${i * 120}ms` }}
-                className={`reveal relative rounded-3xl p-6 flex flex-col gap-4 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1 border-2 ${
+                className={`reveal relative rounded-3xl p-6 flex flex-col gap-4 bg-card transition-all duration-500 hover:-translate-y-1 shadow-[0_24px_50px_-22px_hsl(var(--primary)/0.30),0_2px_4px_hsl(var(--primary)/0.06)] ${
                   plan.highlight
-                    ? "bg-card/85 border-primary ring-1 ring-primary/20 shadow-[0_20px_50px_-25px_hsl(var(--primary)/0.25)]"
-                    : "bg-card/85 border-transparent ring-1 ring-primary/10 shadow-[0_20px_50px_-25px_hsl(var(--primary)/0.25)]"
+                    ? "border-2 border-accent"
+                    : "border border-border/60"
                 }`}
+
               >
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
