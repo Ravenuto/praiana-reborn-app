@@ -96,7 +96,7 @@ export default function Login() {
                 key={key}
                 type="button"
                 onClick={() => { setMode(key); setError(""); setInfo(""); }}
-                className={`flex items-center justify-center gap-0.5 rounded-full px-1 py-2 text-[9px] sm:text-[10px] font-semibold tracking-wide transition-colors whitespace-nowrap leading-none ${
+                className={`flex items-center justify-center gap-0.5 rounded-full px-0.5 py-1.5 text-[8px] sm:text-[9px] font-semibold tracking-wide transition-colors whitespace-nowrap leading-none ${
                   mode === key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
