@@ -11,10 +11,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pencil, Plus, Star, Trash2, Loader2, CheckCircle2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { DURATION_PRESETS, DEFAULT_DURATION_DAYS, getDurationDays, durationLabel } from "@/lib/planDuration";
+import { DURATION_PRESETS, DEFAULT_DURATION_DAYS, getDurationDays, durationLabel, installmentsFromDays, getInstallments, priceMain, priceTotalLabel, perClassLabel } from "@/lib/planDuration";
 
 const EMPTY = {
-  label: "", price_value: 0, credits: 1, duration_days: DEFAULT_DURATION_DAYS,
+  label: "", price_value: 0, credits: 1, duration_days: DEFAULT_DURATION_DAYS, installments: 1,
   highlight: false, is_active: true, benefits: [""],
 };
 
@@ -74,7 +74,7 @@ export default function ManagePlansAdmin() {
   const autoKey = (label) => label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
 
   const openNew = () => setDialog({ form: { ...EMPTY, benefits: [""] } });
-  const openEdit = (plan) => setDialog({ plan, form: { ...plan, key: plan.key || "", duration_days: getDurationDays(plan), benefits: plan.benefits?.length ? [...plan.benefits] : [""] } });
+  const openEdit = (plan) => setDialog({ plan, form: { ...plan, key: plan.key || "", duration_days: getDurationDays(plan), installments: getInstallments(plan), benefits: plan.benefits?.length ? [...plan.benefits] : [""] } });
   const closeDialog = () => setDialog(null);
 
   const setField = (field, value) =>
@@ -104,12 +104,13 @@ export default function ManagePlansAdmin() {
     // Calcula campos derivados automaticamente
     const credits = Number(form.credits) || 1;
     const priceValue = Number(form.price_value) || 0;
-    const perClassValue = credits > 0 ? (priceValue / credits).toFixed(2).replace(".", ",") : priceValue.toFixed(2).replace(".", ",");
-    const per_class = credits === 1 ? "por aula" : `R$ ${perClassValue}/aula`;
-    const price = `R$ ${String(priceValue).replace(".", ",")}`;
     const key = form.key || autoKey(form.label) || `plano_${Date.now()}`;
     const duration_days = Math.max(1, Number(form.duration_days) || DEFAULT_DURATION_DAYS);
-    const data = { ...form, key, price, price_value: priceValue, per_class, credits, duration_days, benefits: form.benefits.filter(Boolean) };
+    const installments = Math.max(1, Number(form.installments) || installmentsFromDays(duration_days));
+    const per_class = perClassLabel(priceValue, credits);
+    const price = priceMain(priceValue, installments);
+    const price_total_label = priceTotalLabel(priceValue, installments);
+    const data = { ...form, key, price, price_value: priceValue, per_class, credits, duration_days, installments, price_total_label, benefits: form.benefits.filter(Boolean) };
     if (plan?.id) {
       await base44.entities.StudioPlan.update(plan.id, data);
       toast.success("Plano atualizado!");
@@ -193,8 +194,11 @@ export default function ManagePlansAdmin() {
                               </button>
                               <div>
                                 <p className="font-heading text-lg font-bold">{plan.label}</p>
-                                <p className="text-2xl font-bold text-primary font-heading">{plan.price}</p>
-                                <p className="text-xs text-muted-foreground">{plan.per_class}</p>
+                                <p className="text-2xl font-bold text-primary font-heading">{priceMain(plan.price_value, getInstallments(plan))}</p>
+                                {priceTotalLabel(plan.price_value, getInstallments(plan)) && (
+                                  <p className="text-xs text-muted-foreground">{priceTotalLabel(plan.price_value, getInstallments(plan))}</p>
+                                )}
+                                <p className="text-xs text-muted-foreground">{perClassLabel(plan.price_value, plan.credits)}</p>
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
@@ -253,7 +257,7 @@ export default function ManagePlansAdmin() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs mb-1 block">Preço (R$) *</Label>
+                  <Label className="text-xs mb-1 block">Preço total do plano (R$) *</Label>
                   <div className="relative">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
                     <Input
@@ -273,13 +277,8 @@ export default function ManagePlansAdmin() {
               {/* Preview automático do preço por aula */}
               {dialog.form.price_value > 0 && dialog.form.credits >= 1 && (
                 <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
-                  Preço por aula calculado automaticamente:{" "}
-                  <strong>
-                    {dialog.form.credits == 1
-                      ? "por aula"
-                      : `R$ ${(Number(dialog.form.price_value) / Number(dialog.form.credits)).toFixed(2).replace(".", ",")}/aula`
-                    }
-                  </strong>
+                  Preço por aula (considerando todas as aulas do período):{" "}
+                  <strong>{perClassLabel(dialog.form.price_value, dialog.form.credits)}</strong>
                 </p>
               )}
 
@@ -293,7 +292,7 @@ export default function ManagePlansAdmin() {
                       size="sm"
                       variant={Number(dialog.form.duration_days) === p.value ? "default" : "outline"}
                       className="h-7 text-xs rounded-full"
-                      onClick={() => setField("duration_days", p.value)}
+                      onClick={() => setDialog((d) => ({ ...d, form: { ...d.form, duration_days: p.value, installments: installmentsFromDays(p.value) } }))}
                     >
                       {p.label}
                     </Button>
@@ -312,13 +311,39 @@ export default function ManagePlansAdmin() {
                   <Input
                     type="number" min={1}
                     value={dialog.form.duration_days ?? DEFAULT_DURATION_DAYS}
-                    onChange={(e) => setField("duration_days", Number(e.target.value))}
+                    onChange={(e) => setDialog((d) => {
+                      const days = Number(e.target.value);
+                      return { ...d, form: { ...d.form, duration_days: days, installments: installmentsFromDays(days) } };
+                    })}
                     className="h-8 text-sm w-24"
                   />
                   <span className="text-xs text-muted-foreground">
                     dias de validade ({durationLabel(dialog.form.duration_days)})
                   </span>
                 </div>
+              </div>
+
+              <div>
+                <Label className="text-xs mb-1 block">Parcelamento</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number" min={1} max={24}
+                    value={dialog.form.installments ?? installmentsFromDays(dialog.form.duration_days)}
+                    onChange={(e) => setField("installments", Number(e.target.value))}
+                    className="h-8 text-sm w-20"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    parcelas (preenchido automaticamente pela duração)
+                  </span>
+                </div>
+                {Number(dialog.form.price_value) > 0 && (
+                  <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mt-2">
+                    No cartão do plano vai aparecer:{" "}
+                    <strong>{priceMain(dialog.form.price_value, dialog.form.installments || installmentsFromDays(dialog.form.duration_days))}</strong>
+                    {priceTotalLabel(dialog.form.price_value, dialog.form.installments || installmentsFromDays(dialog.form.duration_days)) &&
+                      ` · ${priceTotalLabel(dialog.form.price_value, dialog.form.installments || installmentsFromDays(dialog.form.duration_days))}`}
+                  </p>
+                )}
               </div>
 
 

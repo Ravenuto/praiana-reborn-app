@@ -47,3 +47,46 @@ export function daysLeft(endDate) {
   today.setHours(12, 0, 0, 0);
   return Math.round((end - today) / 86400000);
 }
+
+// ---- Parcelamento ----
+
+// Nº de parcelas sugerido pela duração (30 dias = 1x, 90 = 3x, 180 = 6x, 365 = 12x)
+export function installmentsFromDays(days) {
+  const d = Number(days) || DEFAULT_DURATION_DAYS;
+  return Math.max(1, Math.round(d / 30));
+}
+
+export function formatBRL(value) {
+  const n = Number(value) || 0;
+  return `R$ ${n.toFixed(2).replace(".", ",").replace(/,00$/, "")}`;
+}
+
+// Nº de parcelas do plano (respeita installments salvo, senão deriva da duração)
+export function getInstallments(plan) {
+  const n = Number(plan?.installments);
+  if (Number.isFinite(n) && n > 0) return n;
+  return installmentsFromDays(getDurationDays(plan));
+}
+
+// Texto principal do preço: "6x de R$ 300" ou "R$ 250"
+export function priceMain(priceValue, installments) {
+  const n = Math.max(1, Number(installments) || 1);
+  const total = Number(priceValue) || 0;
+  if (n <= 1) return formatBRL(total);
+  return `${n}x de ${formatBRL(total / n)}`;
+}
+
+// Texto secundário: "Total R$ 1.800" (vazio quando à vista)
+export function priceTotalLabel(priceValue, installments) {
+  const n = Math.max(1, Number(installments) || 1);
+  if (n <= 1) return "";
+  return `Total ${formatBRL(priceValue)}`;
+}
+
+// "R$ 62,50/aula" considerando todas as aulas do período
+export function perClassLabel(priceValue, credits) {
+  const c = Number(credits) || 1;
+  const total = Number(priceValue) || 0;
+  if (c <= 1) return "por aula";
+  return `${formatBRL(total / c)}/aula`;
+}
