@@ -7,10 +7,6 @@ export const ADMIN_NOTIF_TYPES = [
   { type: "booking_made", label: "Novas reservas", description: "Quando uma aluna reserva uma aula" },
   { type: "booking_cancelled", label: "Cancelamentos", description: "Quando uma aluna cancela uma reserva" },
   { type: "waitlist_promoted", label: "Fila de espera", description: "Quando alguém entra na aula pela fila de espera" },
-  { type: "like", label: "Curtidas", description: "Curtidas em posts e recados" },
-  { type: "comment", label: "Comentários", description: "Comentários em posts e recados" },
-  { type: "new_post", label: "Novas publicações", description: "Quando uma aluna publica no feed" },
-  { type: "credits_added", label: "Pagamentos e créditos", description: "Confirmações de pagamento e créditos" },
 ];
 
 export const DEFAULT_PREFS = ADMIN_NOTIF_TYPES.reduce((acc, t) => ({ ...acc, [t.type]: true }), {});
