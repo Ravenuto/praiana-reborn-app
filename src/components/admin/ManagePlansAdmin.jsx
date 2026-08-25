@@ -316,13 +316,39 @@ export default function ManagePlansAdmin() {
                   <Input
                     type="number" min={1}
                     value={dialog.form.duration_days ?? DEFAULT_DURATION_DAYS}
-                    onChange={(e) => setField("duration_days", Number(e.target.value))}
+                    onChange={(e) => setDialog((d) => {
+                      const days = Number(e.target.value);
+                      return { ...d, form: { ...d.form, duration_days: days, installments: installmentsFromDays(days) } };
+                    })}
                     className="h-8 text-sm w-24"
                   />
                   <span className="text-xs text-muted-foreground">
                     dias de validade ({durationLabel(dialog.form.duration_days)})
                   </span>
                 </div>
+              </div>
+
+              <div>
+                <Label className="text-xs mb-1 block">Parcelamento</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number" min={1} max={24}
+                    value={dialog.form.installments ?? installmentsFromDays(dialog.form.duration_days)}
+                    onChange={(e) => setField("installments", Number(e.target.value))}
+                    className="h-8 text-sm w-20"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    parcelas (preenchido automaticamente pela duração)
+                  </span>
+                </div>
+                {Number(dialog.form.price_value) > 0 && (
+                  <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mt-2">
+                    No cartão do plano vai aparecer:{" "}
+                    <strong>{priceMain(dialog.form.price_value, dialog.form.installments || installmentsFromDays(dialog.form.duration_days))}</strong>
+                    {priceTotalLabel(dialog.form.price_value, dialog.form.installments || installmentsFromDays(dialog.form.duration_days)) &&
+                      ` · ${priceTotalLabel(dialog.form.price_value, dialog.form.installments || installmentsFromDays(dialog.form.duration_days))}`}
+                  </p>
+                )}
               </div>
 
 
