@@ -277,13 +277,8 @@ export default function ManagePlansAdmin() {
               {/* Preview automático do preço por aula */}
               {dialog.form.price_value > 0 && dialog.form.credits >= 1 && (
                 <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
-                  Preço por aula calculado automaticamente:{" "}
-                  <strong>
-                    {dialog.form.credits == 1
-                      ? "por aula"
-                      : `R$ ${(Number(dialog.form.price_value) / Number(dialog.form.credits)).toFixed(2).replace(".", ",")}/aula`
-                    }
-                  </strong>
+                  Preço por aula (considerando todas as aulas do período):{" "}
+                  <strong>{perClassLabel(dialog.form.price_value, dialog.form.credits)}</strong>
                 </p>
               )}
 
