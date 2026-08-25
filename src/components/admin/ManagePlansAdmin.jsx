@@ -194,8 +194,11 @@ export default function ManagePlansAdmin() {
                               </button>
                               <div>
                                 <p className="font-heading text-lg font-bold">{plan.label}</p>
-                                <p className="text-2xl font-bold text-primary font-heading">{plan.price}</p>
-                                <p className="text-xs text-muted-foreground">{plan.per_class}</p>
+                                <p className="text-2xl font-bold text-primary font-heading">{priceMain(plan.price_value, getInstallments(plan))}</p>
+                                {priceTotalLabel(plan.price_value, getInstallments(plan)) && (
+                                  <p className="text-xs text-muted-foreground">{priceTotalLabel(plan.price_value, getInstallments(plan))}</p>
+                                )}
+                                <p className="text-xs text-muted-foreground">{perClassLabel(plan.price_value, plan.credits)}</p>
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
