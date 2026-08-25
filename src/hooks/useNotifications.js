@@ -19,7 +19,9 @@ export async function createNotification({ user_email, type, title, message, lin
     const target = users?.[0];
     if (target && (target.is_admin || target.role === "admin")) {
       const prefs = await getAdminNotifPrefs();
-      if (type in prefs && prefs[type] === false) return;
+      // Só aplica filtro para os tipos configuráveis no admin
+      const configurable = ADMIN_NOTIF_TYPES.map((t) => t.type);
+      if (configurable.includes(type) && prefs[type] === false) return;
     }
   } catch { /* noop */ }
   await base44.entities.Notification.create({ user_email, type, title, message, link, actor_name, read: false });
