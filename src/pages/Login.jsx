@@ -96,14 +96,14 @@ export default function Login() {
                 key={key}
                 type="button"
                 onClick={() => { setMode(key); setError(""); setInfo(""); }}
-                className={`flex items-center justify-center gap-1 rounded-full px-1.5 py-2 text-[10px] font-semibold tracking-wide transition-colors ${
+                className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-2 py-2 text-[10px] sm:text-[11px] font-semibold tracking-wide transition-colors text-center leading-none ${
                   mode === key
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="h-3.5 w-3.5 shrink-0" />
-                {label}
+                <span className="whitespace-nowrap">{label}</span>
               </button>
             ))}
           </div>
