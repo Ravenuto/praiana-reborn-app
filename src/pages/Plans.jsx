@@ -71,31 +71,31 @@ export default function Plans() {
                   </div>
                 )}
                 <div>
-                  <p className={`eyebrow ${plan.highlight ? "!text-primary-foreground/70" : ""}`}>{plan.label}</p>
-                  <p className={`font-heading italic text-4xl mt-2 ${plan.highlight ? "text-accent" : "text-primary"}`}>
+                  <p className="eyebrow">{plan.label}</p>
+                  <p className="font-heading italic text-4xl mt-2 text-primary">
                     {priceMain(plan.price_value, getInstallments(plan))}
                   </p>
                   {priceTotalLabel(plan.price_value, getInstallments(plan)) && (
-                    <p className={`text-xs mt-1 ${plan.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                    <p className="text-xs mt-1 text-muted-foreground">
                       {priceTotalLabel(plan.price_value, getInstallments(plan))}
                     </p>
                   )}
-                  <p className={`text-xs mt-1 ${plan.highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                  <p className="text-xs mt-1 text-muted-foreground">
                     {perClassLabel(plan.price_value, plan.credits)} · {durationShort(getDurationDays(plan))}
                   </p>
                 </div>
                 {plan.benefits?.length > 0 && (
                   <ul className="space-y-2 flex-1">
                     {plan.benefits.map((b, i) => (
-                      <li key={i} className={`flex items-start gap-2 text-sm ${plan.highlight ? "text-primary-foreground/90" : ""}`}>
-                        <CheckCircle2 className={`h-4 w-4 shrink-0 mt-0.5 ${plan.highlight ? "text-accent" : "text-primary"}`} />
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
                         {b}
                       </li>
                     ))}
                   </ul>
                 )}
                 <a href={getWhatsappLink(plan.label)} target="_blank" rel="noopener noreferrer">
-                  <Button className="w-full" variant={plan.highlight ? "gold" : "outline"}>
+                  <Button className="w-full" variant="outline">
                     <MessageCircle className="h-4 w-4" /> Quero este plano
                   </Button>
                 </a>
