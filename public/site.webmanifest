@@ -1,0 +1,12 @@
+{
+  "name": "Studio Praiana Pole Dance",
+  "short_name": "Praiana",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf7ee",
+  "theme_color": "#1268c4",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
