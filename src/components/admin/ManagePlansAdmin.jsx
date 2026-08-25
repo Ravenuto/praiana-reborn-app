@@ -257,7 +257,7 @@ export default function ManagePlansAdmin() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs mb-1 block">Preço (R$) *</Label>
+                  <Label className="text-xs mb-1 block">Preço total do plano (R$) *</Label>
                   <div className="relative">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
                     <Input
