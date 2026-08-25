@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import RaissaBlobs from "@/components/shared/RaissaBlobs";
 import SectionHeader from "@/components/shared/SectionHeader";
 import useReveal from "@/hooks/useReveal";
-import { durationShort, getDurationDays } from "@/lib/planDuration";
+import { durationShort, getDurationDays, getInstallments, priceMain, priceTotalLabel, perClassLabel } from "@/lib/planDuration";
 
 const WHATSAPP_NUMBER = "5521999999999";
 
