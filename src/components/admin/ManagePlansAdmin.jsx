@@ -173,9 +173,10 @@ export default function ManagePlansAdmin() {
                         <div
                           ref={dragProvided.innerRef}
                           {...dragProvided.draggableProps}
-                          className={`rounded-xl border-2 p-5 relative flex flex-col gap-3 ${
-                            plan.highlight ? "border-primary bg-card" : "border-border bg-card"
+                          className={`rounded-xl p-5 relative flex flex-col gap-3 bg-card shadow-[0_24px_50px_-22px_hsl(var(--primary)/0.30),0_2px_4px_hsl(var(--primary)/0.06)] ${
+                            plan.highlight ? "border-2 border-accent" : "border border-border/60"
                           } ${!plan.is_active ? "opacity-50" : ""} ${snapshot.isDragging ? "shadow-lg ring-2 ring-primary/40" : ""}`}
+
                         >
                           {plan.highlight && (
                             <span className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
