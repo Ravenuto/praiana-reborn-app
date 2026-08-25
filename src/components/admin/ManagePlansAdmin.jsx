@@ -104,12 +104,13 @@ export default function ManagePlansAdmin() {
     // Calcula campos derivados automaticamente
     const credits = Number(form.credits) || 1;
     const priceValue = Number(form.price_value) || 0;
-    const perClassValue = credits > 0 ? (priceValue / credits).toFixed(2).replace(".", ",") : priceValue.toFixed(2).replace(".", ",");
-    const per_class = credits === 1 ? "por aula" : `R$ ${perClassValue}/aula`;
-    const price = `R$ ${String(priceValue).replace(".", ",")}`;
     const key = form.key || autoKey(form.label) || `plano_${Date.now()}`;
     const duration_days = Math.max(1, Number(form.duration_days) || DEFAULT_DURATION_DAYS);
-    const data = { ...form, key, price, price_value: priceValue, per_class, credits, duration_days, benefits: form.benefits.filter(Boolean) };
+    const installments = Math.max(1, Number(form.installments) || installmentsFromDays(duration_days));
+    const per_class = perClassLabel(priceValue, credits);
+    const price = priceMain(priceValue, installments);
+    const price_total_label = priceTotalLabel(priceValue, installments);
+    const data = { ...form, key, price, price_value: priceValue, per_class, credits, duration_days, installments, price_total_label, benefits: form.benefits.filter(Boolean) };
     if (plan?.id) {
       await base44.entities.StudioPlan.update(plan.id, data);
       toast.success("Plano atualizado!");
