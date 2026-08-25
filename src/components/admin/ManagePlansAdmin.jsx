@@ -173,8 +173,8 @@ export default function ManagePlansAdmin() {
                         <div
                           ref={dragProvided.innerRef}
                           {...dragProvided.draggableProps}
-                          className={`rounded-xl p-5 relative flex flex-col gap-3 bg-card shadow-[0_24px_50px_-22px_hsl(var(--primary)/0.30),0_2px_4px_hsl(var(--primary)/0.06)] ${
-                            plan.highlight ? "border-2 border-accent" : "border border-border/60"
+                          className={`rounded-xl p-5 relative flex flex-col gap-3 bg-card shadow-[0_24px_50px_-22px_hsl(var(--primary)/0.30),0_2px_4px_hsl(var(--primary)/0.06)] dark:bg-gradient-to-b dark:from-[hsl(212_46%_18%)] dark:to-[hsl(212_50%_15%)] dark:shadow-[0_26px_55px_-24px_hsl(var(--primary)/0.45),inset_0_1px_0_hsl(0_0%_100%/0.08)] ${
+                            plan.highlight ? "border-2 border-accent" : "border border-border/60 dark:border-[hsl(205_40%_34%)]"
                           } ${!plan.is_active ? "opacity-50" : ""} ${snapshot.isDragging ? "shadow-lg ring-2 ring-primary/40" : ""}`}
 
                         >
