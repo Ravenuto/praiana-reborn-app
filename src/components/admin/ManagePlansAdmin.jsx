@@ -297,7 +297,7 @@ export default function ManagePlansAdmin() {
                       size="sm"
                       variant={Number(dialog.form.duration_days) === p.value ? "default" : "outline"}
                       className="h-7 text-xs rounded-full"
-                      onClick={() => setField("duration_days", p.value)}
+                      onClick={() => setDialog((d) => ({ ...d, form: { ...d.form, duration_days: p.value, installments: installmentsFromDays(p.value) } }))}
                     >
                       {p.label}
                     </Button>
