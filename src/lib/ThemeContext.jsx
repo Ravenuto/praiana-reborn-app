@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem("raissa-theme") || "light");
+  const [theme, setTheme] = useState(() => localStorage.getItem("raissa-theme") || "dark");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -15,17 +15,6 @@ export function ThemeProvider({ children }) {
     localStorage.setItem("raissa-theme", theme);
   }, [theme]);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => {
-      const stored = localStorage.getItem("raissa-theme");
-      if (!stored) {
-        setTheme(mediaQuery.matches ? "dark" : "light");
-      }
-    };
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [setTheme]);
 
   const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
