@@ -268,9 +268,14 @@ export default function ManageStudents() {
   };
 
   const handleRemoveTeacher = async (teacher) => {
+    const alsoAdmin = teacher.role === "admin" || teacher.is_admin === true;
     if (!window.confirm(`Remover o acesso de professora de ${teacher.full_name || teacher.email}?`)) return;
     try {
-      await base44.entities.User.delete(teacher.id);
+      if (alsoAdmin) {
+        await base44.entities.User.update(teacher.id, { role: "admin", is_admin: true, is_teacher: false });
+      } else {
+        await base44.entities.User.delete(teacher.id);
+      }
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["teachersList"] });
       toast.success("Professora removida.");
