@@ -966,7 +966,14 @@ export default function ManageStudents() {
             {teachers.map((t) => (
               <div key={t.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{t.full_name || "—"}</p>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="text-sm font-medium truncate">{t.full_name || "—"}</p>
+                    {(t.role === "admin" || t.is_admin === true) && (
+                      <span className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-muted-foreground">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate">{t.email}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
