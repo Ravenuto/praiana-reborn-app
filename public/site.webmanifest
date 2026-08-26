@@ -3,7 +3,7 @@
   "short_name": "Praiana",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0F172A",
+  "background_color": "#000000",
   "theme_color": "#1268c4",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
