@@ -1,19 +1,20 @@
-# Ícone do iPhone: só a bolinha, sem moldura
+# Ícone do iPhone/Android: logo completa com fundo preto
 
-## O que acontece hoje
+Usar a imagem enviada (logo completa "Praiana Pole Dance" sobre fundo preto) como ícone do app na tela inicial.
 
-O iOS não aceita ícone transparente: ele sempre desenha um quadrado com cantos arredondados. Se a imagem tem transparência, o sistema preenche com branco (era o problema anterior). Hoje o ícone está com um quadrado escuro (#0F172A) em volta da bolinha.
+## O que muda
 
-## Solução proposta
+- Gerar `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png` e `favicon.png` a partir da imagem enviada, em quadrado cheio, com o fundo preto original — sem transparência, então o iOS não aplica mais o branco.
+- Manter a logo centralizada e ocupando o quadrado como na imagem.
+- Ajustar `background_color` do `site.webmanifest` para preto (`#000000`), combinando com o ícone na splash screen.
 
-Ampliar a logo circular para ocupar 100% do quadrado, encostando nas bordas. Assim o recorte arredondado do iOS corta exatamente a bolinha e o resultado visual é só a logo redonda, sem moldura aparente.
+## Observação
 
-- Regenerar `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png` e `favicon.png` com a bolinha em sangria total (sem margem).
-- Como o iOS recorta um pouco as bordas, o desenho interno da logo continua centralizado e com folga natural do próprio círculo.
-- Ajustar `background_color` do `site.webmanifest` para casar com a cor predominante da logo (evita flash escuro na splash).
+Como a arte tem o nome escrito, em tamanhos pequenos (favicon da aba do navegador) o texto fica pouco legível. Se preferir, posso manter na aba do navegador só a bolinha do pôr do sol e usar a arte completa apenas no ícone da tela inicial — é só avisar.
 
 ## Detalhes técnicos
 
-- Fonte: logo oficial `praiana-logo-v5.png`.
-- ImageMagick: recorte exato do círculo + `-resize` para 100% da tela do ícone, sem `-extent` com padding.
-- Nenhuma mudança em telas ou lógica do app.
+- Fonte: `user-uploads://652EC485-969F-48D1-B481-A36F9D598585_1_105_c.jpeg`.
+- ImageMagick: resize quadrado nos tamanhos alvo, sem alpha (fundo preto sólido).
+- `src/routes/__root.tsx` já referencia esses arquivos — sem mudança.
+- Nenhuma alteração em telas ou lógica do app.
