@@ -100,7 +100,7 @@ export default function ManageStudents() {
 
   const students = users.filter((u) => u.role !== "admin" && u.role !== "teacher" && u.is_teacher !== true);
   const admins = users.filter((u) => u.role === "admin" || u.is_admin === true);
-  const teachers = users.filter((u) => (u.role === "teacher" || u.is_teacher === true) && u.role !== "admin");
+  const teachers = users.filter((u) => u.role === "teacher" || u.is_teacher === true);
 
   const filtered = students.filter((s) => {
     const q = search.toLowerCase();
@@ -268,9 +268,14 @@ export default function ManageStudents() {
   };
 
   const handleRemoveTeacher = async (teacher) => {
+    const alsoAdmin = teacher.role === "admin" || teacher.is_admin === true;
     if (!window.confirm(`Remover o acesso de professora de ${teacher.full_name || teacher.email}?`)) return;
     try {
-      await base44.entities.User.delete(teacher.id);
+      if (alsoAdmin) {
+        await base44.entities.User.update(teacher.id, { role: "admin", is_admin: true, is_teacher: false });
+      } else {
+        await base44.entities.User.delete(teacher.id);
+      }
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["teachersList"] });
       toast.success("Professora removida.");
@@ -961,7 +966,14 @@ export default function ManageStudents() {
             {teachers.map((t) => (
               <div key={t.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{t.full_name || "—"}</p>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="text-sm font-medium truncate">{t.full_name || "—"}</p>
+                    {(t.role === "admin" || t.is_admin === true) && (
+                      <span className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-muted-foreground">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground truncate">{t.email}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
