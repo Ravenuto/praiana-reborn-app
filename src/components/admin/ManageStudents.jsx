@@ -100,7 +100,7 @@ export default function ManageStudents() {
 
   const students = users.filter((u) => u.role !== "admin" && u.role !== "teacher" && u.is_teacher !== true);
   const admins = users.filter((u) => u.role === "admin" || u.is_admin === true);
-  const teachers = users.filter((u) => (u.role === "teacher" || u.is_teacher === true) && u.role !== "admin");
+  const teachers = users.filter((u) => u.role === "teacher" || u.is_teacher === true);
 
   const filtered = students.filter((s) => {
     const q = search.toLowerCase();
