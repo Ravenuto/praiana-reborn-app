@@ -198,6 +198,7 @@ export default function ManageSiteContent() {
     cancelHours: SETTINGS_DEFAULTS.cancel_min_hours,
     lateMinutes: SETTINGS_DEFAULTS.late_tolerance_minutes,
   });
+  const [blocks, setBlocks] = useState(DEFAULT_RULE_BLOCKS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState("");
