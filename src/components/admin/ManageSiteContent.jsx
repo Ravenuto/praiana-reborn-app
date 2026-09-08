@@ -4,7 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, RotateCcw, ImagePlus, X, ChevronDown, Eye } from "lucide-react";
+import {
+  Save,
+  Loader2,
+  RotateCcw,
+  ImagePlus,
+  X,
+  ChevronDown,
+  Eye,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import {
   CONTENT_GROUPS,
   CONTENT_DEFAULTS,
