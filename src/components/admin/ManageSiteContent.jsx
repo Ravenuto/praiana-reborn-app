@@ -154,23 +154,20 @@ function SectionPreview({ preview, v, numbers }) {
     case "rules_block":
       return (
         <div className="space-y-2 text-xs">
-          {[
-            [
-              v.content_rules_booking_title,
-              [v.content_rules_booking_text, v.content_rules_cancel_text],
-            ],
-            [v.content_rules_late_title, [v.content_rules_late_text]],
-            [v.content_rules_credits_title, [v.content_rules_credits_text]],
-            [v.content_rules_waitlist_title, [v.content_rules_waitlist_text]],
-            [v.content_rules_holidays_title, [v.content_rules_holidays_text]],
-          ].map(([title, texts], i) => (
-            <div key={i} className="rounded-lg bg-muted/50 p-2.5">
-              <p className="font-medium text-foreground">{title}</p>
-              {texts.map((t, j) => (
-                <p key={j} className="text-muted-foreground">
-                  {fillPlaceholders(t, numbers)}
-                </p>
-              ))}
+          <p className="font-heading text-sm font-semibold text-foreground">
+            {v.content_rules_title}
+          </p>
+          {(blocks || []).map((b, i) => (
+            <div key={b.id || i} className="rounded-lg bg-muted/50 p-2.5">
+              <p className="font-medium text-foreground">{b.title}</p>
+              {String(b.text || "")
+                .split("\n")
+                .filter((t) => t.trim())
+                .map((t, j) => (
+                  <p key={j} className="text-muted-foreground">
+                    {fillPlaceholders(t, numbers)}
+                  </p>
+                ))}
             </div>
           ))}
         </div>
@@ -179,6 +176,7 @@ function SectionPreview({ preview, v, numbers }) {
       return null;
   }
 }
+
 
 /* ---------------- Editor ---------------- */
 
