@@ -5,7 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Save, Loader2, RotateCcw, ImagePlus, X, ChevronDown, Eye } from "lucide-react";
-import { CONTENT_GROUPS, CONTENT_DEFAULTS, clearContentCache } from "@/lib/siteContent";
+import {
+  CONTENT_GROUPS,
+  CONTENT_DEFAULTS,
+  clearContentCache,
+  getRuleBlocks,
+  serializeRuleBlocks,
+  DEFAULT_RULE_BLOCKS,
+} from "@/lib/siteContent";
 import { getStudioSettings, DEFAULTS as SETTINGS_DEFAULTS } from "@/lib/studioSettings";
 import { fillPlaceholders } from "@/lib/siteContent";
 import praianaLogo from "@/assets/praiana-logo.png.asset.json";
