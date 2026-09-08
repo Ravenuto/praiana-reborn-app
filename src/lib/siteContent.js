@@ -378,7 +378,11 @@ export const DEFAULT_RULE_BLOCKS = [
 
 /** Chaves antigas (uma por regra) — mantidas para não perder textos já salvos. */
 export const LEGACY_RULE_KEYS = {
-  booking: ["content_rules_booking_title", "content_rules_booking_text", "content_rules_cancel_text"],
+  booking: [
+    "content_rules_booking_title",
+    "content_rules_booking_text",
+    "content_rules_cancel_text",
+  ],
   late: ["content_rules_late_title", "content_rules_late_text"],
   credits: ["content_rules_credits_title", "content_rules_credits_text"],
   waitlist: ["content_rules_waitlist_title", "content_rules_waitlist_text"],
@@ -436,7 +440,10 @@ export function getRuleBlocks(content = {}) {
   return DEFAULT_RULE_BLOCKS.map((b) => {
     const keys = LEGACY_RULE_KEYS[b.id] || [];
     const title = content[keys[0]] || b.title;
-    const texts = keys.slice(1).map((k) => content[k]).filter(Boolean);
+    const texts = keys
+      .slice(1)
+      .map((k) => content[k])
+      .filter(Boolean);
     return { id: b.id, title, text: texts.length ? texts.join("\n") : b.text };
   });
 }
@@ -446,7 +453,6 @@ export function serializeRuleBlocks(blocks) {
     (blocks || []).map((b) => ({ id: b.id, title: b.title || "", text: b.text || "" })),
   );
 }
-
 
 /** Substitui os marcadores {horas_marcar}, {horas_cancelar} e {minutos_tolerancia}. */
 export function fillPlaceholders(text, { bookingHours, cancelHours, lateMinutes } = {}) {
