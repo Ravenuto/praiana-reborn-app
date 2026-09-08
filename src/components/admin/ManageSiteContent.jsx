@@ -4,8 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Save, Loader2, RotateCcw, ImagePlus, X, ChevronDown, Eye } from "lucide-react";
-import { CONTENT_GROUPS, CONTENT_DEFAULTS, clearContentCache } from "@/lib/siteContent";
+import {
+  Save,
+  Loader2,
+  RotateCcw,
+  ImagePlus,
+  X,
+  ChevronDown,
+  Eye,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
+import {
+  CONTENT_GROUPS,
+  CONTENT_DEFAULTS,
+  clearContentCache,
+  getRuleBlocks,
+  serializeRuleBlocks,
+  DEFAULT_RULE_BLOCKS,
+} from "@/lib/siteContent";
 import { getStudioSettings, DEFAULTS as SETTINGS_DEFAULTS } from "@/lib/studioSettings";
 import { fillPlaceholders } from "@/lib/siteContent";
 import praianaLogo from "@/assets/praiana-logo.png.asset.json";
@@ -24,7 +43,7 @@ function PreviewFrame({ children }) {
   );
 }
 
-function SectionPreview({ preview, v, numbers }) {
+function SectionPreview({ preview, v, numbers, blocks }) {
   const logo = v.content_home_logo || v.content_login_logo || praianaLogo.url;
 
   switch (preview) {
@@ -154,23 +173,20 @@ function SectionPreview({ preview, v, numbers }) {
     case "rules_block":
       return (
         <div className="space-y-2 text-xs">
-          {[
-            [
-              v.content_rules_booking_title,
-              [v.content_rules_booking_text, v.content_rules_cancel_text],
-            ],
-            [v.content_rules_late_title, [v.content_rules_late_text]],
-            [v.content_rules_credits_title, [v.content_rules_credits_text]],
-            [v.content_rules_waitlist_title, [v.content_rules_waitlist_text]],
-            [v.content_rules_holidays_title, [v.content_rules_holidays_text]],
-          ].map(([title, texts], i) => (
-            <div key={i} className="rounded-lg bg-muted/50 p-2.5">
-              <p className="font-medium text-foreground">{title}</p>
-              {texts.map((t, j) => (
-                <p key={j} className="text-muted-foreground">
-                  {fillPlaceholders(t, numbers)}
-                </p>
-              ))}
+          <p className="font-heading text-sm font-semibold text-foreground">
+            {v.content_rules_title}
+          </p>
+          {(blocks || []).map((b, i) => (
+            <div key={b.id || i} className="rounded-lg bg-muted/50 p-2.5">
+              <p className="font-medium text-foreground">{b.title}</p>
+              {String(b.text || "")
+                .split("\n")
+                .filter((t) => t.trim())
+                .map((t, j) => (
+                  <p key={j} className="text-muted-foreground">
+                    {fillPlaceholders(t, numbers)}
+                  </p>
+                ))}
             </div>
           ))}
         </div>
@@ -179,6 +195,7 @@ function SectionPreview({ preview, v, numbers }) {
       return null;
   }
 }
+
 
 /* ---------------- Editor ---------------- */
 
@@ -193,6 +210,7 @@ export default function ManageSiteContent() {
     cancelHours: SETTINGS_DEFAULTS.cancel_min_hours,
     lateMinutes: SETTINGS_DEFAULTS.late_tolerance_minutes,
   });
+  const [blocks, setBlocks] = useState(DEFAULT_RULE_BLOCKS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState("");
@@ -211,6 +229,7 @@ export default function ManageSiteContent() {
     });
     setValues(map);
     setSaved(map);
+    setBlocks(getRuleBlocks(map));
     const s = await getStudioSettings({ fresh: true });
     setNumbers({
       bookingHours: s.booking_min_hours,
@@ -229,6 +248,32 @@ export default function ManageSiteContent() {
   );
 
   const setField = (key, value) => setValues((v) => ({ ...v, [key]: value }));
+
+  const applyBlocks = (next) => {
+    setBlocks(next);
+    setField("content_rules_blocks", serializeRuleBlocks(next));
+  };
+
+  const updateBlock = (i, patch) =>
+    applyBlocks(blocks.map((b, idx) => (idx === i ? { ...b, ...patch } : b)));
+
+  const addBlock = () =>
+    applyBlocks([...blocks, { id: `regra_${Date.now()}`, title: "Nova regra", text: "" }]);
+
+  const removeBlock = (i) => {
+    if (!window.confirm(`Retirar a regra "${blocks[i]?.title || ""}"?`)) return;
+    applyBlocks(blocks.filter((_, idx) => idx !== i));
+  };
+
+  const moveBlock = (i, dir) => {
+    const j = i + dir;
+    if (j < 0 || j >= blocks.length) return;
+    const next = [...blocks];
+    [next[i], next[j]] = [next[j], next[i]];
+    applyBlocks(next);
+  };
+
+  const restoreDefaultRules = () => applyBlocks(DEFAULT_RULE_BLOCKS.map((b) => ({ ...b })));
 
   const persist = async (key, value) => {
     const existing = rows.find((r) => r.key === key);
@@ -434,14 +479,101 @@ export default function ManageSiteContent() {
               </div>
             );
           })}
+
+          {current.dynamic === "rules" && (
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <div>
+                <p className="text-sm font-medium">Regras</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Acrescente, edite ou retire regras. Cada linha do texto vira um item da lista.
+                  Você pode usar {"{horas_marcar}"}, {"{horas_cancelar}"} e{" "}
+                  {"{minutos_tolerancia}"} para inserir os números da aba Regras.
+                </p>
+              </div>
+
+              {blocks.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Nenhuma regra. O bloco não vai aparecer no site.
+                </p>
+              )}
+
+              {blocks.map((b, i) => (
+                <div key={b.id || i} className="rounded-xl border border-border/70 p-3 space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      value={b.title}
+                      onChange={(e) => updateBlock(i, { title: e.target.value })}
+                      placeholder="Título da regra"
+                      className="text-sm min-w-0"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => moveBlock(i, -1)}
+                      disabled={i === 0}
+                      className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-muted text-muted-foreground disabled:opacity-40"
+                      aria-label="Subir"
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveBlock(i, 1)}
+                      disabled={i === blocks.length - 1}
+                      className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-muted text-muted-foreground disabled:opacity-40"
+                      aria-label="Descer"
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeBlock(i)}
+                      className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-destructive/10 text-destructive"
+                      aria-label="Retirar regra"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <Textarea
+                    rows={3}
+                    value={b.text}
+                    onChange={(e) => updateBlock(i, { text: e.target.value })}
+                    placeholder="Texto da regra"
+                    className="w-full min-w-0 text-sm"
+                  />
+                </div>
+              ))}
+
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={addBlock} className="gap-2 text-xs">
+                  <Plus className="h-3.5 w-3.5" />
+                  Acrescentar regra
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={restoreDefaultRules}
+                  className="gap-2 text-xs text-muted-foreground"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Restaurar regras padrão
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Prévia */}
         <div className="lg:sticky lg:top-4 min-w-0">
           <PreviewFrame>
-            <SectionPreview preview={activeSection.preview} v={values} numbers={numbers} />
+            <SectionPreview
+              preview={current.dynamic === "rules" ? "rules_block" : activeSection.preview}
+              v={values}
+              numbers={numbers}
+              blocks={blocks}
+            />
           </PreviewFrame>
         </div>
+
       </div>
 
       {/* Barra de salvar */}

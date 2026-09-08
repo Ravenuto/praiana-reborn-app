@@ -326,7 +326,8 @@ export const CONTENT_GROUPS = [
     id: "rules",
     label: "Regras do Estúdio",
     description:
-      "Textos do bloco Regras do Estúdio, que aparece no final da página Sobre. Os números de horas e minutos continuam sendo definidos na aba Regras.",
+      "Textos do bloco Regras do Estúdio, que aparece no final da página Sobre. Você pode acrescentar ou retirar regras. Os números de horas e minutos continuam vindo da aba Regras.",
+    dynamic: "rules",
     sections: [
       {
         id: "rules_header",
@@ -342,129 +343,116 @@ export const CONTENT_GROUPS = [
           },
         ],
       },
-      {
-        id: "rules_booking",
-        label: "Agendamento e cancelamento",
-        hint: "Use {horas_marcar} e {horas_cancelar} para inserir os números da aba Regras.",
-        preview: "rules_block",
-        fields: [
-          {
-            key: "content_rules_booking_title",
-            label: "Título do bloco",
-            type: "text",
-            default: "Agendamento e Cancelamento",
-          },
-          {
-            key: "content_rules_booking_text",
-            label: "Regra de agendamento",
-            type: "textarea",
-            default: "O agendamento deve ser feito com no mínimo {horas_marcar} de antecedência.",
-            help: "{horas_marcar} vira, por exemplo, “4 horas”.",
-          },
-          {
-            key: "content_rules_cancel_text",
-            label: "Regra de cancelamento",
-            type: "textarea",
-            default:
-              "O cancelamento deve ser feito com no mínimo {horas_cancelar} de antecedência. Após esse prazo, o crédito não será devolvido.",
-            help: "{horas_cancelar} vira, por exemplo, “4 horas”.",
-          },
-        ],
-      },
-      {
-        id: "rules_late",
-        label: "Pontualidade",
-        hint: "Use {minutos_tolerancia} para inserir a tolerância definida na aba Regras.",
-        preview: "rules_block",
-        fields: [
-          {
-            key: "content_rules_late_title",
-            label: "Título do bloco",
-            type: "text",
-            default: "Pontualidade",
-          },
-          {
-            key: "content_rules_late_text",
-            label: "Texto",
-            type: "textarea",
-            default:
-              "Tolerância de atraso de até {minutos_tolerancia}. Após esse período não será possível entrar na aula.",
-          },
-        ],
-      },
-      {
-        id: "rules_credits",
-        label: "Créditos",
-        hint: "Validade e uso dos créditos do plano.",
-        preview: "rules_block",
-        fields: [
-          {
-            key: "content_rules_credits_title",
-            label: "Título do bloco",
-            type: "text",
-            default: "Créditos",
-          },
-          {
-            key: "content_rules_credits_text",
-            label: "Texto",
-            type: "textarea",
-            default:
-              "Os créditos têm validade igual à duração do plano contratado (mensal, trimestral, semestral ou anual), contada a partir da data de início. Créditos não utilizados dentro do período não são transferidos.",
-          },
-        ],
-      },
-      {
-        id: "rules_waitlist",
-        label: "Fila de espera",
-        hint: "Como funciona a fila quando a turma está cheia.",
-        preview: "rules_block",
-        fields: [
-          {
-            key: "content_rules_waitlist_title",
-            label: "Título do bloco",
-            type: "text",
-            default: "Fila de espera",
-          },
-          {
-            key: "content_rules_waitlist_text",
-            label: "Texto",
-            type: "textarea",
-            default:
-              "Quando a aula estiver lotada, você pode entrar na fila de espera. Ao surgir uma vaga, você será notificada automaticamente.",
-          },
-        ],
-      },
-      {
-        id: "rules_holidays",
-        label: "Feriados",
-        hint: "O que acontece nos feriados marcados no sistema.",
-        preview: "rules_block",
-        fields: [
-          {
-            key: "content_rules_holidays_title",
-            label: "Título do bloco",
-            type: "text",
-            default: "Feriados",
-          },
-          {
-            key: "content_rules_holidays_text",
-            label: "Texto",
-            type: "textarea",
-            default:
-              "Nos feriados marcados no sistema não haverá aulas. Verifique o calendário antes de reservar.",
-          },
-        ],
-      },
     ],
   },
 ];
 
+/** Regras padrão do estúdio (lista editável: dá para acrescentar e retirar). */
+export const DEFAULT_RULE_BLOCKS = [
+  {
+    id: "booking",
+    title: "Agendamento e Cancelamento",
+    text: "O agendamento deve ser feito com no mínimo {horas_marcar} de antecedência.\nO cancelamento deve ser feito com no mínimo {horas_cancelar} de antecedência. Após esse prazo, o crédito não será devolvido.",
+  },
+  {
+    id: "late",
+    title: "Pontualidade",
+    text: "Tolerância de atraso de até {minutos_tolerancia}. Após esse período não será possível entrar na aula.",
+  },
+  {
+    id: "credits",
+    title: "Créditos",
+    text: "Os créditos têm validade igual à duração do plano contratado (mensal, trimestral, semestral ou anual), contada a partir da data de início. Créditos não utilizados dentro do período não são transferidos.",
+  },
+  {
+    id: "waitlist",
+    title: "Fila de espera",
+    text: "Quando a aula estiver lotada, você pode entrar na fila de espera. Ao surgir uma vaga, você será notificada automaticamente.",
+  },
+  {
+    id: "holidays",
+    title: "Feriados",
+    text: "Nos feriados marcados no sistema não haverá aulas. Verifique o calendário antes de reservar.",
+  },
+];
+
+/** Chaves antigas (uma por regra) — mantidas para não perder textos já salvos. */
+export const LEGACY_RULE_KEYS = {
+  booking: [
+    "content_rules_booking_title",
+    "content_rules_booking_text",
+    "content_rules_cancel_text",
+  ],
+  late: ["content_rules_late_title", "content_rules_late_text"],
+  credits: ["content_rules_credits_title", "content_rules_credits_text"],
+  waitlist: ["content_rules_waitlist_title", "content_rules_waitlist_text"],
+  holidays: ["content_rules_holidays_title", "content_rules_holidays_text"],
+};
+
+const LEGACY_RULE_DEFAULTS = {
+  content_rules_booking_title: "Agendamento e Cancelamento",
+  content_rules_booking_text:
+    "O agendamento deve ser feito com no mínimo {horas_marcar} de antecedência.",
+  content_rules_cancel_text:
+    "O cancelamento deve ser feito com no mínimo {horas_cancelar} de antecedência. Após esse prazo, o crédito não será devolvido.",
+  content_rules_late_title: "Pontualidade",
+  content_rules_late_text:
+    "Tolerância de atraso de até {minutos_tolerancia}. Após esse período não será possível entrar na aula.",
+  content_rules_credits_title: "Créditos",
+  content_rules_credits_text: DEFAULT_RULE_BLOCKS[2].text,
+  content_rules_waitlist_title: "Fila de espera",
+  content_rules_waitlist_text: DEFAULT_RULE_BLOCKS[3].text,
+  content_rules_holidays_title: "Feriados",
+  content_rules_holidays_text: DEFAULT_RULE_BLOCKS[4].text,
+};
+
 export const ALL_FIELDS = CONTENT_GROUPS.flatMap((g) => g.sections.flatMap((s) => s.fields));
 
-export const CONTENT_DEFAULTS = ALL_FIELDS.reduce((acc, f) => {
-  acc[f.key] = f.default;
-  return acc;
-}, {});
+export const CONTENT_DEFAULTS = {
+  ...ALL_FIELDS.reduce((acc, f) => {
+    acc[f.key] = f.default;
+    return acc;
+  }, {}),
+  ...LEGACY_RULE_DEFAULTS,
+  // Lista de regras em JSON. Vazio = usa os textos antigos/padrão.
+  content_rules_blocks: "",
+};
+
+/** Lista de regras a exibir/editar, com migração dos textos antigos. */
+export function getRuleBlocks(content = {}) {
+  const raw = content.content_rules_blocks;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((b) => b && (b.title || b.text))
+          .map((b, i) => ({
+            id: b.id || `regra_${i}`,
+            title: String(b.title || ""),
+            text: String(b.text || ""),
+          }));
+      }
+    } catch {
+      /* usa o padrão */
+    }
+  }
+  return DEFAULT_RULE_BLOCKS.map((b) => {
+    const keys = LEGACY_RULE_KEYS[b.id] || [];
+    const title = content[keys[0]] || b.title;
+    const texts = keys
+      .slice(1)
+      .map((k) => content[k])
+      .filter(Boolean);
+    return { id: b.id, title, text: texts.length ? texts.join("\n") : b.text };
+  });
+}
+
+export function serializeRuleBlocks(blocks) {
+  return JSON.stringify(
+    (blocks || []).map((b) => ({ id: b.id, title: b.title || "", text: b.text || "" })),
+  );
+}
 
 /** Substitui os marcadores {horas_marcar}, {horas_cancelar} e {minutos_tolerancia}. */
 export function fillPlaceholders(text, { bookingHours, cancelHours, lateMinutes } = {}) {

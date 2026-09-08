@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BookOpen, Loader2 } from "lucide-react";
 import { getStudioSettings } from "@/lib/studioSettings";
-import { useSiteContent, fillPlaceholders } from "@/lib/siteContent";
+import { useSiteContent, fillPlaceholders, getRuleBlocks } from "@/lib/siteContent";
 
 export default function StudioRules() {
   const c = useSiteContent();
@@ -24,18 +24,17 @@ export default function StudioRules() {
     lateMinutes: settings.late_tolerance_minutes || "15",
   };
 
-  const fill = (t) => fillPlaceholders(t, numbers);
+  const blocks = getRuleBlocks(c)
+    .map((b) => ({
+      title: b.title,
+      items: String(b.text || "")
+        .split("\n")
+        .map((t) => fillPlaceholders(t, numbers).trim())
+        .filter(Boolean),
+    }))
+    .filter((b) => b.items.length > 0 || String(b.title || "").trim());
 
-  const blocks = [
-    {
-      title: c.content_rules_booking_title,
-      items: [fill(c.content_rules_booking_text), fill(c.content_rules_cancel_text)],
-    },
-    { title: c.content_rules_late_title, items: [fill(c.content_rules_late_text)] },
-    { title: c.content_rules_credits_title, items: [fill(c.content_rules_credits_text)] },
-    { title: c.content_rules_waitlist_title, items: [fill(c.content_rules_waitlist_text)] },
-    { title: c.content_rules_holidays_title, items: [fill(c.content_rules_holidays_text)] },
-  ].filter((b) => b.items.some((t) => String(t || "").trim()));
+  if (blocks.length === 0) return null;
 
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
