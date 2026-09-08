@@ -237,6 +237,32 @@ export default function ManageSiteContent() {
 
   const setField = (key, value) => setValues((v) => ({ ...v, [key]: value }));
 
+  const applyBlocks = (next) => {
+    setBlocks(next);
+    setField("content_rules_blocks", serializeRuleBlocks(next));
+  };
+
+  const updateBlock = (i, patch) =>
+    applyBlocks(blocks.map((b, idx) => (idx === i ? { ...b, ...patch } : b)));
+
+  const addBlock = () =>
+    applyBlocks([...blocks, { id: `regra_${Date.now()}`, title: "Nova regra", text: "" }]);
+
+  const removeBlock = (i) => {
+    if (!window.confirm(`Retirar a regra "${blocks[i]?.title || ""}"?`)) return;
+    applyBlocks(blocks.filter((_, idx) => idx !== i));
+  };
+
+  const moveBlock = (i, dir) => {
+    const j = i + dir;
+    if (j < 0 || j >= blocks.length) return;
+    const next = [...blocks];
+    [next[i], next[j]] = [next[j], next[i]];
+    applyBlocks(next);
+  };
+
+  const restoreDefaultRules = () => applyBlocks(DEFAULT_RULE_BLOCKS.map((b) => ({ ...b })));
+
   const persist = async (key, value) => {
     const existing = rows.find((r) => r.key === key);
     if (existing)
