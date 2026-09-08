@@ -24,7 +24,7 @@ function PreviewFrame({ children }) {
   );
 }
 
-function SectionPreview({ preview, v, numbers }) {
+function SectionPreview({ preview, v, numbers, blocks }) {
   const logo = v.content_home_logo || v.content_login_logo || praianaLogo.url;
 
   switch (preview) {
