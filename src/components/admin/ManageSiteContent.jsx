@@ -467,14 +467,101 @@ export default function ManageSiteContent() {
               </div>
             );
           })}
+
+          {current.dynamic === "rules" && (
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <div>
+                <p className="text-sm font-medium">Regras</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Acrescente, edite ou retire regras. Cada linha do texto vira um item da lista.
+                  Você pode usar {"{horas_marcar}"}, {"{horas_cancelar}"} e{" "}
+                  {"{minutos_tolerancia}"} para inserir os números da aba Regras.
+                </p>
+              </div>
+
+              {blocks.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Nenhuma regra. O bloco não vai aparecer no site.
+                </p>
+              )}
+
+              {blocks.map((b, i) => (
+                <div key={b.id || i} className="rounded-xl border border-border/70 p-3 space-y-2">
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      value={b.title}
+                      onChange={(e) => updateBlock(i, { title: e.target.value })}
+                      placeholder="Título da regra"
+                      className="text-sm min-w-0"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => moveBlock(i, -1)}
+                      disabled={i === 0}
+                      className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-muted text-muted-foreground disabled:opacity-40"
+                      aria-label="Subir"
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveBlock(i, 1)}
+                      disabled={i === blocks.length - 1}
+                      className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-muted text-muted-foreground disabled:opacity-40"
+                      aria-label="Descer"
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeBlock(i)}
+                      className="h-8 w-8 shrink-0 grid place-items-center rounded-lg bg-destructive/10 text-destructive"
+                      aria-label="Retirar regra"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <Textarea
+                    rows={3}
+                    value={b.text}
+                    onChange={(e) => updateBlock(i, { text: e.target.value })}
+                    placeholder="Texto da regra"
+                    className="w-full min-w-0 text-sm"
+                  />
+                </div>
+              ))}
+
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={addBlock} className="gap-2 text-xs">
+                  <Plus className="h-3.5 w-3.5" />
+                  Acrescentar regra
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={restoreDefaultRules}
+                  className="gap-2 text-xs text-muted-foreground"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Restaurar regras padrão
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Prévia */}
         <div className="lg:sticky lg:top-4 min-w-0">
           <PreviewFrame>
-            <SectionPreview preview={activeSection.preview} v={values} numbers={numbers} />
+            <SectionPreview
+              preview={current.dynamic === "rules" ? "rules_block" : activeSection.preview}
+              v={values}
+              numbers={numbers}
+              blocks={blocks}
+            />
           </PreviewFrame>
         </div>
+
       </div>
 
       {/* Barra de salvar */}
