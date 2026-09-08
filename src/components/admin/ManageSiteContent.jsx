@@ -217,6 +217,7 @@ export default function ManageSiteContent() {
     });
     setValues(map);
     setSaved(map);
+    setBlocks(getRuleBlocks(map));
     const s = await getStudioSettings({ fresh: true });
     setNumbers({
       bookingHours: s.booking_min_hours,
