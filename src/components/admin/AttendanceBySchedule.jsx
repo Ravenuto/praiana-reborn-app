@@ -13,6 +13,7 @@ import { ptBR } from "date-fns/locale";
 import { Check, X, Clock, Users, ChevronDown, ChevronUp, UserPlus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { getCredits } from "@/utils";
+import { addManualBooking, removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
 
 const DAYS = [
   { key: "segunda", label: "Seg" }, { key: "terca", label: "Ter" },
@@ -52,7 +53,7 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
    });
    const [selectedDate, setSelectedDate] = useState(initialDate || format(new Date(), "yyyy-MM-dd"));
    const [addStudentDialog, setAddStudentDialog] = useState(null);
-   const [addStudentForm, setAddStudentForm] = useState({ selectedUserId: "", isAvulsa: false });
+    const [addStudentForm, setAddStudentForm] = useState({ selectedUserId: "", isAvulsa: false, guestName: "", guestType: "experimental" });
    const [addingStudent, setAddingStudent] = useState(false);
 
    const selectedDayKey = useMemo(() => {
@@ -94,9 +95,15 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
   }, [bookings]);
 
   const handleStatus = async (bookingId, status) => {
-    await base44.entities.Booking.update(bookingId, { status });
-    queryClient.invalidateQueries({ queryKey: ["adminBookingsAtt"] });
-    toast.success("Status atualizado");
+    try {
+      const booking = bookings.find((b) => b.id === bookingId);
+      if (status === "cancelada" && booking) await removeManualBooking(booking);
+      else await base44.entities.Booking.update(bookingId, { status });
+      invalidateManualBookings(queryClient);
+      toast.success("Status atualizado");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao atualizar");
+    }
   };
 
   const handleMarkAll = async (sessionId, status) => {
@@ -107,51 +114,18 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
   };
 
   const handleAddStudent = async () => {
-    if (!addStudentForm.selectedUserId && !addStudentForm.isAvulsa) return toast.error("Selecione uma aluna");
+     if (!addStudentForm.selectedUserId && !addStudentForm.isAvulsa) return toast.error("Selecione uma aluna");
     setAddingStudent(true);
     try {
       const session = addStudentDialog.session;
-      let studentName = "Avulsa";
-      let studentEmail = `avulsa-${Date.now()}@raissapoledance.com`;
-
-      if (!addStudentForm.isAvulsa) {
-        const student = activeStudents.find(s => s.id === addStudentForm.selectedUserId);
-        if (!student) return toast.error("Aluna não encontrada");
-        studentName = student.full_name || student.email;
-        studentEmail = student.email;
-
-        // Verificar se a aluna já está nesta aula
-        const existingBookings = bookingsBySession[addStudentDialog.session.id] || [];
-        const alreadyBooked = existingBookings.some(b => b.student_email === studentEmail && b.status !== "cancelada");
-        if (alreadyBooked) {
-          toast.error("Esta aluna já está reservada nesta aula.");
-          setAddingStudent(false);
-          return;
-        }
-
-        // Debitar crédito da aluna
-         const currentCredits = getCredits(student);
-         if (currentCredits > 0) {
-           await base44.entities.User.update(student.id, { data: { ...student.data, credits: currentCredits - 1 } });
-         }
-      }
-
-      await base44.entities.Booking.create({
-        session_id: session.id,
-        session_date: selectedDate,
-        session_time: session.time,
-        class_type_name: session.class_type_name,
-        student_name: studentName,
-        student_email: studentEmail,
-        status: "confirmada",
-      });
-      queryClient.invalidateQueries({ queryKey: ["adminBookingsAtt"] });
-      queryClient.invalidateQueries({ queryKey: ["activeStudentsForAttendance"] });
-      toast.success(addStudentForm.isAvulsa ? "Vaga avulsa adicionada!" : "Aluna adicionada e crédito debitado!");
+       const student = addStudentForm.isAvulsa ? null : activeStudents.find(s => s.id === addStudentForm.selectedUserId);
+       await addManualBooking({ session, date: selectedDate, student, guestName: addStudentForm.guestName, guestType: addStudentForm.guestType });
+       invalidateManualBookings(queryClient);
+       toast.success("Participante adicionada!");
       setAddStudentDialog(null);
-      setAddStudentForm({ selectedUserId: "", isAvulsa: false });
-    } catch {
-      toast.error("Erro ao adicionar");
+       setAddStudentForm({ selectedUserId: "", isAvulsa: false, guestName: "", guestType: "experimental" });
+     } catch (error) {
+       toast.error(error?.message || "Erro ao adicionar");
     }
     setAddingStudent(false);
   };
@@ -253,7 +227,7 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
                         <X className="h-2.5 w-2.5" /> Faltaram
                       </Button>
                       <Button size="sm" variant="outline" className="text-[9px] h-6 gap-0.5 flex-1 text-primary border-primary/30"
-                        onClick={() => { setAddStudentDialog({ session }); setAddStudentForm({ name: "", isAvulsa: false }); }}>
+                         onClick={() => { setAddStudentDialog({ session }); setAddStudentForm({ selectedUserId: "", isAvulsa: false, guestName: "", guestType: "experimental" }); }}>
                         <UserPlus className="h-2.5 w-2.5" /> Adicionar
                       </Button>
                     </div>
@@ -322,15 +296,15 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
               <div className="flex gap-2">
                 <button
                   onClick={() => setAddStudentForm(f => ({ ...f, isAvulsa: false }))}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${!addStudentForm.isAvulsa ? "bg-primary text-white border-primary" : "bg-muted text-muted-foreground border-border"}`}
+                   className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${!addStudentForm.isAvulsa ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}`}
                 >
                   Aluna ativa
                 </button>
                 <button
                   onClick={() => setAddStudentForm(f => ({ ...f, isAvulsa: true, selectedUserId: "" }))}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${addStudentForm.isAvulsa ? "bg-primary text-white border-primary" : "bg-muted text-muted-foreground border-border"}`}
+                   className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${addStudentForm.isAvulsa ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border"}`}
                 >
-                  Avulsa
+                   Sem cadastro
                 </button>
               </div>
               {!addStudentForm.isAvulsa && (
@@ -364,7 +338,14 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
                 </div>
               )}
               {addStudentForm.isAvulsa && (
-                <p className="text-sm text-muted-foreground text-center py-2">Uma vaga "Avulsa" será reservada nesta aula.</p>
+                 <div className="space-y-2">
+                   <Label htmlFor="attendance-guest-name" className="text-xs">Nome</Label>
+                   <Input id="attendance-guest-name" value={addStudentForm.guestName} onChange={(e) => setAddStudentForm(f => ({ ...f, guestName: e.target.value }))} placeholder="Nome da participante" />
+                   <Select value={addStudentForm.guestType} onValueChange={(v) => setAddStudentForm(f => ({ ...f, guestType: v }))}>
+                     <SelectTrigger><SelectValue /></SelectTrigger>
+                     <SelectContent><SelectItem value="experimental">Experimental</SelectItem><SelectItem value="avulsa">Avulsa</SelectItem></SelectContent>
+                   </Select>
+                 </div>
               )}
               <Button onClick={handleAddStudent} disabled={addingStudent} className="w-full rounded-full">
                 {addingStudent ? <Loader2 className="h-4 w-4 animate-spin" /> : "Adicionar"}
