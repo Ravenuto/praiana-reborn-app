@@ -12,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { Search, UserCheck, CalendarRange, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { createNotification } from "@/hooks/useNotifications";
+import { removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
 
 const statusOptions = [
   { value: "confirmada", label: "Confirmada", class: "bg-primary/10 text-primary" },
@@ -76,8 +77,15 @@ export default function ManageBookings() {
 
   const handleStatusChange = async (bookingId, newStatus) => {
     const booking = bookings.find((b) => b.id === bookingId);
-    await base44.entities.Booking.update(bookingId, { status: newStatus });
-    if (newStatus === "cancelada" && booking?.student_email && booking?.status !== "cancelada") {
+    try {
+      if (newStatus === "cancelada" && booking?.status !== "cancelada") await removeManualBooking(booking);
+      else await base44.entities.Booking.update(bookingId, { status: newStatus });
+    } catch (error) {
+      toast.error(error?.message || "Erro ao atualizar reserva");
+      invalidateManualBookings(queryClient);
+      return;
+    }
+    if (newStatus === "cancelada" && booking?.student_email && booking?.status !== "cancelada" && !booking.guest_type) {
       createNotification({
         user_email: booking.student_email,
         type: "booking_cancelled",
@@ -86,7 +94,7 @@ export default function ManageBookings() {
         link: "/minhas-reservas",
       });
     }
-    queryClient.invalidateQueries({ queryKey: ["adminBookingsPeriod"] });
+    invalidateManualBookings(queryClient);
     toast.success("Status atualizado");
   };
 
