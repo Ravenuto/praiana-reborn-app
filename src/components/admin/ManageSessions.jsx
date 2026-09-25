@@ -468,9 +468,11 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { setRosterSession(s); setStudentId(""); setGuestName(""); }}>
-                      <Users className="h-4 w-4" /> Alunas
-                    </Button>
+                    {canCreate && (
+                      <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { setRosterSession(s); setStudentId(""); setGuestName(""); }}>
+                        <Users className="h-4 w-4" /> Alunas
+                      </Button>
+                    )}
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(s)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
