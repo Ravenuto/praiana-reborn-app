@@ -1,0 +1,3 @@
+- [ ] Gerenciar participantes por aula em Admin > Horários, com cadastradas e convidadas nomeadas.
+- [ ] Compartilhar inclusão/retirada em Presenças, créditos e fila de espera.
+- [ ] Verificar exibição e interações no celular e computador.
