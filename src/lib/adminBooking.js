@@ -5,9 +5,13 @@ import { getCredits } from "@/utils";
 const active = (booking) => booking.status !== "cancelada";
 
 export async function addManualBooking({ session, date, student, guestName, guestType }) {
-  const existing = await base44.entities.Booking.filter({ session_id: session.id, session_date: date });
+  const existing = await base44.entities.Booking.filter({
+    session_id: session.id,
+    session_date: date,
+  });
   const activeBookings = existing.filter(active);
-  if (activeBookings.length >= (Number(session.max_students) || 8)) throw new Error("Esta aula está lotada.");
+  if (activeBookings.length >= (Number(session.max_students) || 8))
+    throw new Error("Esta aula está lotada.");
 
   let studentName;
   let studentEmail;
@@ -15,7 +19,11 @@ export async function addManualBooking({ session, date, student, guestName, gues
   if (student) {
     studentName = student.full_name || student.email;
     studentEmail = student.email;
-    if (activeBookings.some((booking) => booking.student_email?.toLowerCase() === studentEmail?.toLowerCase())) {
+    if (
+      activeBookings.some(
+        (booking) => booking.student_email?.toLowerCase() === studentEmail?.toLowerCase(),
+      )
+    ) {
       throw new Error("Esta aluna já está nesta aula.");
     }
     const latest = await base44.entities.User.get(student.id);
@@ -27,7 +35,8 @@ export async function addManualBooking({ session, date, student, guestName, gues
   } else {
     studentName = guestName?.trim();
     if (!studentName) throw new Error("Informe o nome da participante.");
-    if (!["experimental", "avulsa"].includes(guestType)) throw new Error("Escolha Experimental ou Avulsa.");
+    if (!["experimental", "avulsa"].includes(guestType))
+      throw new Error("Escolha Experimental ou Avulsa.");
     studentEmail = `convidada-${crypto.randomUUID()}@participante.invalid`;
   }
 
@@ -45,7 +54,9 @@ export async function addManualBooking({ session, date, student, guestName, gues
   if (creditDebited && student) {
     try {
       const latest = await base44.entities.User.get(student.id);
-      await base44.entities.User.update(student.id, { data: { ...(latest?.data || {}), credits: getCredits(latest) - 1 } });
+      await base44.entities.User.update(student.id, {
+        data: { ...(latest?.data || {}), credits: getCredits(latest) - 1 },
+      });
     } catch (error) {
       await base44.entities.Booking.update(booking.id, { status: "cancelada" });
       throw error;
@@ -58,7 +69,10 @@ export async function removeManualBooking(booking) {
   if (!active(booking)) throw new Error("Esta participante já foi retirada.");
   await base44.entities.Booking.update(booking.id, { status: "cancelada" });
   // Older registered bookings did not store credit_debited; they followed the same credit rule.
-  const guest = booking.guest_type || booking.student_email?.endsWith("@participante.invalid") || booking.student_email?.startsWith("avulsa-");
+  const guest =
+    booking.guest_type ||
+    booking.student_email?.endsWith("@participante.invalid") ||
+    booking.student_email?.startsWith("avulsa-");
   if (!guest && booking.credit_debited !== false && booking.student_email) {
     const [student] = await base44.entities.User.filter({ email: booking.student_email });
     if (student && student.role !== "admin") {
@@ -76,7 +90,18 @@ export async function removeManualBooking(booking) {
 }
 
 export function invalidateManualBookings(queryClient) {
-  for (const key of ["bookings", "adminBookingsAtt", "adminBookingsPeriod", "activeStudentsForAttendance", "userCredits", "myBookings", "myAllBookings", "myProfile", "allWaitlist", "myWaitlist"]) {
+  for (const key of [
+    "bookings",
+    "adminBookingsAtt",
+    "adminBookingsPeriod",
+    "activeStudentsForAttendance",
+    "userCredits",
+    "myBookings",
+    "myAllBookings",
+    "myProfile",
+    "allWaitlist",
+    "myWaitlist",
+  ]) {
     queryClient.invalidateQueries({ queryKey: [key] });
   }
 }
