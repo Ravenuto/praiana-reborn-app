@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Loader2, Clock, User, Users, ChevronLeft, ChevronRight, CalendarDays, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, startOfWeek, addMonths, subMonths, startOfMonth, endOfMonth, isSameMonth, isSameDay, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import DaySelector, { DAYS } from "@/components/schedule/DaySelector";
 import { notifyAllStudents, notifyBookedStudents } from "@/hooks/useNotifications";
+import { addManualBooking, removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
+import { getCredits } from "@/utils";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -64,6 +66,13 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null); // session a ser deletada
+  const [rosterSession, setRosterSession] = useState(null);
+  const [participantMode, setParticipantMode] = useState("registered");
+  const [studentId, setStudentId] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [guestType, setGuestType] = useState("experimental");
+  const [rosterBusy, setRosterBusy] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState(null);
 
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [weekAnchor, setWeekAnchor] = useState(new Date());
@@ -76,6 +85,12 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       const all = await base44.entities.User.list();
       return all.filter((u) => u.role === "teacher" || u.is_teacher === true);
     },
+  });
+
+  const { data: activeStudents = [] } = useQuery({
+    queryKey: ["activeStudentsForAttendance"],
+    queryFn: () => base44.entities.User.filter({ is_active: true }, "full_name", 500),
+    enabled: !!rosterSession,
   });
 
   const { data: classTypes = [] } = useQuery({
@@ -109,7 +124,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
 
   const { data: bookings = [] } = useQuery({
     queryKey: ["bookings", selectedDate],
-    queryFn: () => base44.entities.Booking.filter({ session_date: selectedDate, status: "confirmada" }, "-created_date", 100),
+    queryFn: () => base44.entities.Booking.filter({ session_date: selectedDate }, "-created_date"),
   });
 
   const selectedDayKey = useMemo(() => DAY_NAMES[new Date(selectedDate + "T12:00:00").getDay()], [selectedDate]);
@@ -130,9 +145,45 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
 
   const bookingCountMap = useMemo(() => {
     const map = {};
-    bookings.forEach((b) => { map[b.session_id] = (map[b.session_id] || 0) + 1; });
+    bookings.filter((b) => b.status !== "cancelada").forEach((b) => { map[b.session_id] = (map[b.session_id] || 0) + 1; });
     return map;
   }, [bookings]);
+
+  const roster = useMemo(() => bookings.filter((b) => b.session_id === rosterSession?.id && b.status !== "cancelada"), [bookings, rosterSession]);
+
+  const handleAddParticipant = async () => {
+    const student = participantMode === "registered" ? activeStudents.find((s) => s.id === studentId) : null;
+    if (participantMode === "registered" && !student) return toast.error("Selecione uma aluna.");
+    if (participantMode === "guest" && !guestName.trim()) return toast.error("Informe o nome da participante.");
+    setRosterBusy(true);
+    try {
+      await addManualBooking({ session: rosterSession, date: selectedDate, student, guestName, guestType });
+      invalidateManualBookings(queryClient);
+      setStudentId("");
+      setGuestName("");
+      toast.success("Participante adicionada à aula.");
+    } catch (error) {
+      toast.error(error?.message || "Não foi possível adicionar.");
+    } finally {
+      setRosterBusy(false);
+    }
+  };
+
+  const handleRemoveParticipant = async () => {
+    if (!removeTarget) return;
+    setRosterBusy(true);
+    try {
+      await removeManualBooking(removeTarget);
+      invalidateManualBookings(queryClient);
+      toast.success("Participante retirada da aula.");
+      setRemoveTarget(null);
+    } catch (error) {
+      invalidateManualBookings(queryClient);
+      toast.error(error?.message || "Não foi possível retirar.");
+    } finally {
+      setRosterBusy(false);
+    }
+  };
 
   const handleClassTypeChange = (ctId) => {
     const ct = classTypes.find((c) => c.id === ctId);
@@ -417,6 +468,9 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
+                    <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { setRosterSession(s); setStudentId(""); setGuestName(""); }}>
+                      <Users className="h-4 w-4" /> Alunas
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleEdit(s)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -430,6 +484,63 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
           })
         )}
       </div>
+
+      <Dialog open={!!rosterSession} onOpenChange={(value) => { if (!value && !rosterBusy) setRosterSession(null); }}>
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Alunas da aula</DialogTitle>
+            <DialogDescription>{rosterSession?.class_type_name} · {rosterSession?.time} · {format(new Date(selectedDate + "T12:00:00"), "dd/MM/yyyy")}</DialogDescription>
+          </DialogHeader>
+          <p className="text-sm font-medium">{roster.length}/{rosterSession?.max_students || 8} vagas ocupadas</p>
+          <div className="divide-y divide-border border-y border-border">
+            {roster.length === 0 && <p className="text-sm text-muted-foreground py-3">Nenhuma participante nesta aula.</p>}
+            {roster.map((booking) => (
+              <div key={booking.id} className="flex items-center justify-between gap-2 py-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium break-words">{booking.student_name || booking.student_email}</p>
+                  <p className="text-xs text-muted-foreground">{booking.guest_type === "experimental" ? "Experimental" : booking.guest_type === "avulsa" ? "Avulsa" : booking.status === "presente" ? "Presente" : booking.status === "faltou" ? "Faltou" : "Cadastrada"}</p>
+                </div>
+                <Button size="icon" variant="ghost" aria-label={`Retirar ${booking.student_name || "participante"}`} title="Retirar da aula" disabled={rosterBusy} onClick={() => setRemoveTarget(booking)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-3">
+            <p className="text-sm font-semibold">Adicionar participante</p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button size="sm" variant={participantMode === "registered" ? "default" : "outline"} onClick={() => setParticipantMode("registered")}>Cadastrada</Button>
+              <Button size="sm" variant={participantMode === "guest" ? "default" : "outline"} onClick={() => setParticipantMode("guest")}>Sem cadastro</Button>
+            </div>
+            {participantMode === "registered" ? (
+              <div className="space-y-1">
+                <Label>Aluna</Label>
+                <Select value={studentId} onValueChange={setStudentId}>
+                  <SelectTrigger><SelectValue placeholder="Selecione a aluna" /></SelectTrigger>
+                  <SelectContent>
+                    {activeStudents.map((student) => <SelectItem key={student.id} value={student.id}>{student.full_name || student.email} · {getCredits(student)} crédito(s)</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="space-y-1"><Label htmlFor="guest-name">Nome</Label><Input id="guest-name" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Nome da participante" /></div>
+                <div className="space-y-1"><Label>Tipo</Label><Select value={guestType} onValueChange={setGuestType}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="experimental">Experimental</SelectItem><SelectItem value="avulsa">Avulsa</SelectItem></SelectContent></Select></div>
+              </div>
+            )}
+            <Button className="w-full gap-2" onClick={handleAddParticipant} disabled={rosterBusy || roster.length >= (Number(rosterSession?.max_students) || 8)}>
+              {rosterBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Adicionar à aula
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!removeTarget} onOpenChange={(value) => { if (!value && !rosterBusy) setRemoveTarget(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Retirar da aula?</DialogTitle><DialogDescription>{removeTarget?.student_name} sairá desta aula. Se houver fila de espera, a próxima aluna entrará automaticamente. O crédito será devolvido quando aplicável.</DialogDescription></DialogHeader>
+          <div className="flex justify-end gap-2"><Button variant="outline" disabled={rosterBusy} onClick={() => setRemoveTarget(null)}>Voltar</Button><Button variant="destructive" disabled={rosterBusy} onClick={handleRemoveParticipant}>{rosterBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Retirar"}</Button></div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog confirmar exclusão de recorrente */}
       {deleteTarget && (
