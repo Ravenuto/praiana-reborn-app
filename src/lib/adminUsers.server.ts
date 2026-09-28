@@ -2,7 +2,13 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
-export const FALLBACK_DEFAULT_PASSWORD = 'praiana2026';
+
+/** Unique first-access credential; never use a shared studio password. */
+export function generateTemporaryPassword() {
+  const bytes = new Uint8Array(18);
+  crypto.getRandomValues(bytes);
+  return `P-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+}
 
 export type StudioRole = 'admin' | 'teacher' | 'student';
 

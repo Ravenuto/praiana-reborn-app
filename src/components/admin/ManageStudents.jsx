@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44, ADMIN_EMAIL, getDefaultPassword } from "@/api/base44Client";
+import { base44, ADMIN_EMAIL } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ export default function ManageStudents() {
   const [manualDialog, setManualDialog] = useState(false);
   const [manualForm, setManualForm] = useState(EMPTY_MANUAL);
   const [savingManual, setSavingManual] = useState(false);
+  const [newAccess, setNewAccess] = useState(null);
   const [creditDialog, setCreditDialog] = useState(null);
   const [creditValue, setCreditValue] = useState(0);
   const [savingCredit, setSavingCredit] = useState(false);
@@ -154,11 +155,12 @@ export default function ManageStudents() {
       const selectedPlan = plans.find((p) => p.key === manualForm.plan);
       const startISO = new Date().toISOString().slice(0, 10);
 
-      await base44.entities.User.create({
+      const created = await base44.entities.User.create({
         full_name: manualForm.name,
         email,
         role: "user",
         is_admin: false,
+        is_active: true,
         must_change_password: true,
         plan_status: "active",
         data: {
@@ -167,14 +169,14 @@ export default function ManageStudents() {
           birth_date: manualForm.birth_date,
           plan: manualForm.plan,
           credits: manualForm.credits,
-          is_active: true,
           plan_start_date: startISO,
           plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
         },
       });
 
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success(`Aluna cadastrada! Primeiro acesso com a senha padrão "${getDefaultPassword()}".`);
+      setNewAccess({ name: manualForm.name, password: created.temporaryPassword });
+      toast.success("Aluna cadastrada!");
       setManualDialog(false);
       setManualForm(EMPTY_MANUAL);
     } catch (err) {
@@ -185,13 +187,14 @@ export default function ManageStudents() {
   };
 
   const handleResetPassword = async (student) => {
-    if (!window.confirm(`Resetar a senha de ${student.full_name || student.email} para a senha padrão?`)) return;
+    if (!window.confirm(`Criar uma nova senha temporária para ${student.full_name || student.email}? A senha anterior deixará de funcionar.`)) return;
     try {
-      await base44.auth.resetToDefaultPassword(student.id);
+      const result = await base44.auth.resetToDefaultPassword(student.id);
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success(`Senha resetada para "${getDefaultPassword()}". Ela criará uma nova no próximo login.`);
-    } catch {
-      toast.error("Erro ao resetar senha");
+      setNewAccess({ name: student.full_name || student.email, password: result.temporaryPassword });
+      toast.success("Nova senha temporária criada.");
+    } catch (err) {
+      toast.error("Erro ao redefinir senha: " + (err?.message || "tente novamente"));
     }
   };
 
@@ -205,7 +208,7 @@ export default function ManageStudents() {
         await base44.entities.User.update(existing[0].id, { role: "admin", is_admin: true });
         toast.success("Acesso de administrador concedido.");
       } else {
-        await base44.entities.User.create({
+        const created = await base44.entities.User.create({
           full_name: adminForm.name,
           email,
           role: "admin",
@@ -213,7 +216,8 @@ export default function ManageStudents() {
           is_active: true,
           must_change_password: true,
         });
-        toast.success(`Administrador criado! Primeiro acesso com a senha padrão "${getDefaultPassword()}".`);
+        setNewAccess({ name: adminForm.name, password: created.temporaryPassword });
+        toast.success("Administrador criado!");
       }
       setAdminForm({ name: "", email: "" });
       setAdminDialog(false);
@@ -246,7 +250,7 @@ export default function ManageStudents() {
         await base44.entities.User.update(existing[0].id, { role: "teacher", is_teacher: true, is_active: true });
         toast.success("Acesso de professora concedido.");
       } else {
-        await base44.entities.User.create({
+        const created = await base44.entities.User.create({
           full_name: teacherForm.name,
           email,
           role: "teacher",
@@ -255,7 +259,8 @@ export default function ManageStudents() {
           must_change_password: true,
           data: { full_name: teacherForm.name },
         });
-        toast.success(`Professora cadastrada! Primeiro acesso com a senha padrão "${getDefaultPassword()}".`);
+        setNewAccess({ name: teacherForm.name, password: created.temporaryPassword });
+        toast.success("Professora cadastrada!");
       }
       setTeacherForm({ name: "", email: "" });
       setTeacherDialog(false);
@@ -751,7 +756,7 @@ export default function ManageStudents() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
-                      title="Resetar senha para a padrão"
+           title="Criar nova senha temporária"
                       onClick={() => handleResetPassword(student)}
                       disabled={student.is_invited}
                     >
@@ -865,7 +870,7 @@ export default function ManageStudents() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
-          Quem estiver aqui entra pela opção "Sou administrador" no login, com a senha padrão "{getDefaultPassword()}" no primeiro acesso.
+          Quem estiver aqui entra pela opção "Sou administrador" no login. Ao cadastrar, você recebe uma senha temporária individual para o primeiro acesso.
         </p>
         <div className="space-y-2">
           {admins.map((a) => {
@@ -957,7 +962,7 @@ export default function ManageStudents() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
-          A professora entra pela opção "Sou professora" no login (senha padrão "{getDefaultPassword()}" no primeiro acesso) e vê só a área de presenças. Ela também aparece para escolher em Horários › Professora.
+          A professora entra pela opção "Sou professora" no login. Ao cadastrar, você recebe uma senha temporária individual para o primeiro acesso. Ela também aparece para escolher em Horários › Professora.
         </p>
         {teachers.length === 0 ? (
           <p className="text-xs text-muted-foreground">Nenhuma professora cadastrada ainda.</p>
@@ -1048,6 +1053,27 @@ export default function ManageStudents() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!newAccess} onOpenChange={(open) => { if (!open) setNewAccess(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Acesso de {newAccess?.name}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Envie esta senha temporária diretamente para a pessoa. Ela criará a própria senha no primeiro acesso. Anote antes de fechar: não será possível vê-la novamente.</p>
+          <div className="flex items-center gap-2 min-w-0">
+            <Input aria-label="Senha temporária" readOnly value={newAccess?.password || ""} className="font-mono text-sm min-w-0" onFocus={(event) => event.target.select()} />
+            <Button type="button" variant="outline" onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(newAccess?.password || "");
+                toast.success("Senha copiada.");
+              } catch {
+                toast.error("Selecione e copie a senha manualmente.");
+              }
+            }}>Copiar</Button>
+          </div>
+          <Button type="button" onClick={() => setNewAccess(null)}>Concluir</Button>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog cadastro manual */}
       {manualDialog && (
         <Dialog open={manualDialog} onOpenChange={() => { setManualDialog(false); setManualForm(EMPTY_MANUAL); }}>
@@ -1103,7 +1129,7 @@ export default function ManageStudents() {
                 </div>
               </div>
               <Button onClick={handleSaveManual} disabled={savingManual} className="w-full rounded-full">
-                {savingManual ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar e enviar convite"}
+                {savingManual ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar aluna"}
               </Button>
             </div>
           </DialogContent>
