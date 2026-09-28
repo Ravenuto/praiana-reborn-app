@@ -31,7 +31,6 @@ export const adminCreateUser = createServerFn({ method: 'POST' })
   .inputValidator(
     (input: {
       email: string;
-      password: string;
       roles: Array<'admin' | 'teacher' | 'student'>;
       profile: Record<string, unknown>;
     }) => input,
@@ -40,28 +39,30 @@ export const adminCreateUser = createServerFn({ method: 'POST' })
     const helpers = await import('@/lib/adminUsers.server');
     await helpers.assertCallerIsAdmin(context.userId);
     if (!data.email) throw new Error('E-mail obrigatório');
-    return helpers.createStudioUser({
+    const password = helpers.generateTemporaryPassword();
+    const user = await helpers.createStudioUser({
       email: data.email,
-      password: data.password || helpers.FALLBACK_DEFAULT_PASSWORD,
+      password,
       roles: data.roles?.length ? data.roles : ['student'],
       profile: data.profile || {},
     });
+    return { ...user, temporaryPassword: password };
   });
 
-/** Define uma nova senha para uma conta (usada ao redefinir para a senha padrão). */
+/** Define uma nova senha temporária exclusiva para uma conta. */
 export const adminSetPassword = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string; password: string }) => input)
+  .inputValidator((input: { userId: string }) => input)
   .handler(async ({ data, context }) => {
     const helpers = await import('@/lib/adminUsers.server');
     await helpers.assertCallerIsAdmin(context.userId);
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const password = String(data.password || '');
-    if (password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres');
+    const password = helpers.generateTemporaryPassword();
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password });
     if (error) throw new Error(error.message);
-    await supabaseAdmin.from('profiles').update({ must_change_password: true }).eq('id', data.userId);
-    return { ok: true };
+    const { error: profileError } = await supabaseAdmin.from('profiles').update({ must_change_password: true }).eq('id', data.userId);
+    if (profileError) throw new Error(profileError.message);
+    return { ok: true, temporaryPassword: password };
   });
 
 /** Atualiza os papéis (aluna / professora / administradora) de uma conta. */

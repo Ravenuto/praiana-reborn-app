@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Save, Loader2 } from "lucide-react";
 import { DEFAULTS, clearSettingsCache } from "@/lib/studioSettings";
-import { FALLBACK_DEFAULT_PASSWORD } from "@/api/base44Client";
 
 const FIELDS = [
   { key: "booking_min_hours", label: "Antecedência mínima para MARCAR aula (horas)", description: "Horas mínimas antes da aula para permitir reserva" },
@@ -13,7 +12,7 @@ const FIELDS = [
 ];
 
 export default function ManageStudioSettings() {
-  const [values, setValues] = useState({ booking_min_hours: DEFAULTS.booking_min_hours, cancel_min_hours: DEFAULTS.cancel_min_hours, default_password: FALLBACK_DEFAULT_PASSWORD });
+  const [values, setValues] = useState({ booking_min_hours: DEFAULTS.booking_min_hours, cancel_min_hours: DEFAULTS.cancel_min_hours });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dbRows, setDbRows] = useState([]);
@@ -24,7 +23,7 @@ export default function ManageStudioSettings() {
     setLoading(true);
     const rows = await base44.entities.StudioSettings.list();
     setDbRows(rows);
-    const map = { booking_min_hours: DEFAULTS.booking_min_hours, cancel_min_hours: DEFAULTS.cancel_min_hours, default_password: FALLBACK_DEFAULT_PASSWORD };
+    const map = { booking_min_hours: DEFAULTS.booking_min_hours, cancel_min_hours: DEFAULTS.cancel_min_hours };
     rows.forEach((r) => { if (r.key in map) map[r.key] = r.value; });
     setValues(map);
     setLoading(false);
@@ -70,18 +69,6 @@ export default function ManageStudioSettings() {
           </div>
         </div>
       ))}
-
-      <div>
-        <label className="text-sm font-medium block mb-1">Senha padrão do primeiro acesso</label>
-        <p className="text-xs text-muted-foreground mb-1.5">
-          É com essa senha que uma aluna ou administrador novo entra pela primeira vez. No primeiro login, a pessoa cria a própria senha.
-        </p>
-        <Input
-          value={values.default_password || ""}
-          onChange={(e) => setValues((v) => ({ ...v, default_password: e.target.value }))}
-          className="w-48 text-sm"
-        />
-      </div>
 
       <Button onClick={handleSave} disabled={saving} className="gap-2">
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

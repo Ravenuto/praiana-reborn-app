@@ -12,7 +12,6 @@ import {
 const isBrowser = typeof window !== 'undefined';
 
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
-export const FALLBACK_DEFAULT_PASSWORD = 'praiana2026';
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -228,12 +227,12 @@ const userEntity = {
     const res = await adminCreateUser({
       data: {
         email: String(payload.email || '').trim().toLowerCase(),
-        password: getDefaultPassword(),
         roles,
         profile: { ...columns, must_change_password: true, data: extra },
       },
     });
-    return (await userEntity.get(res.id)) || { id: res.id, ...payload };
+    const user = (await userEntity.get(res.id)) || { id: res.id, ...payload };
+    return { ...user, temporaryPassword: res.temporaryPassword };
   },
   async update(id, patch) {
     const { data: current, error } = await supabase
@@ -289,23 +288,6 @@ const entities = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Senha padrão do primeiro acesso                                     */
-/* ------------------------------------------------------------------ */
-
-let defaultPasswordCache = FALLBACK_DEFAULT_PASSWORD;
-
-const refreshDefaultPassword = async () => {
-  try {
-    const rows = await entities.StudioSettings.filter({ key: 'default_password' });
-    if (rows[0]?.value) defaultPasswordCache = String(rows[0].value);
-  } catch {
-    /* mantém o padrão */
-  }
-};
-
-export const getDefaultPassword = () => defaultPasswordCache || FALLBACK_DEFAULT_PASSWORD;
-
-/* ------------------------------------------------------------------ */
 /* Autenticação                                                        */
 /* ------------------------------------------------------------------ */
 
@@ -357,7 +339,6 @@ const auth = {
   async me() {
     await sessionOnlyReady;
     const me = await loadMe();
-    refreshDefaultPassword();
     return me;
   },
 
@@ -434,9 +415,7 @@ const auth = {
   },
 
   async resetToDefaultPassword(userId) {
-    const password = getDefaultPassword();
-    await adminSetPassword({ data: { userId, password } });
-    return { ok: true, password };
+    return adminSetPassword({ data: { userId } });
   },
 
   async register() {
