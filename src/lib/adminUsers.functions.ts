@@ -39,6 +39,9 @@ export const adminCreateUser = createServerFn({ method: 'POST' })
     const helpers = await import('@/lib/adminUsers.server');
     await helpers.assertCallerIsAdmin(context.userId);
     if (!data.email) throw new Error('E-mail obrigatório');
+    if (await helpers.findAuthUserByEmail(data.email)) {
+      throw new Error('Este e-mail já está cadastrado. Use a opção de redefinir senha no cadastro existente.');
+    }
     const password = helpers.generateTemporaryPassword();
     const user = await helpers.createStudioUser({
       email: data.email,
