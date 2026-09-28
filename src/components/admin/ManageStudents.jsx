@@ -160,6 +160,7 @@ export default function ManageStudents() {
         email,
         role: "user",
         is_admin: false,
+        is_active: true,
         must_change_password: true,
         plan_status: "active",
         data: {
@@ -168,7 +169,6 @@ export default function ManageStudents() {
           birth_date: manualForm.birth_date,
           plan: manualForm.plan,
           credits: manualForm.credits,
-          is_active: true,
           plan_start_date: startISO,
           plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
         },
