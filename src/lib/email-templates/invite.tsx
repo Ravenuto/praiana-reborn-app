@@ -32,9 +32,9 @@ export const InviteEmail = ({
         <Text style={brand}>STUDIO <span style={accent}>PRAIANA</span> POLE DANCE</Text>
         <Heading style={h1}>Você recebeu um convite</Heading>
         <Text style={text}>
-          O Studio Praiana Pole Dance convidou você para acessar o{' '}
+          Você foi convidada para acessar o{' '}
           <Link href={siteUrl} style={link}>
-            <strong>{siteName}</strong>
+            <strong>Praiana Pole Dance App</strong>
           </Link>. Clique no botão abaixo para aceitar o convite e criar sua senha.
         </Text>
         <Button style={button} href={confirmationUrl}>
