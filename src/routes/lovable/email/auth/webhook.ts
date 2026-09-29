@@ -38,7 +38,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                 }),
             },
             invite: {
-              subject: 'Seu convite para o Studio Praiana Pole Dance',
+              subject: 'Convite para criar sua senha | Studio Praiana Pole Dance',
               render: (data) =>
                 React.createElement(InviteEmail, {
                   siteName: SITE_NAME,
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                 }),
             },
             recovery: {
-              subject: 'Redefina sua senha | Studio Praiana Pole Dance',
+              subject: 'Crie uma nova senha | Studio Praiana Pole Dance',
               render: (data) =>
                 React.createElement(RecoveryEmail, {
                   siteName: SITE_NAME,
