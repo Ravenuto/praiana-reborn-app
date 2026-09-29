@@ -212,7 +212,7 @@ export default function ManageStudents() {
           must_change_password: true,
           data: { full_name: teacherForm.name },
         });
-        toast.success(`Professora cadastrada. Convite enviado para ${created.email}.`);
+        toast.success(`Professora cadastrada. Convite solicitado para ${created.email}.`);
       }
       setTeacherForm({ name: "", email: "" });
       setTeacherDialog(false);
