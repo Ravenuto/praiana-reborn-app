@@ -2,3 +2,5 @@
 - [x] Compartilhar inclusão/retirada em Presenças, créditos e fila de espera.
 - [x] Verificar exibição e interações no celular e computador sem alterar dados reais.
 - [x] Corrigir cadastro e redefinição de acesso rejeitados pela senha padrão fraca.
+- [x] Substituir senhas temporárias por convites de acesso por e-mail e links de redefinição, mantendo o cadastro exclusivo da administração.
+- [ ] Confirmar entrega de um convite real e conclusão da criação de senha com uma destinatária do estúdio (depende de uma caixa de e-mail da destinatária).

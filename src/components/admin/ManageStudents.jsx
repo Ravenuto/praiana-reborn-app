@@ -30,12 +30,9 @@ const EMPTY_MANUAL = { name: "", email: "", phone: "", birth_date: "", plan: "4_
 
 export default function ManageStudents() {
   const queryClient = useQueryClient();
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviting, setInviting] = useState(false);
   const [manualDialog, setManualDialog] = useState(false);
   const [manualForm, setManualForm] = useState(EMPTY_MANUAL);
   const [savingManual, setSavingManual] = useState(false);
-  const [newAccess, setNewAccess] = useState(null);
   const [creditDialog, setCreditDialog] = useState(null);
   const [creditValue, setCreditValue] = useState(0);
   const [savingCredit, setSavingCredit] = useState(false);
@@ -45,7 +42,6 @@ export default function ManageStudents() {
   const [filterStatus, setFilterStatus] = useState("todas");
   const [expandedId, setExpandedId] = useState(null);
   const [paymentDialog, setPaymentDialog] = useState(null);
-  const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
   const [adminDialog, setAdminDialog] = useState(false);
   const [adminForm, setAdminForm] = useState({ name: "", email: "" });
@@ -69,29 +65,13 @@ export default function ManageStudents() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["allUsers"],
     queryFn: async () => {
-      const [allUsers, invites] = await Promise.all([
-        base44.entities.User.list(),
-        base44.entities.StudentInvitation.filter({ status: "pending" }),
-      ]);
-      // Marca convites pendentes como is_invited para a UI
-      const inviteRows = invites
-        .filter((inv) => !allUsers.some((u) => u.email === inv.email))
-        .map((inv) => ({
-          id: inv.id,
-          full_name: inv.full_name || "",
-          email: inv.email,
-          plan: inv.plan,
-          credits: inv.credits,
-          is_active: false,
-          is_invited: true,
-          role: "user",
-        }));
+      const allUsers = await base44.entities.User.list();
       // Flatten data field so a aluna ative apareça com os campos esperados
       const normalUsers = allUsers.map((u) => ({
         ...u,
         ...(u.data || {}),
       }));
-      return [...normalUsers, ...inviteRows];
+      return normalUsers;
     },
   });
 
@@ -115,29 +95,6 @@ export default function ManageStudents() {
       (filterStatus === "inativas" && s.is_active === false);
     return matchSearch && matchStatus;
   });
-
-  const handleInvite = async () => {
-    if (!inviteEmail.includes("@")) return toast.error("Email inválido");
-    setInviting(true);
-    try {
-      // Cria StudentInvitation com plano padrão
-      const defaultPlan = plans.find((p) => p.key === "4_aulas") || plans[0];
-      await base44.entities.StudentInvitation.create({
-        email: inviteEmail,
-        plan: defaultPlan?.key || "4_aulas",
-        credits: defaultPlan?.credits || 4,
-        status: "pending",
-        invited_date: new Date().toISOString(),
-      });
-      // Então convida o usuário
-      await base44.users.inviteUser(inviteEmail, "user");
-      setInviteEmail("");
-      toast.success("Convite enviado para " + inviteEmail);
-    } catch {
-      toast.error("Erro ao enviar convite");
-    }
-    setInviting(false);
-  };
 
   const handleSaveManual = async () => {
     if (!manualForm.name || !manualForm.email) return toast.error("Nome e email são obrigatórios");
@@ -175,8 +132,7 @@ export default function ManageStudents() {
       });
 
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      setNewAccess({ name: manualForm.name, password: created.temporaryPassword });
-      toast.success("Aluna cadastrada!");
+      toast.success(`Aluna cadastrada. Convite solicitado para ${created.email}.`);
       setManualDialog(false);
       setManualForm(EMPTY_MANUAL);
     } catch (err) {
@@ -187,12 +143,10 @@ export default function ManageStudents() {
   };
 
   const handleResetPassword = async (student) => {
-    if (!window.confirm(`Criar uma nova senha temporária para ${student.full_name || student.email}? A senha anterior deixará de funcionar.`)) return;
+    if (!window.confirm(`Enviar um link para ${student.email} criar uma nova senha? A senha atual continuará funcionando até ela concluir a alteração.`)) return;
     try {
-      const result = await base44.auth.resetToDefaultPassword(student.id);
-      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      setNewAccess({ name: student.full_name || student.email, password: result.temporaryPassword });
-      toast.success("Nova senha temporária criada.");
+      await base44.auth.sendPasswordLink(student.id);
+      toast.success(`Link solicitado para ${student.email}.`);
     } catch (err) {
       toast.error("Erro ao redefinir senha: " + (err?.message || "tente novamente"));
     }
@@ -216,8 +170,7 @@ export default function ManageStudents() {
           is_active: true,
           must_change_password: true,
         });
-        setNewAccess({ name: adminForm.name, password: created.temporaryPassword });
-        toast.success("Administrador criado!");
+        toast.success(`Administrador criado. Convite solicitado para ${created.email}.`);
       }
       setAdminForm({ name: "", email: "" });
       setAdminDialog(false);
@@ -259,8 +212,7 @@ export default function ManageStudents() {
           must_change_password: true,
           data: { full_name: teacherForm.name },
         });
-        setNewAccess({ name: teacherForm.name, password: created.temporaryPassword });
-        toast.success("Professora cadastrada!");
+        toast.success(`Professora cadastrada. Convite solicitado para ${created.email}.`);
       }
       setTeacherForm({ name: "", email: "" });
       setTeacherDialog(false);
@@ -312,9 +264,7 @@ export default function ManageStudents() {
   const handlePlanChange = async (student, plan) => {
     const selectedPlan = plans.find((p) => p.key === plan);
     const credits = selectedPlan?.credits || 4;
-    if (student.is_invited) {
-      await base44.entities.StudentInvitation.update(student.id, { plan, credits });
-    } else {
+    {
       const [freshUser] = await base44.entities.User.filter({ email: student.email }, "-created_date", 1);
       if (freshUser) {
         const cleanData = Object.fromEntries(
@@ -364,11 +314,6 @@ export default function ManageStudents() {
   };
 
   const handleToggleActive = async (student) => {
-    if (student.is_invited) {
-      // Para invites pendentes, não muda nada (permanecem inativos)
-      toast.info("Alunas com convite pendente não podem ser ativadas");
-      return;
-    }
     // Para usuários normais, apenas alterna o status
     const newStatus = student.is_active === false ? true : false;
     await base44.entities.User.update(student.id, {
@@ -379,38 +324,13 @@ export default function ManageStudents() {
   };
 
 
-  const handleResendInvite = async (student) => {
-    setResendingInvite(student.id);
-    try {
-      await base44.functions.invoke("resendInviteEmail", {
-        email: student.email,
-      });
-      toast.success("Email reenviado para " + student.email);
-    } catch {
-      toast.error("Erro ao reenviar email");
-    }
-    setResendingInvite(null);
-  };
-
   const handleDeleteStudent = async (student) => {
     if (!window.confirm(`Tem certeza que deseja deletar ${student.full_name || student.email}? Ela poderá se cadastrar novamente do zero.`)) {
       return;
     }
     setDeletingStudent(student.id);
     try {
-      if (student.is_invited) {
-        await base44.entities.StudentInvitation.delete(student.id);
-      } else {
-        // Deleta o usuário diretamente
-        await base44.entities.User.delete(student.id);
-        // Best-effort: também tenta no backend (se existir)
-        try {
-          await base44.functions.invoke("deleteStudent", {
-            userId: student.id,
-            email: student.email,
-          });
-        } catch { /* ignora se função não existir */ }
-      }
+      await base44.entities.User.delete(student.id);
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       toast.success("Aluna deletada com sucesso");
     } catch (err) {
@@ -668,8 +588,8 @@ export default function ManageStudents() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-base truncate leading-tight">{student.full_name || <span className="text-muted-foreground italic text-sm">Sem nome</span>}</p>
-                        {student.is_invited && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1"><Mail className="h-3 w-3" /> Email enviado</Badge>}
                         {isActive && !student.is_invited && <Badge className="bg-green-100 text-green-700 border-0 text-xs">Ativa</Badge>}
+                        {student.must_change_password && <Badge variant="secondary" className="text-xs">Aguardando senha</Badge>}
                         {!isActive && !student.is_invited && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Inativa</Badge>}
                         {isPaused && !student.is_invited && (
                           <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1">
@@ -739,24 +659,11 @@ export default function ManageStudents() {
                     >
                       <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
-                    {student.is_invited && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        title="Reenviar convite por email"
-                        onClick={() => handleResendInvite(student)}
-                        disabled={resendingInvite === student.id}
-                      >
-                        {resendingInvite === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5 text-primary" />}
-                      </Button>
-                    )}
                     <Button
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
-           title="Criar nova senha temporária"
+                      title={student.must_change_password ? "Reenviar link para criar senha" : "Enviar link para criar nova senha"}
                       onClick={() => handleResetPassword(student)}
                       disabled={student.is_invited}
                     >
@@ -870,7 +777,7 @@ export default function ManageStudents() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
-          Quem estiver aqui entra pela opção "Sou administrador" no login. Ao cadastrar, você recebe uma senha temporária individual para o primeiro acesso.
+          Quem estiver aqui entra pela opção "Sou administrador" no login. Ao cadastrar, a pessoa recebe um convite por e-mail para criar a senha.
         </p>
         <div className="space-y-2">
           {admins.map((a) => {
@@ -896,7 +803,7 @@ export default function ManageStudents() {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    title="Resetar senha"
+                    title="Enviar link para redefinir senha"
                     onClick={() => handleResetPassword(a)}
                   >
                     <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
@@ -962,7 +869,7 @@ export default function ManageStudents() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
-          A professora entra pela opção "Sou professora" no login. Ao cadastrar, você recebe uma senha temporária individual para o primeiro acesso. Ela também aparece para escolher em Horários › Professora.
+          A professora entra pela opção "Sou professora" no login. Ao cadastrar, ela recebe um convite por e-mail para criar a senha. Ela também aparece para escolher em Horários › Professora.
         </p>
         {teachers.length === 0 ? (
           <p className="text-xs text-muted-foreground">Nenhuma professora cadastrada ainda.</p>
@@ -985,7 +892,7 @@ export default function ManageStudents() {
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Editar nome" onClick={() => setStaffEdit({ ...t, full_name: t.full_name || "" })}>
                     <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Resetar senha" onClick={() => handleResetPassword(t)}>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Enviar link para redefinir senha" onClick={() => handleResetPassword(t)}>
                     <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Remover professora" onClick={() => handleRemoveTeacher(t)}>
@@ -1050,27 +957,6 @@ export default function ManageStudents() {
               {savingStaff ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!newAccess} onOpenChange={(open) => { if (!open) setNewAccess(null); }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Acesso de {newAccess?.name}</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">Envie esta senha temporária diretamente para a pessoa. Ela criará a própria senha no primeiro acesso. Anote antes de fechar: não será possível vê-la novamente.</p>
-          <div className="flex items-center gap-2 min-w-0">
-            <Input aria-label="Senha temporária" readOnly value={newAccess?.password || ""} className="font-mono text-sm min-w-0" onFocus={(event) => event.target.select()} />
-            <Button type="button" variant="outline" onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(newAccess?.password || "");
-                toast.success("Senha copiada.");
-              } catch {
-                toast.error("Selecione e copie a senha manualmente.");
-              }
-            }}>Copiar</Button>
-          </div>
-          <Button type="button" onClick={() => setNewAccess(null)}>Concluir</Button>
         </DialogContent>
       </Dialog>
 

@@ -4,9 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   adminCreateUser,
   adminDeleteUser,
-  adminSetPassword,
+  adminSendPasswordLink,
   adminSetRoles,
-  bootstrapAdmin,
 } from '@/lib/adminUsers.functions';
 
 const isBrowser = typeof window !== 'undefined';
@@ -232,7 +231,7 @@ const userEntity = {
       },
     });
     const user = (await userEntity.get(res.id)) || { id: res.id, ...payload };
-    return { ...user, temporaryPassword: res.temporaryPassword };
+    return { ...user, invitationSent: res.invitationSent };
   },
   async update(id, patch) {
     const { data: current, error } = await supabase
@@ -281,7 +280,6 @@ const entities = {
   PaymentHistory: makeEntity('PaymentHistory'),
   Holiday: makeEntity('Holiday'),
   StudioSettings: makeEntity('StudioSettings'),
-  StudentInvitation: makeEntity('StudentInvitation'),
   WaitlistEntry: makeEntity('WaitlistEntry'),
   Move: makeEntity('Move'),
   StudentMovePlan: makeEntity('StudentMovePlan'),
@@ -297,6 +295,8 @@ const SESSION_MARK = 'raissa_session_active';
 // Sem "manter conectado", a sessão termina quando o navegador é fechado.
 const enforceSessionOnly = async () => {
   if (!isBrowser) return;
+  // Invitation/recovery links establish a temporary session on this page.
+  if (window.location.pathname === '/criar-senha') return;
   try {
     const remember = window.localStorage.getItem(REMEMBER_KEY);
     const active = window.sessionStorage.getItem(SESSION_MARK);
@@ -322,16 +322,7 @@ const loadMe = async () => {
     supabase.from('profiles').select('*').eq('id', data.user.id).maybeSingle(),
     supabase.from('user_roles').select('user_id, role').eq('user_id', data.user.id),
   ]);
-  if (!profile) {
-    return {
-      id: data.user.id,
-      email: data.user.email,
-      full_name: '',
-      role: 'user',
-      is_active: true,
-      data: {},
-    };
-  }
+  if (!profile) throw new Error('Conta ainda não liberada pelo estúdio.');
   return fromProfile(profile, roleRows);
 };
 
@@ -350,19 +341,7 @@ const auth = {
     const remember = Boolean(args.remember);
     if (!email) throw new Error('Email obrigatório');
 
-    let { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    // Primeiro acesso do estúdio: cria a conta da administradora principal.
-    if (error && email === ADMIN_EMAIL) {
-      try {
-        const res = await bootstrapAdmin({ data: { email, password } });
-        if (res?.created) {
-          ({ error } = await supabase.auth.signInWithPassword({ email, password }));
-        }
-      } catch {
-        /* mantém o erro original */
-      }
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       const err = new Error('Email ou senha inválidos');
@@ -370,7 +349,13 @@ const auth = {
       throw err;
     }
 
-    const me = await loadMe();
+    let me;
+    try {
+      me = await loadMe();
+    } catch (profileError) {
+      await supabase.auth.signOut();
+      throw profileError;
+    }
     const isAdminAccount = me.is_admin === true;
     const isTeacherAccount = me.is_teacher === true;
     if (mode === 'admin' && !isAdminAccount) {
@@ -407,15 +392,17 @@ const auth = {
     if (!newPassword || String(newPassword).length < 6) {
       throw new Error('A senha deve ter pelo menos 6 caracteres');
     }
+    const id = await currentUserId();
+    if (!id) throw new Error('Sessão expirada. Abra novamente o link enviado por e-mail.');
     const { error } = await supabase.auth.updateUser({ password: String(newPassword) });
     if (error) throw new Error(error.message);
-    const id = await currentUserId();
-    if (id) await supabase.from('profiles').update({ must_change_password: false }).eq('id', id);
+    const { error: profileError } = await supabase.from('profiles').update({ must_change_password: false }).eq('id', id);
+    throwIf(profileError);
     return loadMe();
   },
 
-  async resetToDefaultPassword(userId) {
-    return adminSetPassword({ data: { userId } });
+  async sendPasswordLink(userId) {
+    return adminSendPasswordLink({ data: { userId } });
   },
 
   async register() {
@@ -443,7 +430,7 @@ const auth = {
   },
 
   async resetPasswordRequest(email) {
-    const redirectTo = isBrowser ? `${window.location.origin}/redefinir-senha` : undefined;
+    const redirectTo = 'https://praianapoledance-app.com.br/criar-senha?origem=recuperacao';
     const { error } = await supabase.auth.resetPasswordForEmail(String(email || '').trim().toLowerCase(), {
       redirectTo,
     });

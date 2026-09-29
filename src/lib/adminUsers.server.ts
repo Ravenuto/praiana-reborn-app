@@ -2,26 +2,10 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
-
-/** Unique first-access credential; never use a shared studio password. */
-export function generateTemporaryPassword() {
-  const bytes = new Uint8Array(18);
-  crypto.getRandomValues(bytes);
-  return `P-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
-}
+export const INVITE_REDIRECT = 'https://praianapoledance-app.com.br/criar-senha?origem=convite';
+export const RECOVERY_REDIRECT = 'https://praianapoledance-app.com.br/criar-senha?origem=recuperacao';
 
 export type StudioRole = 'admin' | 'teacher' | 'student';
-
-export async function assertCallerIsAdmin(userId: string) {
-  const { data, error } = await supabaseAdmin
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .eq('role', 'admin')
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error('Forbidden');
-}
 
 export async function findAuthUserByEmail(email: string) {
   const target = email.trim().toLowerCase();
@@ -54,43 +38,22 @@ export async function upsertProfile(userId: string, email: string, patch: Record
   if (error) throw new Error(error.message);
 }
 
-export async function createStudioUser(input: {
+/** An invited account has no password until the recipient opens the email link. */
+export async function inviteStudioUser(input: {
   email: string;
-  password: string;
   roles: StudioRole[];
   profile: Record<string, unknown>;
 }) {
   const email = input.email.trim().toLowerCase();
-  let userId: string;
-  const existing = await findAuthUserByEmail(email);
-  if (existing) {
-    userId = existing.id;
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      password: input.password,
-      email_confirm: true,
-    });
-    if (error) throw new Error(error.message);
-  } else {
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password: input.password,
-      email_confirm: true,
-      user_metadata: { full_name: input.profile['full_name'] ?? '' },
-    });
-    if (error) throw new Error(error.message);
-    userId = data.user!.id;
-  }
-  await upsertProfile(userId, email, input.profile);
+  const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+    redirectTo: INVITE_REDIRECT,
+    data: { full_name: input.profile['full_name'] ?? '' },
+  });
+  if (error) throw new Error(error.message);
+  const userId = data.user?.id;
+  if (!userId) throw new Error('O convite não retornou a conta criada.');
+  await upsertProfile(userId, email, { ...input.profile, must_change_password: true });
   await setRoles(userId, input.roles);
   return { id: userId, email };
 }
 
-export async function adminExists() {
-  const { data, error } = await supabaseAdmin
-    .from('user_roles')
-    .select('user_id')
-    .eq('role', 'admin')
-    .limit(1);
-  if (error) throw new Error(error.message);
-  return Boolean(data && data.length);
-}
