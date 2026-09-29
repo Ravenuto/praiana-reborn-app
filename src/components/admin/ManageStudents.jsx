@@ -42,7 +42,6 @@ export default function ManageStudents() {
   const [filterStatus, setFilterStatus] = useState("todas");
   const [expandedId, setExpandedId] = useState(null);
   const [paymentDialog, setPaymentDialog] = useState(null);
-  const [resendingInvite, setResendingInvite] = useState(null);
   const [deletingStudent, setDeletingStudent] = useState(null);
   const [adminDialog, setAdminDialog] = useState(false);
   const [adminForm, setAdminForm] = useState({ name: "", email: "" });
@@ -663,7 +662,7 @@ export default function ManageStudents() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
-            title="Enviar link para criar nova senha"
+                      title="Enviar link para criar nova senha"
                       onClick={() => handleResetPassword(student)}
                       disabled={student.is_invited}
                     >
