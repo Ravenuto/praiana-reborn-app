@@ -27,7 +27,7 @@ export const adminCreateUser = createServerFn({ method: 'POST' })
     return { ...user, invitationSent: true };
   });
 
-/** Envia um link de recuperação sem invalidar a senha atual. */
+/** Reenvia o convite pendente ou envia recuperação para contas já confirmadas. */
 export const adminSendPasswordLink = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { userId: string }) => input)
@@ -38,11 +38,22 @@ export const adminSendPasswordLink = createServerFn({ method: 'POST' })
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('email').eq('id', data.userId).single();
     if (profileError || !profile?.email) throw new Error('Conta não encontrada.');
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+    if (authError || !authUser.user || authUser.user.email?.toLowerCase() !== profile.email.toLowerCase()) {
+      throw new Error('Conta de acesso não encontrada.');
+    }
+    if (authUser.user.invited_at && !authUser.user.confirmed_at) {
+      const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(profile.email, {
+        redirectTo: helpers.INVITE_REDIRECT,
+      });
+      if (error) throw new Error(error.message);
+      return { ok: true, kind: 'invite' as const };
+    }
     const { error } = await supabaseAdmin.auth.resetPasswordForEmail(profile.email, {
       redirectTo: helpers.RECOVERY_REDIRECT,
     });
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return { ok: true, kind: 'recovery' as const };
   });
 
 /** Atualiza os papéis (aluna / professora / administradora) de uma conta. */

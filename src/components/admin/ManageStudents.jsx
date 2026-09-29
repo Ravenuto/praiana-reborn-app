@@ -49,6 +49,7 @@ export default function ManageStudents() {
   const [teacherDialog, setTeacherDialog] = useState(false);
   const [teacherForm, setTeacherForm] = useState({ name: "", email: "" });
   const [savingTeacher, setSavingTeacher] = useState(false);
+  const [sendingLinkId, setSendingLinkId] = useState(null);
   const [staffEdit, setStaffEdit] = useState(null);
   const [savingStaff, setSavingStaff] = useState(false);
   const [pausingId, setPausingId] = useState(null);
@@ -143,12 +144,22 @@ export default function ManageStudents() {
   };
 
   const handleResetPassword = async (student) => {
-    if (!window.confirm(`Enviar um link para ${student.email} criar uma nova senha? A senha atual continuará funcionando até ela concluir a alteração.`)) return;
+    if (sendingLinkId) return;
+    const pending = student.must_change_password === true;
+    const message = pending
+      ? `Reenviar o convite para ${student.email}? Se ela já aceitou o convite, receberá um link para criar uma nova senha.`
+      : `Enviar um link para ${student.email} criar uma nova senha? A senha atual continuará funcionando até ela concluir a alteração.`;
+    if (!window.confirm(message)) return;
+    setSendingLinkId(student.id);
     try {
-      await base44.auth.sendPasswordLink(student.id);
-      toast.success(`Link solicitado para ${student.email}.`);
+      const result = await base44.auth.sendPasswordLink(student.id);
+      toast.success(result.kind === 'invite'
+        ? `Convite reenviado para ${student.email}.`
+        : `Link para criar uma nova senha enviado para ${student.email}.`);
     } catch (err) {
-      toast.error("Erro ao redefinir senha: " + (err?.message || "tente novamente"));
+      toast.error("Não foi possível enviar o e-mail: " + (err?.message || "tente novamente"));
+    } finally {
+      setSendingLinkId(null);
     }
   };
 
@@ -665,9 +676,9 @@ export default function ManageStudents() {
                       className="h-8 w-8 p-0"
                       title={student.must_change_password ? "Reenviar link para criar senha" : "Enviar link para criar nova senha"}
                       onClick={() => handleResetPassword(student)}
-                      disabled={student.is_invited}
+                      disabled={student.is_invited || sendingLinkId !== null}
                     >
-                      <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+                      {sendingLinkId === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />}
                     </Button>
                     <Button
                       variant="ghost"
