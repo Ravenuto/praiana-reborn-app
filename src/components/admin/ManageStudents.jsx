@@ -132,7 +132,7 @@ export default function ManageStudents() {
       });
 
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success(`Aluna cadastrada. Convite enviado para ${created.email}.`);
+      toast.success(`Aluna cadastrada. Convite solicitado para ${created.email}.`);
       setManualDialog(false);
       setManualForm(EMPTY_MANUAL);
     } catch (err) {
@@ -146,7 +146,7 @@ export default function ManageStudents() {
     if (!window.confirm(`Enviar um link para ${student.email} criar uma nova senha? A senha atual continuará funcionando até ela concluir a alteração.`)) return;
     try {
       await base44.auth.sendPasswordLink(student.id);
-      toast.success(`Link enviado para ${student.email}.`);
+      toast.success(`Link solicitado para ${student.email}.`);
     } catch (err) {
       toast.error("Erro ao redefinir senha: " + (err?.message || "tente novamente"));
     }
@@ -170,7 +170,7 @@ export default function ManageStudents() {
           is_active: true,
           must_change_password: true,
         });
-        toast.success(`Administrador criado. Convite enviado para ${created.email}.`);
+        toast.success(`Administrador criado. Convite solicitado para ${created.email}.`);
       }
       setAdminForm({ name: "", email: "" });
       setAdminDialog(false);
@@ -589,6 +589,7 @@ export default function ManageStudents() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-base truncate leading-tight">{student.full_name || <span className="text-muted-foreground italic text-sm">Sem nome</span>}</p>
                         {isActive && !student.is_invited && <Badge className="bg-green-100 text-green-700 border-0 text-xs">Ativa</Badge>}
+                        {student.must_change_password && <Badge variant="secondary" className="text-xs">Aguardando senha</Badge>}
                         {!isActive && !student.is_invited && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Inativa</Badge>}
                         {isPaused && !student.is_invited && (
                           <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1">
@@ -662,7 +663,7 @@ export default function ManageStudents() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
-                      title="Enviar link para criar nova senha"
+                      title={student.must_change_password ? "Reenviar link para criar senha" : "Enviar link para criar nova senha"}
                       onClick={() => handleResetPassword(student)}
                       disabled={student.is_invited}
                     >
