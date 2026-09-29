@@ -30,12 +30,9 @@ const EMPTY_MANUAL = { name: "", email: "", phone: "", birth_date: "", plan: "4_
 
 export default function ManageStudents() {
   const queryClient = useQueryClient();
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviting, setInviting] = useState(false);
   const [manualDialog, setManualDialog] = useState(false);
   const [manualForm, setManualForm] = useState(EMPTY_MANUAL);
   const [savingManual, setSavingManual] = useState(false);
-  const [newAccess, setNewAccess] = useState(null);
   const [creditDialog, setCreditDialog] = useState(null);
   const [creditValue, setCreditValue] = useState(0);
   const [savingCredit, setSavingCredit] = useState(false);
@@ -69,29 +66,13 @@ export default function ManageStudents() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["allUsers"],
     queryFn: async () => {
-      const [allUsers, invites] = await Promise.all([
-        base44.entities.User.list(),
-        base44.entities.StudentInvitation.filter({ status: "pending" }),
-      ]);
-      // Marca convites pendentes como is_invited para a UI
-      const inviteRows = invites
-        .filter((inv) => !allUsers.some((u) => u.email === inv.email))
-        .map((inv) => ({
-          id: inv.id,
-          full_name: inv.full_name || "",
-          email: inv.email,
-          plan: inv.plan,
-          credits: inv.credits,
-          is_active: false,
-          is_invited: true,
-          role: "user",
-        }));
+      const allUsers = await base44.entities.User.list();
       // Flatten data field so a aluna ative apareça com os campos esperados
       const normalUsers = allUsers.map((u) => ({
         ...u,
         ...(u.data || {}),
       }));
-      return [...normalUsers, ...inviteRows];
+      return normalUsers;
     },
   });
 
@@ -115,29 +96,6 @@ export default function ManageStudents() {
       (filterStatus === "inativas" && s.is_active === false);
     return matchSearch && matchStatus;
   });
-
-  const handleInvite = async () => {
-    if (!inviteEmail.includes("@")) return toast.error("Email inválido");
-    setInviting(true);
-    try {
-      // Cria StudentInvitation com plano padrão
-      const defaultPlan = plans.find((p) => p.key === "4_aulas") || plans[0];
-      await base44.entities.StudentInvitation.create({
-        email: inviteEmail,
-        plan: defaultPlan?.key || "4_aulas",
-        credits: defaultPlan?.credits || 4,
-        status: "pending",
-        invited_date: new Date().toISOString(),
-      });
-      // Então convida o usuário
-      await base44.users.inviteUser(inviteEmail, "user");
-      setInviteEmail("");
-      toast.success("Convite enviado para " + inviteEmail);
-    } catch {
-      toast.error("Erro ao enviar convite");
-    }
-    setInviting(false);
-  };
 
   const handleSaveManual = async () => {
     if (!manualForm.name || !manualForm.email) return toast.error("Nome e email são obrigatórios");
@@ -307,9 +265,7 @@ export default function ManageStudents() {
   const handlePlanChange = async (student, plan) => {
     const selectedPlan = plans.find((p) => p.key === plan);
     const credits = selectedPlan?.credits || 4;
-    if (student.is_invited) {
-      await base44.entities.StudentInvitation.update(student.id, { plan, credits });
-    } else {
+    {
       const [freshUser] = await base44.entities.User.filter({ email: student.email }, "-created_date", 1);
       if (freshUser) {
         const cleanData = Object.fromEntries(
@@ -359,11 +315,6 @@ export default function ManageStudents() {
   };
 
   const handleToggleActive = async (student) => {
-    if (student.is_invited) {
-      // Para invites pendentes, não muda nada (permanecem inativos)
-      toast.info("Alunas com convite pendente não podem ser ativadas");
-      return;
-    }
     // Para usuários normais, apenas alterna o status
     const newStatus = student.is_active === false ? true : false;
     await base44.entities.User.update(student.id, {
@@ -391,9 +342,7 @@ export default function ManageStudents() {
     }
     setDeletingStudent(student.id);
     try {
-      if (student.is_invited) {
-        await base44.entities.StudentInvitation.delete(student.id);
-      } else {
+      {
         // Deleta o usuário diretamente
         await base44.entities.User.delete(student.id);
         // Best-effort: também tenta no backend (se existir)
@@ -661,7 +610,6 @@ export default function ManageStudents() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-base truncate leading-tight">{student.full_name || <span className="text-muted-foreground italic text-sm">Sem nome</span>}</p>
-                        {student.is_invited && <Badge className="bg-amber-100 text-amber-700 border-0 text-xs gap-1"><Mail className="h-3 w-3" /> Email enviado</Badge>}
                         {isActive && !student.is_invited && <Badge className="bg-green-100 text-green-700 border-0 text-xs">Ativa</Badge>}
                         {!isActive && !student.is_invited && <Badge className="bg-red-100 text-red-700 border-0 text-xs">Inativa</Badge>}
                         {isPaused && !student.is_invited && (
@@ -732,19 +680,6 @@ export default function ManageStudents() {
                     >
                       <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
-                    {student.is_invited && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        title="Reenviar convite por email"
-                        onClick={() => handleResendInvite(student)}
-                        disabled={resendingInvite === student.id}
-                      >
-                        {resendingInvite === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5 text-primary" />}
-                      </Button>
-                    )}
                     <Button
                       variant="ghost"
                       size="sm"

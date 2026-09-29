@@ -297,6 +297,8 @@ const SESSION_MARK = 'raissa_session_active';
 // Sem "manter conectado", a sessão termina quando o navegador é fechado.
 const enforceSessionOnly = async () => {
   if (!isBrowser) return;
+  // Invitation/recovery links establish a temporary session on this page.
+  if (window.location.pathname === '/criar-senha') return;
   try {
     const remember = window.localStorage.getItem(REMEMBER_KEY);
     const active = window.sessionStorage.getItem(SESSION_MARK);
@@ -322,16 +324,7 @@ const loadMe = async () => {
     supabase.from('profiles').select('*').eq('id', data.user.id).maybeSingle(),
     supabase.from('user_roles').select('user_id, role').eq('user_id', data.user.id),
   ]);
-  if (!profile) {
-    return {
-      id: data.user.id,
-      email: data.user.email,
-      full_name: '',
-      role: 'user',
-      is_active: true,
-      data: {},
-    };
-  }
+  if (!profile) throw new Error('Conta ainda não liberada pelo estúdio.');
   return fromProfile(profile, roleRows);
 };
 
