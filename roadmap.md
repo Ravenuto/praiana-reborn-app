@@ -4,3 +4,5 @@
 - [x] Corrigir cadastro e redefinição de acesso rejeitados pela senha padrão fraca.
 - [x] Substituir senhas temporárias por convites de acesso por e-mail e links de redefinição, mantendo o cadastro exclusivo da administração.
 - [ ] Confirmar entrega de um convite real e conclusão da criação de senha com uma destinatária do estúdio (depende de uma caixa de e-mail da destinatária).
+- [x] Preparar os modelos de e-mail do Studio Praiana para o domínio notify.praianapoledance-app.com.br.
+- [ ] Confirmar o domínio de envio no serviço de domínio (depende dos registros de confirmação da proprietária).

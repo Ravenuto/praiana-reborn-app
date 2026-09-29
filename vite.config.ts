@@ -5,8 +5,24 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { loadEnv } from "vite";
+import path from "node:path";
+
+// Populate server-only process.env without exposing these values through Vite's client defines.
+// The Lovable config wrapper separately handles VITE_-prefixed browser values.
+const mode = process.env.NODE_ENV === "production" ? "production" : "development";
+Object.assign(process.env, loadEnv(mode, process.cwd(), ""));
 
 export default defineConfig({
+  vite: {
+    resolve: {
+      alias: {
+        "entities/lib/decode.js": path.resolve(process.cwd(), "node_modules/entities/lib/decode.js"),
+        "entities/lib/encode.js": path.resolve(process.cwd(), "node_modules/entities/lib/encode.js"),
+        entities: path.resolve(process.cwd(), "node_modules/entities"),
+      },
+    },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
