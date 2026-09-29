@@ -39,7 +39,7 @@ export const adminSendPasswordLink = createServerFn({ method: 'POST' })
     const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('email').eq('id', data.userId).single();
     if (profileError || !profile?.email) throw new Error('Conta não encontrada.');
     const { error } = await supabaseAdmin.auth.resetPasswordForEmail(profile.email, {
-      redirectTo: helpers.INVITE_REDIRECT,
+      redirectTo: helpers.RECOVERY_REDIRECT,
     });
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -51,7 +51,8 @@ export const adminSetRoles = createServerFn({ method: 'POST' })
   .inputValidator((input: { userId: string; roles: Array<'admin' | 'teacher' | 'student'> }) => input)
   .handler(async ({ data, context }) => {
     const helpers = await import('@/lib/adminUsers.server');
-    await helpers.assertCallerIsAdmin(context.userId);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
+    if (roleError || !isAdmin) throw new Error('Forbidden');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: target } = await supabaseAdmin.from('profiles').select('email').eq('id', data.userId).maybeSingle();
     if (target?.email?.toLowerCase() === helpers.ADMIN_EMAIL && !data.roles.includes('admin')) throw new Error('A administradora principal não pode ser rebaixada.');
@@ -65,7 +66,8 @@ export const adminDeleteUser = createServerFn({ method: 'POST' })
   .inputValidator((input: { userId: string }) => input)
   .handler(async ({ data, context }) => {
     const helpers = await import('@/lib/adminUsers.server');
-    await helpers.assertCallerIsAdmin(context.userId);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
+    if (roleError || !isAdmin) throw new Error('Forbidden');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const { data: target } = await supabaseAdmin.from('profiles').select('email').eq('id', data.userId).maybeSingle();
     if (target?.email?.toLowerCase() === helpers.ADMIN_EMAIL) throw new Error('A administradora principal não pode ser removida.');

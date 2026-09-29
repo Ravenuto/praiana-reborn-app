@@ -26,6 +26,13 @@ export default function AcceptInvitation() {
 
       const tokenHash = query.get("token_hash");
       const type = query.get("type");
+      const expectedType = query.get("origem");
+      const hasRedirectSession = fragment.has("access_token") && fragment.has("refresh_token");
+      const isEmailLink = expectedType === "convite" || expectedType === "recuperacao" || hasRedirectSession;
+      if (!isEmailLink && !tokenHash) {
+        if (active) setStatus("invalid");
+        return;
+      }
       if (tokenHash && (type === "invite" || type === "recovery")) {
         const { error: tokenError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
         if (tokenError) {

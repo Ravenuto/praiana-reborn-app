@@ -428,7 +428,7 @@ const auth = {
   },
 
   async resetPasswordRequest(email) {
-    const redirectTo = 'https://praianapoledance-app.com.br/criar-senha';
+    const redirectTo = 'https://praianapoledance-app.com.br/criar-senha?origem=recuperacao';
     const { error } = await supabase.auth.resetPasswordForEmail(String(email || '').trim().toLowerCase(), {
       redirectTo,
     });
