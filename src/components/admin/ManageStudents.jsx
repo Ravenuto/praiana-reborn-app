@@ -325,34 +325,13 @@ export default function ManageStudents() {
   };
 
 
-  const handleResendInvite = async (student) => {
-    setResendingInvite(student.id);
-    try {
-      await base44.auth.sendPasswordLink(student.id);
-      toast.success("Email reenviado para " + student.email);
-    } catch (err) {
-      toast.error("Erro ao reenviar email: " + (err?.message || "tente novamente"));
-    }
-    setResendingInvite(null);
-  };
-
   const handleDeleteStudent = async (student) => {
     if (!window.confirm(`Tem certeza que deseja deletar ${student.full_name || student.email}? Ela poderá se cadastrar novamente do zero.`)) {
       return;
     }
     setDeletingStudent(student.id);
     try {
-      {
-        // Deleta o usuário diretamente
-        await base44.entities.User.delete(student.id);
-        // Best-effort: também tenta no backend (se existir)
-        try {
-          await base44.functions.invoke("deleteStudent", {
-            userId: student.id,
-            email: student.email,
-          });
-        } catch { /* ignora se função não existir */ }
-      }
+      await base44.entities.User.delete(student.id);
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       toast.success("Aluna deletada com sucesso");
     } catch (err) {
