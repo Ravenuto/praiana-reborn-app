@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "Praiana App"
+const SITE_NAME = "Studio Praiana Pole Dance"
 const ROOT_DOMAIN = "praianapoledance-app.com.br"
 
 // Sample data for preview mode ONLY (not used in actual email sending).
