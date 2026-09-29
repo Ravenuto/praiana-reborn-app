@@ -1,3 +1,4 @@
 - Keep manual class roster operations in a shared booking helper because Horários and Presenças must apply the same credit, capacity, and waitlist rules.
 - Store guest attendance as Booking records with guest_type and a synthetic non-deliverable identity because a guest must occupy a seat without requiring an account.
-- Generate first-access and reset passwords per account on the server and display them only to the administrator; shared predictable passwords are rejected by auth and unsafe.
+- Invite studio accounts by email and let each recipient set their own password through a one-time auth link; shared credentials and administrator-visible passwords are unsafe.
+- Keep studio account invitations and role changes behind a server-validated administrator role; client-side account labels alone cannot authorize privileged changes.
