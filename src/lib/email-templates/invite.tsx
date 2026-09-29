@@ -2,6 +2,7 @@ import {
   Body,
   Button,
   Container,
+  Head,
   Heading,
   Html,
   Link,
@@ -22,16 +23,19 @@ export const InviteEmail = ({
   confirmationUrl,
 }: InviteEmailProps) => (
   <Html lang="pt-BR" dir="ltr">
-    <Preview>Seu convite para o {siteName}</Preview>
+    <Head>
+      <meta charSet="UTF-8" />
+    </Head>
+    <Preview>Crie sua senha para acessar o {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Text style={brand}>STUDIO <span style={accent}>PRAIANA</span> POLE DANCE</Text>
-        <Heading style={h1}>Seu convite chegou</Heading>
+        <Heading style={h1}>Você recebeu um convite</Heading>
         <Text style={text}>
-          Você recebeu um convite para acessar o{' '}
+          O Studio Praiana Pole Dance convidou você para acessar o{' '}
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
-          </Link>. Para entrar pela primeira vez, abra o link abaixo e crie sua senha.
+          </Link>. Clique no botão abaixo para aceitar o convite e criar sua senha.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Aceitar convite e criar senha
