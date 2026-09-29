@@ -175,8 +175,7 @@ export default function ManageStudents() {
       });
 
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      setNewAccess({ name: manualForm.name, password: created.temporaryPassword });
-      toast.success("Aluna cadastrada!");
+      toast.success(`Aluna cadastrada. Convite enviado para ${created.email}.`);
       setManualDialog(false);
       setManualForm(EMPTY_MANUAL);
     } catch (err) {
@@ -187,12 +186,10 @@ export default function ManageStudents() {
   };
 
   const handleResetPassword = async (student) => {
-    if (!window.confirm(`Criar uma nova senha temporária para ${student.full_name || student.email}? A senha anterior deixará de funcionar.`)) return;
+    if (!window.confirm(`Enviar um link para ${student.email} criar uma nova senha? A senha atual continuará funcionando até ela concluir a alteração.`)) return;
     try {
-      const result = await base44.auth.resetToDefaultPassword(student.id);
-      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      setNewAccess({ name: student.full_name || student.email, password: result.temporaryPassword });
-      toast.success("Nova senha temporária criada.");
+      await base44.auth.sendPasswordLink(student.id);
+      toast.success(`Link enviado para ${student.email}.`);
     } catch (err) {
       toast.error("Erro ao redefinir senha: " + (err?.message || "tente novamente"));
     }
@@ -216,8 +213,7 @@ export default function ManageStudents() {
           is_active: true,
           must_change_password: true,
         });
-        setNewAccess({ name: adminForm.name, password: created.temporaryPassword });
-        toast.success("Administrador criado!");
+        toast.success(`Administrador criado. Convite enviado para ${created.email}.`);
       }
       setAdminForm({ name: "", email: "" });
       setAdminDialog(false);
@@ -259,8 +255,7 @@ export default function ManageStudents() {
           must_change_password: true,
           data: { full_name: teacherForm.name },
         });
-        setNewAccess({ name: teacherForm.name, password: created.temporaryPassword });
-        toast.success("Professora cadastrada!");
+        toast.success(`Professora cadastrada. Convite enviado para ${created.email}.`);
       }
       setTeacherForm({ name: "", email: "" });
       setTeacherDialog(false);
@@ -382,12 +377,10 @@ export default function ManageStudents() {
   const handleResendInvite = async (student) => {
     setResendingInvite(student.id);
     try {
-      await base44.functions.invoke("resendInviteEmail", {
-        email: student.email,
-      });
+      await base44.auth.sendPasswordLink(student.id);
       toast.success("Email reenviado para " + student.email);
-    } catch {
-      toast.error("Erro ao reenviar email");
+    } catch (err) {
+      toast.error("Erro ao reenviar email: " + (err?.message || "tente novamente"));
     }
     setResendingInvite(null);
   };
@@ -756,7 +749,7 @@ export default function ManageStudents() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
-           title="Criar nova senha temporária"
+            title="Enviar link para criar nova senha"
                       onClick={() => handleResetPassword(student)}
                       disabled={student.is_invited}
                     >
@@ -870,7 +863,7 @@ export default function ManageStudents() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
-          Quem estiver aqui entra pela opção "Sou administrador" no login. Ao cadastrar, você recebe uma senha temporária individual para o primeiro acesso.
+          Quem estiver aqui entra pela opção "Sou administrador" no login. Ao cadastrar, a pessoa recebe um convite por e-mail para criar a senha.
         </p>
         <div className="space-y-2">
           {admins.map((a) => {
@@ -896,7 +889,7 @@ export default function ManageStudents() {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    title="Resetar senha"
+                    title="Enviar link para redefinir senha"
                     onClick={() => handleResetPassword(a)}
                   >
                     <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
@@ -962,7 +955,7 @@ export default function ManageStudents() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
-          A professora entra pela opção "Sou professora" no login. Ao cadastrar, você recebe uma senha temporária individual para o primeiro acesso. Ela também aparece para escolher em Horários › Professora.
+          A professora entra pela opção "Sou professora" no login. Ao cadastrar, ela recebe um convite por e-mail para criar a senha. Ela também aparece para escolher em Horários › Professora.
         </p>
         {teachers.length === 0 ? (
           <p className="text-xs text-muted-foreground">Nenhuma professora cadastrada ainda.</p>
@@ -985,7 +978,7 @@ export default function ManageStudents() {
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Editar nome" onClick={() => setStaffEdit({ ...t, full_name: t.full_name || "" })}>
                     <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Resetar senha" onClick={() => handleResetPassword(t)}>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Enviar link para redefinir senha" onClick={() => handleResetPassword(t)}>
                     <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Remover professora" onClick={() => handleRemoveTeacher(t)}>
@@ -1050,27 +1043,6 @@ export default function ManageStudents() {
               {savingStaff ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!newAccess} onOpenChange={(open) => { if (!open) setNewAccess(null); }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Acesso de {newAccess?.name}</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">Envie esta senha temporária diretamente para a pessoa. Ela criará a própria senha no primeiro acesso. Anote antes de fechar: não será possível vê-la novamente.</p>
-          <div className="flex items-center gap-2 min-w-0">
-            <Input aria-label="Senha temporária" readOnly value={newAccess?.password || ""} className="font-mono text-sm min-w-0" onFocus={(event) => event.target.select()} />
-            <Button type="button" variant="outline" onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(newAccess?.password || "");
-                toast.success("Senha copiada.");
-              } catch {
-                toast.error("Selecione e copie a senha manualmente.");
-              }
-            }}>Copiar</Button>
-          </div>
-          <Button type="button" onClick={() => setNewAccess(null)}>Concluir</Button>
         </DialogContent>
       </Dialog>
 
