@@ -676,9 +676,9 @@ export default function ManageStudents() {
                       className="h-8 w-8 p-0"
                       title={student.must_change_password ? "Reenviar link para criar senha" : "Enviar link para criar nova senha"}
                       onClick={() => handleResetPassword(student)}
-                       disabled={student.is_invited || sendingLinkId !== null}
+                      disabled={student.is_invited || sendingLinkId !== null}
                     >
-                       {sendingLinkId === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />}
+                      {sendingLinkId === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />}
                     </Button>
                     <Button
                       variant="ghost"
