@@ -395,7 +395,9 @@ const auth = {
     const { error } = await supabase.auth.updateUser({ password: String(newPassword) });
     if (error) throw new Error(error.message);
     const id = await currentUserId();
-    if (id) await supabase.from('profiles').update({ must_change_password: false }).eq('id', id);
+    if (!id) throw new Error('Sessão expirada. Abra novamente o link enviado por e-mail.');
+    const { error: profileError } = await supabase.from('profiles').update({ must_change_password: false }).eq('id', id);
+    throwIf(profileError);
     return loadMe();
   },
 

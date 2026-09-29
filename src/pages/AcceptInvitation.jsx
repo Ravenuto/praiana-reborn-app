@@ -28,8 +28,12 @@ export default function AcceptInvitation() {
       const type = query.get("type");
       const expectedType = query.get("origem");
       const hasRedirectSession = fragment.has("access_token") && fragment.has("refresh_token");
-      const isEmailLink = expectedType === "convite" || expectedType === "recuperacao" || hasRedirectSession;
+      const isEmailLink = hasRedirectSession || expectedType === "convite" || expectedType === "recuperacao";
       if (!isEmailLink && !tokenHash) {
+        if (active) setStatus("invalid");
+        return;
+      }
+      if (tokenHash && type !== "invite" && type !== "recovery") {
         if (active) setStatus("invalid");
         return;
       }
@@ -44,6 +48,16 @@ export default function AcceptInvitation() {
       const { data, error: sessionError } = await supabase.auth.getSession();
       if (!active) return;
       if (sessionError || !data.session) {
+        setStatus("invalid");
+        return;
+      }
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", data.session.user.id)
+        .maybeSingle();
+      if (!active) return;
+      if (profileError || !profile) {
         setStatus("invalid");
         return;
       }
