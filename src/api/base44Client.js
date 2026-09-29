@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   adminCreateUser,
   adminDeleteUser,
-  adminSetPassword,
+  adminSendPasswordLink,
   adminSetRoles,
   bootstrapAdmin,
 } from '@/lib/adminUsers.functions';
@@ -232,7 +232,7 @@ const userEntity = {
       },
     });
     const user = (await userEntity.get(res.id)) || { id: res.id, ...payload };
-    return { ...user, temporaryPassword: res.temporaryPassword };
+    return { ...user, invitationSent: res.invitationSent };
   },
   async update(id, patch) {
     const { data: current, error } = await supabase
@@ -414,8 +414,8 @@ const auth = {
     return loadMe();
   },
 
-  async resetToDefaultPassword(userId) {
-    return adminSetPassword({ data: { userId } });
+  async sendPasswordLink(userId) {
+    return adminSendPasswordLink({ data: { userId } });
   },
 
   async register() {
@@ -443,7 +443,7 @@ const auth = {
   },
 
   async resetPasswordRequest(email) {
-    const redirectTo = isBrowser ? `${window.location.origin}/redefinir-senha` : undefined;
+    const redirectTo = 'https://praianapoledance-app.com.br/criar-senha';
     const { error } = await supabase.auth.resetPasswordForEmail(String(email || '').trim().toLowerCase(), {
       redirectTo,
     });

@@ -37,35 +37,36 @@ export const adminCreateUser = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data, context }) => {
     const helpers = await import('@/lib/adminUsers.server');
-    await helpers.assertCallerIsAdmin(context.userId);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
+    if (roleError || !isAdmin) throw new Error('Forbidden');
     if (!data.email) throw new Error('E-mail obrigatório');
     if (await helpers.findAuthUserByEmail(data.email)) {
       throw new Error('Este e-mail já está cadastrado. Use a opção de redefinir senha no cadastro existente.');
     }
-    const password = helpers.generateTemporaryPassword();
-    const user = await helpers.createStudioUser({
+    const user = await helpers.inviteStudioUser({
       email: data.email,
-      password,
       roles: data.roles?.length ? data.roles : ['student'],
       profile: data.profile || {},
     });
-    return { ...user, temporaryPassword: password };
+    return { ...user, invitationSent: true };
   });
 
-/** Define uma nova senha temporária exclusiva para uma conta. */
-export const adminSetPassword = createServerFn({ method: 'POST' })
+/** Envia um link de recuperação sem invalidar a senha atual. */
+export const adminSendPasswordLink = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { userId: string }) => input)
   .handler(async ({ data, context }) => {
     const helpers = await import('@/lib/adminUsers.server');
-    await helpers.assertCallerIsAdmin(context.userId);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
+    if (roleError || !isAdmin) throw new Error('Forbidden');
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const password = helpers.generateTemporaryPassword();
-    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, { password });
+    const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('email').eq('id', data.userId).single();
+    if (profileError || !profile?.email) throw new Error('Conta não encontrada.');
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(profile.email, {
+      redirectTo: helpers.INVITE_REDIRECT,
+    });
     if (error) throw new Error(error.message);
-    const { error: profileError } = await supabaseAdmin.from('profiles').update({ must_change_password: true }).eq('id', data.userId);
-    if (profileError) throw new Error(profileError.message);
-    return { ok: true, temporaryPassword: password };
+    return { ok: true };
   });
 
 /** Atualiza os papéis (aluna / professora / administradora) de uma conta. */

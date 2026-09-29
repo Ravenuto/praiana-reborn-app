@@ -2,6 +2,7 @@
 import { supabaseAdmin } from '@/integrations/supabase/client.server';
 
 export const ADMIN_EMAIL = 'ravenutto@gmail.com';
+export const INVITE_REDIRECT = 'https://praianapoledance-app.com.br/criar-senha';
 
 /** Unique first-access credential; never use a shared studio password. */
 export function generateTemporaryPassword() {
@@ -81,6 +82,25 @@ export async function createStudioUser(input: {
     userId = data.user!.id;
   }
   await upsertProfile(userId, email, input.profile);
+  await setRoles(userId, input.roles);
+  return { id: userId, email };
+}
+
+/** An invited account has no password until the recipient opens the email link. */
+export async function inviteStudioUser(input: {
+  email: string;
+  roles: StudioRole[];
+  profile: Record<string, unknown>;
+}) {
+  const email = input.email.trim().toLowerCase();
+  const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+    redirectTo: INVITE_REDIRECT,
+    data: { full_name: input.profile['full_name'] ?? '' },
+  });
+  if (error) throw new Error(error.message);
+  const userId = data.user?.id;
+  if (!userId) throw new Error('O convite não retornou a conta criada.');
+  await upsertProfile(userId, email, { ...input.profile, must_change_password: true });
   await setRoles(userId, input.roles);
   return { id: userId, email };
 }
