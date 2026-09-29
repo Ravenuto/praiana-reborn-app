@@ -1,30 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 
-/** Cria a conta da administradora principal na primeira vez que o app roda. */
-export const bootstrapAdmin = createServerFn({ method: 'POST' })
-  .inputValidator((input: { email: string; password: string }) => input)
-  .handler(async ({ data }) => {
-    const helpers = await import('@/lib/adminUsers.server');
-    const email = (data.email || '').trim().toLowerCase();
-    if (email !== helpers.ADMIN_EMAIL) throw new Error('Forbidden');
-    if (await helpers.adminExists()) return { created: false };
-    const password = String(data.password || '');
-    if (password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres');
-    await helpers.createStudioUser({
-      email,
-      password,
-      roles: ['admin'],
-      profile: {
-        full_name: 'Raissa Venuto',
-        is_active: true,
-        must_change_password: true,
-        plan_status: 'active',
-      },
-    });
-    return { created: true };
-  });
-
 /** Cria (ou reativa) uma conta de aluna, professora ou administradora. */
 export const adminCreateUser = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
@@ -76,6 +52,9 @@ export const adminSetRoles = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const helpers = await import('@/lib/adminUsers.server');
     await helpers.assertCallerIsAdmin(context.userId);
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: target } = await supabaseAdmin.from('profiles').select('email').eq('id', data.userId).maybeSingle();
+    if (target?.email?.toLowerCase() === helpers.ADMIN_EMAIL && !data.roles.includes('admin')) throw new Error('A administradora principal não pode ser rebaixada.');
     await helpers.setRoles(data.userId, data.roles || ['student']);
     return { ok: true };
   });
@@ -88,6 +67,8 @@ export const adminDeleteUser = createServerFn({ method: 'POST' })
     const helpers = await import('@/lib/adminUsers.server');
     await helpers.assertCallerIsAdmin(context.userId);
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: target } = await supabaseAdmin.from('profiles').select('email').eq('id', data.userId).maybeSingle();
+    if (target?.email?.toLowerCase() === helpers.ADMIN_EMAIL) throw new Error('A administradora principal não pode ser removida.');
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
     if (error) throw new Error(error.message);
     return { ok: true };

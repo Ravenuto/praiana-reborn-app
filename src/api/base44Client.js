@@ -6,7 +6,6 @@ import {
   adminDeleteUser,
   adminSendPasswordLink,
   adminSetRoles,
-  bootstrapAdmin,
 } from '@/lib/adminUsers.functions';
 
 const isBrowser = typeof window !== 'undefined';
@@ -281,7 +280,6 @@ const entities = {
   PaymentHistory: makeEntity('PaymentHistory'),
   Holiday: makeEntity('Holiday'),
   StudioSettings: makeEntity('StudioSettings'),
-  StudentInvitation: makeEntity('StudentInvitation'),
   WaitlistEntry: makeEntity('WaitlistEntry'),
   Move: makeEntity('Move'),
   StudentMovePlan: makeEntity('StudentMovePlan'),
@@ -343,19 +341,7 @@ const auth = {
     const remember = Boolean(args.remember);
     if (!email) throw new Error('Email obrigatório');
 
-    let { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    // Primeiro acesso do estúdio: cria a conta da administradora principal.
-    if (error && email === ADMIN_EMAIL) {
-      try {
-        const res = await bootstrapAdmin({ data: { email, password } });
-        if (res?.created) {
-          ({ error } = await supabase.auth.signInWithPassword({ email, password }));
-        }
-      } catch {
-        /* mantém o erro original */
-      }
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       const err = new Error('Email ou senha inválidos');
@@ -363,7 +349,13 @@ const auth = {
       throw err;
     }
 
-    const me = await loadMe();
+    let me;
+    try {
+      me = await loadMe();
+    } catch (profileError) {
+      await supabase.auth.signOut();
+      throw profileError;
+    }
     const isAdminAccount = me.is_admin === true;
     const isTeacherAccount = me.is_teacher === true;
     if (mode === 'admin' && !isAdminAccount) {
