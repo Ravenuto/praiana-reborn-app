@@ -105,25 +105,11 @@ export default function About() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
               >
-                <div className="rounded-xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow">
-                  {ct.image_url ? (
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={ct.image_url}
-                        alt={ct.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      className="aspect-[4/3] flex items-center justify-center"
-                      style={{ backgroundColor: ct.color || "hsl(320, 45%, 45%)", opacity: 0.15 }}
-                    />
-                  )}
-                  <div className="p-4">
+                <div className="border-b border-border py-5">
+                  <div>
                     <h3 className="font-heading text-lg font-semibold">{ct.name}</h3>
                     {ct.description && (
-                      <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                         {ct.description}
                       </p>
                     )}

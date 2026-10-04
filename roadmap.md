@@ -10,3 +10,7 @@
 - [x] Criar controle mensal no admin: mensalistas ativas com preço do plano e ajuste por mês; planos de vários meses com total recebido dividido em retiradas até o fim, mesmo se inativas.
 - [x] Conferir privacidade e funcionamento do controle mensal no computador e no celular.
 - [x] Iniciar parcelas na data do plano atual e calcular automaticamente a validade pelos meses de calendário.
+- [x] Mostrar plano inativo com orientação e WhatsApp configurado.
+- [x] Fazer notificações de alunas serem marcadas como lidas sem remover o histórico.
+- [x] Explicar e validar número e caractere especial na criação de senha.
+- [x] Exibir modalidades só com nome e descrição, sem imagens.

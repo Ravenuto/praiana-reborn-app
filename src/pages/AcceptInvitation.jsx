@@ -71,7 +71,7 @@ export default function AcceptInvitation() {
   const savePassword = async (event) => {
     event.preventDefault();
     setError("");
-    if (password.length < 6) return setError("A senha deve ter pelo menos 6 caracteres.");
+    if (password.length < 6 || !/\d/.test(password) || !/[^\p{L}\p{N}\s]/u.test(password)) return setError("A senha deve ter pelo menos 6 caracteres, um número e um caractere especial.");
     if (password !== confirmation) return setError("As senhas não coincidem.");
     setStatus("saving");
     try {
@@ -105,6 +105,7 @@ export default function AcceptInvitation() {
           <div className="space-y-2">
             <Label htmlFor="invite-password">Nova senha</Label>
             <Input id="invite-password" type="password" autoComplete="new-password" minLength={6} value={password} onChange={(event) => setPassword(event.target.value)} required />
+            <p className="text-xs text-muted-foreground">Use pelo menos 6 caracteres, incluindo um número e um caractere especial (como ! ou @).</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="invite-confirmation">Confirme a senha</Label>

@@ -2,8 +2,12 @@ import React from "react";
 import { Heart, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
+import { useSiteContent } from "@/lib/siteContent";
 
 export default function InactivePlanScreen() {
+  const content = useSiteContent();
+  const whatsappUrl = content.content_home_whatsapp_url;
+  const hasWhatsapp = /^https:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(whatsappUrl || "") && !/9999999999/.test(whatsappUrl);
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="max-w-sm w-full text-center space-y-6">
@@ -15,20 +19,20 @@ export default function InactivePlanScreen() {
             Studio Praiana Pole Dance
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Oii! Seu acesso ainda está sendo liberado. 💙
+            Seu plano está inativo no momento. 💙
           </p>
           <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-            Assim que sua professora confirmar seu plano, você já poderá agendar suas aulas normalmente. Se tiver dúvidas, entre em contato!
+            Para reativar seu plano e voltar a acessar as aulas, entre em contato com o estúdio pelo WhatsApp.
           </p>
         </div>
         <div className="flex flex-col gap-3">
-          <Button
-            className="rounded-full gap-2"
-            onClick={() => window.open("https://wa.me/55", "_blank")}
-          >
-            <Phone className="w-4 h-4" />
-            Falar pelo WhatsApp
-          </Button>
+          {hasWhatsapp && (
+            <Button asChild className="rounded-full gap-2">
+              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                <Phone className="w-4 h-4" /> Falar pelo WhatsApp
+              </a>
+            </Button>
+          )}
           <Button
             variant="ghost"
             className="text-muted-foreground text-sm"

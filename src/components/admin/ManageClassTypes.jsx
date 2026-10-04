@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { notifyAllStudents } from "@/hooks/useNotifications";
 
-const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, image_url: "", color: "#c2185b", show_in_app: true };
+const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, color: "#c2185b", show_in_app: true };
 
 export default function ManageClassTypes() {
   const queryClient = useQueryClient();
@@ -19,8 +19,6 @@ export default function ManageClassTypes() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [uploadingImg, setUploadingImg] = useState(false);
-  const fileRef = useRef(null);
 
   const { data: classTypes = [], isLoading } = useQuery({
     queryKey: ["classTypes"],
@@ -62,26 +60,11 @@ export default function ManageClassTypes() {
       description: ct.description || "",
       duration_minutes: ct.duration_minutes || 60,
       max_students: ct.max_students || 8,
-      image_url: ct.image_url || "",
       color: ct.color || "#c2185b",
       show_in_app: ct.show_in_app !== false,
     });
     setEditingId(ct.id);
     setOpen(true);
-  };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingImg(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setForm((f) => ({ ...f, image_url: file_url }));
-      toast.success("Imagem carregada!");
-    } catch {
-      toast.error("Erro ao carregar imagem");
-    }
-    setUploadingImg(false);
   };
 
   const handleDelete = async (id) => {
@@ -123,40 +106,6 @@ export default function ManageClassTypes() {
                   <Label>Máx. Alunas</Label>
                   <Input type="number" value={form.max_students} onChange={(e) => setForm({ ...form, max_students: parseInt(e.target.value) || 8 })} />
                 </div>
-              </div>
-              <div>
-                <Label>Imagem</Label>
-                <div className="mt-1 flex items-center gap-3">
-                  {form.image_url ? (
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden border">
-                      <img src={form.image_url} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, image_url: "" }))}
-                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileRef.current?.click()}
-                      className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-                    >
-                      {uploadingImg ? <Loader2 className="h-5 w-5 animate-spin" /> : <><ImagePlus className="h-5 w-5" /><span className="text-xs mt-1">Foto</span></>}
-                    </button>
-                  )}
-                  <div className="flex-1">
-                    <Input
-                      value={form.image_url}
-                      onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                      placeholder="Ou cole a URL..."
-                      className="text-xs"
-                    />
-                  </div>
-                </div>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </div>
               <label className="flex items-center gap-2 text-sm cursor-pointer select-none p-3 rounded-xl bg-muted/30 border border-border">
                 <input
