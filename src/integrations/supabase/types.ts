@@ -44,6 +44,47 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_forecast_entries: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          installments: number
+          kind: string
+          month: string
+          plan_key: string
+          student_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          installments?: number
+          kind: string
+          month: string
+          plan_key?: string
+          student_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          installments?: number
+          kind?: string
+          month?: string
+          plan_key?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_forecast_entries_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active_plan_id: string | null

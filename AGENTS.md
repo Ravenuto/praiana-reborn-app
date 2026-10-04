@@ -3,3 +3,4 @@
 - Invite studio accounts by email and let each recipient set their own password through a one-time auth link; shared credentials and administrator-visible passwords are unsafe.
 - Keep studio account invitations and role changes behind a server-validated administrator role; client-side account labels alone cannot authorize privileged changes.
 - Keep authentication email templates in the managed Lovable email scaffold, with shared brand styling and signed email links untouched, because invitation and recovery must remain secure and consistent.
+- Store monthly financial overrides and prepaid plan allocations in an admin-only table, not generic app records, because students and teachers can read those records.
