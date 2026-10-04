@@ -6,3 +6,4 @@
 - Store monthly financial overrides and prepaid plan allocations in an admin-only table, not generic app records, because students and teachers can read those records.
 - Calculate standard plan expirations by calendar months in the shared duration helper, retaining day-based custom durations and manual extensions, so billing dates remain aligned with the plan start.
 - Change recipient notification read/deletion state through an authenticated recipient-checked server function because studio-created records may not be owned by the student receiving them.
+- Persist modality display positions on ClassType records and share their sorting helper between Admin and Sobre because both views must show the same order.
