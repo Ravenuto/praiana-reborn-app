@@ -536,7 +536,7 @@ export default function ManageStudents() {
     if (editDialog.student.is_invited) {
       return toast.error("Não é possível editar convites pendentes");
     }
-    const planChanged = editDialog.student.plan !== (student.plan || student.data?.plan);
+    const planChanged = editDialog.student.plan !== editDialog.originalPlan;
     const selectedPlan = plans.find((p) => p.key === editDialog.student.plan);
     let amountCents = null;
     if (planChanged && getInstallments(selectedPlan) > 1) {
@@ -706,7 +706,7 @@ export default function ManageStudents() {
                       size="sm"
                       className="h-8 w-8 p-0"
                       title="Editar detalhes"
-                      onClick={() => setEditDialog({ student, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "", plan_end_date: student.plan_end_date || "", daysToAdd: "" })}
+                      onClick={() => setEditDialog({ student, originalPlan: student.plan, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "", plan_end_date: student.plan_end_date || "", daysToAdd: "" })}
                       disabled={student.is_invited}
                     >
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
