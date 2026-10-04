@@ -14,7 +14,7 @@ export default function About() {
     queryKey: ["classTypes"],
     queryFn: async () => {
       const list = await base44.entities.ClassType.filter({ is_active: true });
-      return sortClassTypes(list.filter((ct) => ct.show_in_app !== false));
+      return list;
     }
   });
 
@@ -91,7 +91,7 @@ export default function About() {
       </section>
 
       {/* Modalidades */}
-      {classTypes.length > 0 && (
+      {classTypes.some((ct) => ct.is_active !== false && ct.show_in_app !== false) && (
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
           <div className="text-center mb-12">
             <h2 className="font-heading text-3xl font-bold">{c.content_about_modalities_title}</h2>
@@ -99,7 +99,7 @@ export default function About() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classTypes.map((ct, i) =>
+            {sortClassTypes(classTypes.filter((ct) => ct.is_active !== false && ct.show_in_app !== false)).map((ct, i) =>
               <motion.div
                 key={ct.id}
                 initial={{ opacity: 0, y: 20 }}
