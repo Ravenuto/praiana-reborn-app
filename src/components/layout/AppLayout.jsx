@@ -7,7 +7,7 @@ import InactivePlanScreen from "@/components/shared/InactivePlanScreen";
 
 const isPlanInactive = (u) => {
   const d = { ...(u || {}), ...((u && u.data) || {}) };
-  if (d.is_active === false) return true;
+  if (u?.is_active === false) return true;
   if (d.plan === "rejected") return true;
   if (d.plan_status && d.plan_status !== "active") return true;
   if (d.plan_end_date) {
