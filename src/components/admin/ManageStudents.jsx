@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44, ADMIN_EMAIL } from "@/api/base44Client";
+import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, 
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { addDaysISO, getDurationDays, daysLeft, durationLabel } from "@/lib/planDuration";
+import { addDaysISO, getDurationDays, daysLeft, durationLabel, getInstallments } from "@/lib/planDuration";
 import { pausedDays, pauseToday, daysBetweenISO } from "@/lib/planPause";
 import { promoteFromWaitlist } from "@/lib/waitlist";
 
@@ -26,7 +27,7 @@ const safeFormat = (value, fmt, opts) => {
   try { return format(d, fmt, opts); } catch { return "—"; }
 };
 
-const EMPTY_MANUAL = { name: "", email: "", phone: "", birth_date: "", plan: "4_aulas", credits: 4 };
+const EMPTY_MANUAL = { name: "", email: "", phone: "", birth_date: "", plan: "4_aulas", credits: 4, total_received: "" };
 
 export default function ManageStudents() {
   const queryClient = useQueryClient();
@@ -112,6 +113,13 @@ export default function ManageStudents() {
 
       const selectedPlan = plans.find((p) => p.key === manualForm.plan);
       const startISO = new Date().toISOString().slice(0, 10);
+      const multiMonth = getInstallments(selectedPlan) > 1;
+      const totalReceived = Number(String(manualForm.total_received).replace(",", "."));
+      if (multiMonth && (!String(manualForm.total_received).trim() || !Number.isFinite(totalReceived) || totalReceived < 0)) {
+        toast.error("Informe o total recebido pelo plano.");
+        setSavingManual(false);
+        return;
+      }
 
       const created = await base44.entities.User.create({
         full_name: manualForm.name,
@@ -131,6 +139,14 @@ export default function ManageStudents() {
           plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
         },
       });
+
+      if (multiMonth) {
+        const { error: allocationError } = await supabase.from("financial_forecast_entries").upsert({
+          student_id: created.id, kind: "allocation", month: `${startISO.slice(0, 7)}-01`,
+          amount_cents: Math.round(totalReceived * 100), installments: getInstallments(selectedPlan), plan_key: selectedPlan.key,
+        }, { onConflict: "student_id,kind,month" });
+        if (allocationError) toast.error("Aluna cadastrada, mas o valor não entrou no controle mensal. Confira na aba Controle mensal.");
+      }
 
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       toast.success(`Aluna cadastrada. Convite solicitado para ${created.email}.`);
@@ -274,6 +290,14 @@ export default function ManageStudents() {
 
   const handlePlanChange = async (student, plan) => {
     const selectedPlan = plans.find((p) => p.key === plan);
+    let amountCents = null;
+    if (getInstallments(selectedPlan) > 1) {
+      const entered = window.prompt(`Total recebido pelo plano de ${student.full_name || student.email} (R$):`, String(selectedPlan?.price_value || ""));
+      if (entered === null) return;
+      const amount = Number(entered.replace(",", "."));
+      if (!entered.trim() || !Number.isFinite(amount) || amount < 0) return toast.error("Informe um valor válido.");
+      amountCents = Math.round(amount * 100);
+    }
     const credits = selectedPlan?.credits || 4;
     {
       const [freshUser] = await base44.entities.User.filter({ email: student.email }, "-created_date", 1);
@@ -291,6 +315,13 @@ export default function ManageStudents() {
             plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
           }
         });
+        if (amountCents !== null) {
+          const { error } = await supabase.from("financial_forecast_entries").upsert({
+            student_id: freshUser.id, kind: "allocation", month: `${startISO.slice(0, 7)}-01`,
+            amount_cents: amountCents, installments: getInstallments(selectedPlan), plan_key: selectedPlan.key,
+          }, { onConflict: "student_id,kind,month" });
+          if (error) toast.error("Plano alterado, mas o valor não entrou no controle mensal.");
+        }
       }
     }
     queryClient.invalidateQueries({ queryKey: ["allUsers"] });
@@ -328,7 +359,8 @@ export default function ManageStudents() {
     // Para usuários normais, apenas alterna o status
     const newStatus = student.is_active === false ? true : false;
     await base44.entities.User.update(student.id, {
-      data: { ...(student.data || {}), is_active: newStatus }
+      is_active: newStatus,
+      data: { ...(student.data || {}), financial_inactive_from: newStatus ? null : new Date().toISOString().slice(0, 7) }
     });
     queryClient.invalidateQueries({ queryKey: ["allUsers"] });
     toast.success(newStatus ? "Aluna ativada" : "Aluna desativada");
@@ -999,7 +1031,7 @@ export default function ManageStudents() {
                 <Label className="text-xs mb-1 block">Plano inicial</Label>
                 <Select value={manualForm.plan} onValueChange={(v) => {
                   const selectedPlan = plans.find((p) => p.key === v);
-                  setManualForm((f) => ({ ...f, plan: v, credits: selectedPlan?.credits || 4 }));
+                  setManualForm((f) => ({ ...f, plan: v, credits: selectedPlan?.credits || 4, total_received: "" }));
                 }}>
                   <SelectTrigger className="h-8 text-sm">
                     <SelectValue />
@@ -1013,6 +1045,12 @@ export default function ManageStudents() {
                   </SelectContent>
                 </Select>
               </div>
+              {getInstallments(plans.find((p) => p.key === manualForm.plan)) > 1 && (
+                <div>
+                  <Label className="text-xs mb-1 block">Total recebido pelo plano (R$) *</Label>
+                  <Input type="number" min="0" step="0.01" value={manualForm.total_received} onChange={(e) => setManualForm((f) => ({ ...f, total_received: e.target.value }))} className="h-8 text-sm" placeholder="Valor total com juros, se houver" />
+                </div>
+              )}
               <div>
                 <Label className="text-xs mb-1 block">Créditos iniciais</Label>
                 <div className="flex items-center gap-3">
