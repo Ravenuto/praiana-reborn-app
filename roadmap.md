@@ -7,3 +7,5 @@
 - [x] Preparar os modelos de e-mail do Studio Praiana para o domínio notify.praianapoledance-app.com.br.
 - [x] Confirmar o domínio de envio no serviço de domínio.
 - [x] Revisar em português os assuntos e textos de convite e redefinição de senha.
+- [ ] Criar controle mensal no admin: mensalistas ativas com preço do plano e ajuste por mês; planos de vários meses com total recebido dividido em retiradas até o fim, mesmo se inativas.
+- [ ] Conferir privacidade e funcionamento do controle mensal no computador e no celular.
