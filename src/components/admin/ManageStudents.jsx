@@ -310,6 +310,8 @@ export default function ManageStudents() {
         );
         const startISO = format(new Date(), "yyyy-MM-dd");
         await base44.entities.User.update(freshUser.id, {
+          plan_start_date: startISO,
+          plan_end_date: planEndDate(startISO, selectedPlan),
           data: {
             ...cleanData,
             plan,
@@ -553,6 +555,10 @@ export default function ManageStudents() {
     setSavingEdit(true);
     const previousStart = String(student.plan_start_date || "").slice(0, 7);
     const nextStart = String(editDialog.plan_start_date || "").slice(0, 7);
+    if (!nextStart) {
+      setSavingEdit(false);
+      return toast.error("Informe a data de início do plano.");
+    }
     await base44.entities.User.update(student.id, {
       full_name: editDialog.full_name,
       plan_start_date: editDialog.plan_start_date || null,
