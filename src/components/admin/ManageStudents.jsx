@@ -129,6 +129,8 @@ export default function ManageStudents() {
         is_active: true,
         must_change_password: true,
         plan_status: "active",
+        plan_start_date: startISO,
+        plan_end_date: planEndDate(startISO, selectedPlan),
         data: {
           full_name: manualForm.name,
           phone: manualForm.phone,
@@ -553,6 +555,8 @@ export default function ManageStudents() {
     const nextStart = String(editDialog.plan_start_date || "").slice(0, 7);
     await base44.entities.User.update(student.id, {
       full_name: editDialog.full_name,
+      plan_start_date: editDialog.plan_start_date || null,
+      plan_end_date: editDialog.plan_end_date || null,
       data: {
         ...(student.data || {}),
         full_name: editDialog.full_name,
