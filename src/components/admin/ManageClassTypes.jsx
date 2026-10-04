@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import { notifyAllStudents } from "@/hooks/useNotifications";
+import { sortClassTypes } from "@/lib/classTypeOrder";
 
 const emptyForm = { name: "", description: "", duration_minutes: 60, max_students: 8, color: "#c2185b", show_in_app: true };
 
@@ -19,11 +20,13 @@ export default function ManageClassTypes() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [reordering, setReordering] = useState(false);
 
   const { data: classTypes = [], isLoading } = useQuery({
     queryKey: ["classTypes"],
     queryFn: () => base44.entities.ClassType.list(),
   });
+  const orderedTypes = sortClassTypes(classTypes);
 
   const handleSave = async () => {
     if (!form.name.trim()) return toast.error("Nome é obrigatório");
@@ -33,7 +36,8 @@ export default function ManageClassTypes() {
         await base44.entities.ClassType.update(editingId, form);
         toast.success("Modalidade atualizada");
       } else {
-        await base44.entities.ClassType.create({ ...form, is_active: true });
+        const lastOrder = Math.max(-1, ...orderedTypes.map((ct, index) => Number.isFinite(Number(ct.sort_order)) && ct.sort_order != null ? Number(ct.sort_order) : index));
+        await base44.entities.ClassType.create({ ...form, is_active: true, sort_order: lastOrder + 1 });
         if (form.show_in_app !== false) {
           notifyAllStudents({
             type: "new_notice",
@@ -72,6 +76,26 @@ export default function ManageClassTypes() {
     await base44.entities.ClassType.delete(id);
     queryClient.invalidateQueries({ queryKey: ["classTypes"] });
     toast.success("Modalidade excluída");
+  };
+
+  const moveClassType = async (index, direction) => {
+    if (reordering || index + direction < 0 || index + direction >= orderedTypes.length) return;
+    const reordered = [...orderedTypes];
+    [reordered[index], reordered[index + direction]] = [reordered[index + direction], reordered[index]];
+    setReordering(true);
+    try {
+      // Give every item an order once, including older modalities without one.
+      // Updates are awaited so a failure cannot be mistaken for a saved order.
+      for (const [position, ct] of reordered.entries()) {
+        if (ct.sort_order !== position) await base44.entities.ClassType.update(ct.id, { sort_order: position });
+      }
+      toast.success("Ordem das modalidades atualizada");
+    } catch {
+      toast.error("Não foi possível alterar a ordem");
+    } finally {
+      await queryClient.invalidateQueries({ queryKey: ["classTypes"] });
+      setReordering(false);
+    }
   };
 
   return (
@@ -128,13 +152,13 @@ export default function ManageClassTypes() {
       </div>
 
       <div className="grid gap-3">
-        {classTypes.map((ct) => (
+        {orderedTypes.map((ct, index) => (
           <Card key={ct.id}>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <CardContent className="p-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ct.color || "#c2185b" }} />
-                <div>
-                  <p className="font-semibold text-sm flex items-center gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm flex flex-wrap items-center gap-2">
                     {ct.name}
                     {ct.show_in_app === false && (
                       <span className="text-[10px] uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Oculta no app</span>
@@ -143,11 +167,17 @@ export default function ManageClassTypes() {
                   <p className="text-xs text-muted-foreground">{ct.duration_minutes || 60}min · Até {ct.max_students || 8} alunas</p>
                 </div>
               </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(ct)}>
+              <div className="flex gap-0.5 shrink-0">
+                <Button variant="ghost" size="icon" title="Subir modalidade" aria-label={`Subir ${ct.name}`} disabled={reordering || index === 0} onClick={() => moveClassType(index, -1)}>
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" title="Descer modalidade" aria-label={`Descer ${ct.name}`} disabled={reordering || index === orderedTypes.length - 1} onClick={() => moveClassType(index, 1)}>
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" title="Editar modalidade" aria-label={`Editar ${ct.name}`} onClick={() => handleEdit(ct)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(ct.id)}>
+                <Button variant="ghost" size="icon" title="Excluir modalidade" aria-label={`Excluir ${ct.name}`} onClick={() => handleDelete(ct.id)}>
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>

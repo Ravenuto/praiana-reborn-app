@@ -14,3 +14,4 @@
 - [x] Fazer notificações de alunas serem marcadas como lidas sem remover o histórico.
 - [x] Explicar e validar número e caractere especial na criação de senha.
 - [x] Exibir modalidades só com nome e descrição, sem imagens.
+- [x] Melhorar os cartões de modalidades em Sobre e permitir reordená-las no Admin.

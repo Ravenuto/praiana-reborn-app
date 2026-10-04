@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import StudioRules from "@/components/settings/StudioRules";
 import SectionHeader from "@/components/shared/SectionHeader";
 import { useSiteContent } from "@/lib/siteContent";
+import { sortClassTypes } from "@/lib/classTypeOrder";
 
 export default function About() {
   const c = useSiteContent();
@@ -13,7 +14,7 @@ export default function About() {
     queryKey: ["classTypes"],
     queryFn: async () => {
       const list = await base44.entities.ClassType.filter({ is_active: true });
-      return list.filter((ct) => ct.show_in_app !== false);
+      return list;
     }
   });
 
@@ -90,7 +91,7 @@ export default function About() {
       </section>
 
       {/* Modalidades */}
-      {classTypes.length > 0 && (
+      {classTypes.some((ct) => ct.is_active !== false && ct.show_in_app !== false) && (
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
           <div className="text-center mb-12">
             <h2 className="font-heading text-3xl font-bold">{c.content_about_modalities_title}</h2>
@@ -98,23 +99,20 @@ export default function About() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classTypes.map((ct, i) =>
+            {sortClassTypes(classTypes.filter((ct) => ct.is_active !== false && ct.show_in_app !== false)).map((ct, i) =>
               <motion.div
                 key={ct.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
-              >
-                <div className="border-b border-border py-5">
-                  <div>
-                    <h3 className="font-heading text-lg font-semibold">{ct.name}</h3>
-                    {ct.description && (
-                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                        {ct.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                className="h-full rounded-lg border border-border border-t-2 border-t-accent bg-card p-6 shadow-sm"
+               >
+                 <h3 className="font-heading text-xl font-semibold text-foreground">{ct.name}</h3>
+                 {ct.description && (
+                   <p className="mt-3 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                     {ct.description}
+                   </p>
+                 )}
               </motion.div>
             )}
           </div>
