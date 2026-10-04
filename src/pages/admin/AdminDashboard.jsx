@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { isAdminUser } from "@/lib/roles";
 import { Navigate } from "react-router-dom";
-import { BookOpen, Calendar, Users, CreditCard, UserPlus, ClipboardCheck, Settings2, Bell, Type } from "lucide-react";
+import { BookOpen, Calendar, Users, CreditCard, UserPlus, ClipboardCheck, Settings2, Bell, Type, Wallet } from "lucide-react";
 import ManageClassTypes from "@/components/admin/ManageClassTypes";
 import ManageSessions from "@/components/admin/ManageSessions";
 import ManageBookings from "@/components/admin/ManageBookingsMobile";
@@ -12,6 +12,7 @@ import AttendanceBySchedule from "@/components/admin/AttendanceBySchedule";
 import ManageStudioSettings from "@/components/admin/ManageStudioSettings";
 import ManageNotifPrefs from "@/components/admin/ManageNotifPrefs";
 import ManageSiteContent from "@/components/admin/ManageSiteContent";
+import FinancialForecast from "@/components/admin/FinancialForecast";
 
 const TABS = [
   { key: "sessions",    label: "Horários",    icon: Calendar },
@@ -19,6 +20,7 @@ const TABS = [
   { key: "bookings",    label: "Reservas",    icon: Users },
   { key: "plans",       label: "Planos",      icon: CreditCard },
   { key: "students",    label: "Cadastros",      icon: UserPlus },
+  { key: "financial",   label: "Controle mensal", icon: Wallet },
   { key: "attendance",  label: "Presenças",   icon: ClipboardCheck },
   { key: "settings",    label: "Regras",      icon: Settings2 },
   { key: "notifs",      label: "Notificações", icon: Bell },
@@ -78,6 +80,7 @@ export default function AdminDashboard() {
         {activeTab === "bookings"    && <ManageBookings />}
         {activeTab === "plans"       && <ManagePlansAdmin />}
         {activeTab === "students"    && <ManageStudents />}
+        {activeTab === "financial"   && <FinancialForecast />}
         {activeTab === "attendance"  && <AttendanceBySchedule initialDate={presencasDate} />}
         {activeTab === "settings"    && <ManageStudioSettings />}
         {activeTab === "notifs"      && <ManageNotifPrefs />}
