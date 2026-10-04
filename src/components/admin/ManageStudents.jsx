@@ -531,6 +531,7 @@ export default function ManageStudents() {
 
   const handleSaveEdit = async () => {
     if (!editDialog) return;
+    const student = editDialog.student;
 
     if (editDialog.student.is_invited) {
       return toast.error("Não é possível editar convites pendentes");
@@ -546,7 +547,6 @@ export default function ManageStudents() {
       amountCents = Math.round(amount * 100);
     }
     setSavingEdit(true);
-    const student = editDialog.student;
     await base44.entities.User.update(student.id, {
       full_name: editDialog.full_name,
       data: {

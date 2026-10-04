@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, Pencil, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { addMonths, forecastForMonth, money, monthDate, monthKey } from "@/lib/financialForecast";
+import { addMonths, forecastForMonth, money, monthDate } from "@/lib/financialForecast";
 
 const currentMonth = () => {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Bahia", year: "numeric", month: "2-digit" }).formatToParts(new Date());
