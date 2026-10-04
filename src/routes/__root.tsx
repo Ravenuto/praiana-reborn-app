@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import type { ErrorComponentProps } from "@tanstack/router-core";
 import { useEffect, type ReactNode } from "react";
-import { Button } from "@/components/ui/button";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -20,9 +19,9 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold text-foreground">Algo deu errado</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
-        <Button onClick={() => reset()} className="mt-6">
+        <button onClick={() => reset()} className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
           Tentar novamente
-        </Button>
+        </button>
       </div>
     </div>
   );
