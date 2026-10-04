@@ -84,21 +84,10 @@ export default function ManageClassTypes() {
     [reordered[index], reordered[index + direction]] = [reordered[index + direction], reordered[index]];
     setReordering(true);
     try {
-      // Only the exchanged positions change. Existing unsorted rows keep their order until moved.
-      const current = orderedTypes[index];
-      const neighbor = orderedTypes[index + direction];
-      const before = orderedTypes[Math.min(index, index + direction) - 1];
-      const after = orderedTypes[Math.max(index, index + direction) + 1];
-      const previousOrder = Number(before?.sort_order);
-      const followingOrder = Number(after?.sort_order);
-      const lower = before && before.sort_order != null && Number.isFinite(previousOrder) ? previousOrder : -1;
-      const upper = after && after.sort_order != null && Number.isFinite(followingOrder) ? followingOrder : orderedTypes.length + 1;
-      const left = Math.min(index, index + direction) === index ? neighbor : current;
-      const right = left === current ? neighbor : current;
-      const leftOrder = lower + (upper - lower) / 3;
-      const rightOrder = lower + (2 * (upper - lower)) / 3;
-      await base44.entities.ClassType.update(left.id, { sort_order: leftOrder });
-      await base44.entities.ClassType.update(right.id, { sort_order: rightOrder });
+      // Normalize legacy rows too, so a later move or reload keeps the exact same order.
+      for (const [position, ct] of reordered.entries()) {
+        if (ct.sort_order !== position) await base44.entities.ClassType.update(ct.id, { sort_order: position });
+      }
       toast.success("Ordem das modalidades atualizada");
     } catch {
       toast.error("Não foi possível alterar a ordem");
