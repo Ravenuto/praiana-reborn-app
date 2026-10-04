@@ -19,7 +19,7 @@ export default function SetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (password.length < 6) return setError("A senha deve ter pelo menos 6 caracteres");
+    if (password.length < 6 || !/\d/.test(password) || !/[^\p{L}\p{N}\s]/u.test(password)) return setError("A senha deve ter pelo menos 6 caracteres, um número e um caractere especial.");
     if (password !== confirm) return setError("As senhas não coincidem");
     setLoading(true);
     try {
@@ -81,6 +81,7 @@ export default function SetPassword() {
                   {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground">Use pelo menos 6 caracteres, incluindo um número e um caractere especial (como ! ou @).</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirmar senha</Label>

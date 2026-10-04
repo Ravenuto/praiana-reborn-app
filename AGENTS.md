@@ -5,3 +5,4 @@
 - Keep authentication email templates in the managed Lovable email scaffold, with shared brand styling and signed email links untouched, because invitation and recovery must remain secure and consistent.
 - Store monthly financial overrides and prepaid plan allocations in an admin-only table, not generic app records, because students and teachers can read those records.
 - Calculate standard plan expirations by calendar months in the shared duration helper, retaining day-based custom durations and manual extensions, so billing dates remain aligned with the plan start.
+- Change recipient notification read/deletion state through an authenticated recipient-checked server function because studio-created records may not be owned by the student receiving them.

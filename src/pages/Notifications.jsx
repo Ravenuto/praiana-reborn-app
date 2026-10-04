@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { updateMyNotifications } from "@/lib/notifications.functions";
 
 const TYPE_CONFIG = {
   new_post: { icon: ImageIcon, color: "text-blue-500 bg-blue-50 dark:bg-blue-950" },
@@ -35,26 +36,43 @@ export default function Notifications() {
 
   const markAllRead = async () => {
     const unread = notifications.filter((n) => !n.read);
-    await Promise.all(unread.map((n) => base44.entities.Notification.update(n.id, { read: true })));
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    queryClient.invalidateQueries({ queryKey: ["notifCount"] });
-    toast.success("Todas marcadas como lidas");
+    if (!unread.length) return;
+    try {
+      await updateMyNotifications({ data: { action: "readAll" } });
+      queryClient.setQueryData(["notifications", user?.email], (old = []) => old.map((n) => ({ ...n, read: true })));
+      queryClient.setQueryData(["notifCount", user?.email], []);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["notifications", user?.email] }),
+        queryClient.invalidateQueries({ queryKey: ["notifCount", user?.email] }),
+      ]);
+      toast.success("Todas marcadas como lidas");
+    } catch {
+      toast.error("Não foi possível marcar as notificações como lidas.");
+    }
   };
 
   const handleClick = async (notif) => {
     if (!notif.read) {
-      await base44.entities.Notification.update(notif.id, { read: true });
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["notifCount"] });
+      try {
+        await updateMyNotifications({ data: { action: "readOne", id: notif.id } });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["notifications", user?.email] }),
+          queryClient.invalidateQueries({ queryKey: ["notifCount", user?.email] }),
+        ]);
+      } catch { toast.error("Não foi possível marcar a notificação como lida."); }
     }
     if (notif.link) navigate(notif.link);
   };
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
-    await base44.entities.Notification.delete(id);
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    queryClient.invalidateQueries({ queryKey: ["notifCount"] });
+    try {
+      await updateMyNotifications({ data: { action: "deleteOne", id } });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["notifications", user?.email] }),
+        queryClient.invalidateQueries({ queryKey: ["notifCount", user?.email] }),
+      ]);
+    } catch { toast.error("Não foi possível excluir a notificação."); }
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
