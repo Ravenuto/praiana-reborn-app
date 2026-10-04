@@ -84,7 +84,8 @@ export default function ManageClassTypes() {
     [reordered[index], reordered[index + direction]] = [reordered[index + direction], reordered[index]];
     setReordering(true);
     try {
-      // Normalize legacy rows too, so a later move or reload keeps the exact same order.
+      // Give every item an order once, including older modalities without one.
+      // Updates are awaited so a failure cannot be mistaken for a saved order.
       for (const [position, ct] of reordered.entries()) {
         if (ct.sort_order !== position) await base44.entities.ClassType.update(ct.id, { sort_order: position });
       }
