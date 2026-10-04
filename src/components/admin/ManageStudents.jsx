@@ -360,8 +360,6 @@ export default function ManageStudents() {
   const handleToggleActive = async (student) => {
     // Para usuários normais, apenas alterna o status
     const newStatus = student.is_active === false ? true : false;
-    const previousStart = String(student.plan_start_date || "").slice(0, 7);
-    const nextStart = String(editDialog.plan_start_date || "").slice(0, 7);
     await base44.entities.User.update(student.id, {
       is_active: newStatus,
       data: { ...(student.data || {}), financial_inactive_from: newStatus ? null : new Date().toISOString().slice(0, 7) }
@@ -551,6 +549,8 @@ export default function ManageStudents() {
       amountCents = Math.round(amount * 100);
     }
     setSavingEdit(true);
+    const previousStart = String(student.plan_start_date || "").slice(0, 7);
+    const nextStart = String(editDialog.plan_start_date || "").slice(0, 7);
     await base44.entities.User.update(student.id, {
       full_name: editDialog.full_name,
       data: {
