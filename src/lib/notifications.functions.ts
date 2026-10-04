@@ -31,7 +31,7 @@ export const updateMyNotifications = createServerFn({ method: 'POST' })
     for (const row of matches) {
       const result = data.action === 'deleteOne'
         ? await supabaseAdmin.from('app_records').delete().eq('id', row.id).eq('collection', 'Notification')
-        : await supabaseAdmin.from('app_records').update({ data: { ...row.data, read: true } }).eq('id', row.id).eq('collection', 'Notification');
+        : await supabaseAdmin.from('app_records').update({ data: { ...(row.data as Record<string, unknown>), read: true } }).eq('id', row.id).eq('collection', 'Notification');
       if (result.error) throw result.error;
     }
     return { ok: true };
