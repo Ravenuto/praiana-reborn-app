@@ -9,7 +9,10 @@ import { ChevronLeft, ChevronRight, Pencil, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { addMonths, forecastForMonth, money, monthDate, monthKey } from "@/lib/financialForecast";
 
-const currentMonth = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Bahia", year: "numeric", month: "2-digit" }).slice(0, 7);
+const currentMonth = () => {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Bahia", year: "numeric", month: "2-digit" }).formatToParts(new Date());
+  return `${parts.find((part) => part.type === "year")?.value}-${parts.find((part) => part.type === "month")?.value}`;
+};
 const monthLabel = (month) => new Date(`${month}-15T12:00:00`).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
 export default function FinancialForecast() {

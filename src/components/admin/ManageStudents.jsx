@@ -535,6 +535,16 @@ export default function ManageStudents() {
     if (editDialog.student.is_invited) {
       return toast.error("Não é possível editar convites pendentes");
     }
+    const planChanged = editDialog.student.plan !== (student.plan || student.data?.plan);
+    const selectedPlan = plans.find((p) => p.key === editDialog.student.plan);
+    let amountCents = null;
+    if (planChanged && getInstallments(selectedPlan) > 1) {
+      const entered = window.prompt(`Total recebido pelo plano de ${student.full_name || student.email} (R$):`, String(selectedPlan?.price_value || ""));
+      if (entered === null) return;
+      const amount = Number(entered.replace(",", "."));
+      if (!entered.trim() || !Number.isFinite(amount) || amount < 0) return toast.error("Informe um valor válido.");
+      amountCents = Math.round(amount * 100);
+    }
     setSavingEdit(true);
     const student = editDialog.student;
     await base44.entities.User.update(student.id, {
@@ -551,6 +561,14 @@ export default function ManageStudents() {
         plan_end_date: editDialog.plan_end_date,
       }
     });
+    if (amountCents !== null) {
+      const start = (editDialog.plan_start_date || new Date().toISOString()).slice(0, 7);
+      const { error } = await supabase.from("financial_forecast_entries").upsert({
+        student_id: student.id, kind: "allocation", month: `${start}-01`,
+        amount_cents: amountCents, installments: getInstallments(selectedPlan), plan_key: selectedPlan.key,
+      }, { onConflict: "student_id,kind,month" });
+      if (error) toast.error("Plano alterado, mas o valor não entrou no controle mensal.");
+    }
     queryClient.invalidateQueries({ queryKey: ["allUsers"] });
     queryClient.invalidateQueries({ queryKey: ["userCredits"] });
     queryClient.invalidateQueries({ queryKey: ["myProfile"] });
