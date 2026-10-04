@@ -9,3 +9,4 @@
 - [x] Revisar em português os assuntos e textos de convite e redefinição de senha.
 - [x] Criar controle mensal no admin: mensalistas ativas com preço do plano e ajuste por mês; planos de vários meses com total recebido dividido em retiradas até o fim, mesmo se inativas.
 - [x] Conferir privacidade e funcionamento do controle mensal no computador e no celular.
+- [x] Iniciar parcelas na data do plano atual e calcular automaticamente a validade pelos meses de calendário.

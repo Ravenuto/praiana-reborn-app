@@ -12,6 +12,7 @@ import { Plus, Loader2, DollarSign, Trash2, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { planEndDate } from "@/lib/planDuration";
 
 export default function PaymentHistoryDialog({ student, onClose }) {
   const queryClient = useQueryClient();
@@ -93,11 +94,13 @@ export default function PaymentHistoryDialog({ student, onClose }) {
           last_payment_date: form.payment_date,
           plan: form.plan_name,
           plan_start_date: form.payment_date,
+          plan_end_date: planEndDate(form.payment_date, planObj),
           data: {
             ...(student.data || {}),
             credits: planCredits,
             plan: form.plan_name,
             plan_start_date: form.payment_date,
+            plan_end_date: planEndDate(form.payment_date, planObj),
           },
         });
         // Notifica aluna

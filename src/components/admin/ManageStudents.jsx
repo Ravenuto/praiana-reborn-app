@@ -15,7 +15,7 @@ import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, 
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { addDaysISO, getDurationDays, daysLeft, durationLabel, getInstallments } from "@/lib/planDuration";
+import { addDaysISO, getDurationDays, daysLeft, durationLabel, getInstallments, planEndDate } from "@/lib/planDuration";
 import { pausedDays, pauseToday, daysBetweenISO } from "@/lib/planPause";
 import { promoteFromWaitlist } from "@/lib/waitlist";
 
@@ -27,7 +27,7 @@ const safeFormat = (value, fmt, opts) => {
   try { return format(d, fmt, opts); } catch { return "—"; }
 };
 
-const EMPTY_MANUAL = { name: "", email: "", phone: "", birth_date: "", plan: "4_aulas", credits: 4, total_received: "" };
+const EMPTY_MANUAL = { name: "", email: "", phone: "", birth_date: "", plan: "4_aulas", credits: 4, total_received: "", plan_start_date: "" };
 
 export default function ManageStudents() {
   const queryClient = useQueryClient();
@@ -112,7 +112,7 @@ export default function ManageStudents() {
       }
 
       const selectedPlan = plans.find((p) => p.key === manualForm.plan);
-      const startISO = new Date().toISOString().slice(0, 10);
+      const startISO = manualForm.plan_start_date || format(new Date(), "yyyy-MM-dd");
       const multiMonth = getInstallments(selectedPlan) > 1;
       const totalReceived = Number(String(manualForm.total_received).replace(",", "."));
       if (multiMonth && (!String(manualForm.total_received).trim() || !Number.isFinite(totalReceived) || totalReceived < 0)) {
@@ -129,6 +129,8 @@ export default function ManageStudents() {
         is_active: true,
         must_change_password: true,
         plan_status: "active",
+        plan_start_date: startISO,
+        plan_end_date: planEndDate(startISO, selectedPlan),
         data: {
           full_name: manualForm.name,
           phone: manualForm.phone,
@@ -136,7 +138,7 @@ export default function ManageStudents() {
           plan: manualForm.plan,
           credits: manualForm.credits,
           plan_start_date: startISO,
-          plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
+          plan_end_date: planEndDate(startISO, selectedPlan),
         },
       });
 
@@ -308,12 +310,14 @@ export default function ManageStudents() {
         );
         const startISO = format(new Date(), "yyyy-MM-dd");
         await base44.entities.User.update(freshUser.id, {
+          plan_start_date: startISO,
+          plan_end_date: planEndDate(startISO, selectedPlan),
           data: {
             ...cleanData,
             plan,
             credits,
             plan_start_date: startISO,
-            plan_end_date: addDaysISO(startISO, getDurationDays(selectedPlan)),
+            plan_end_date: planEndDate(startISO, selectedPlan),
           }
         });
         if (amountCents !== null) {
@@ -549,8 +553,16 @@ export default function ManageStudents() {
       amountCents = Math.round(amount * 100);
     }
     setSavingEdit(true);
+    const previousStart = String(student.plan_start_date || "").slice(0, 7);
+    const nextStart = String(editDialog.plan_start_date || "").slice(0, 7);
+    if (!nextStart) {
+      setSavingEdit(false);
+      return toast.error("Informe a data de início do plano.");
+    }
     await base44.entities.User.update(student.id, {
       full_name: editDialog.full_name,
+      plan_start_date: editDialog.plan_start_date || null,
+      plan_end_date: editDialog.plan_end_date || null,
       data: {
         ...(student.data || {}),
         full_name: editDialog.full_name,
@@ -563,8 +575,19 @@ export default function ManageStudents() {
         plan_end_date: editDialog.plan_end_date,
       }
     });
+    if (amountCents === null && previousStart && nextStart && previousStart !== nextStart && getInstallments(selectedPlan) > 1) {
+      const { data: existing, error: lookupError } = await supabase.from("financial_forecast_entries")
+        .select("*").eq("student_id", student.id).eq("kind", "allocation").eq("month", `${previousStart}-01`).eq("plan_key", student.plan).maybeSingle();
+      if (lookupError) toast.error("Não foi possível conferir a parcela anterior no controle mensal.");
+      if (existing) {
+        const { error: moveError } = await supabase.from("financial_forecast_entries")
+          .update({ month: `${nextStart}-01` }).eq("id", existing.id);
+        if (moveError) toast.error("A data mudou, mas a parcela não pôde ser transferida. Confira o controle mensal.");
+        else queryClient.invalidateQueries({ queryKey: ["financialForecastEntries"] });
+      }
+    }
     if (amountCents !== null) {
-      const start = (editDialog.plan_start_date || new Date().toISOString()).slice(0, 7);
+      const start = (editDialog.plan_start_date || format(new Date(), "yyyy-MM-dd")).slice(0, 7);
       const { error } = await supabase.from("financial_forecast_entries").upsert({
         student_id: student.id, kind: "allocation", month: `${start}-01`,
         amount_cents: amountCents, installments: getInstallments(selectedPlan), plan_key: selectedPlan.key,
@@ -709,7 +732,7 @@ export default function ManageStudents() {
                       size="sm"
                       className="h-8 w-8 p-0"
                       title="Editar detalhes"
-                      onClick={() => setEditDialog({ student, originalPlan: student.plan, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: student.plan_start_date || "", plan_end_date: student.plan_end_date || "", daysToAdd: "" })}
+                      onClick={() => setEditDialog({ student, originalPlan: student.plan, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: String(student.plan_start_date || "").slice(0, 10), plan_end_date: String(student.plan_end_date || "").slice(0, 10), daysToAdd: "" })}
                       disabled={student.is_invited}
                     >
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1072,6 +1095,11 @@ export default function ManageStudents() {
                   <Input type="number" min="0" step="0.01" value={manualForm.total_received} onChange={(e) => setManualForm((f) => ({ ...f, total_received: e.target.value }))} className="h-8 text-sm" placeholder="Valor total com juros, se houver" />
                 </div>
               )}
+              <div className="min-w-0">
+                <Label className="text-xs mb-1 block">Início do plano atual</Label>
+                <Input type="date" value={manualForm.plan_start_date || format(new Date(), "yyyy-MM-dd")} onChange={(e) => setManualForm((f) => ({ ...f, plan_start_date: e.target.value }))} className="mobile-native-field h-8 text-sm w-full block" />
+                <p className="text-[11px] text-muted-foreground mt-1">Válido até {safeFormat(planEndDate(manualForm.plan_start_date || format(new Date(), "yyyy-MM-dd"), plans.find((p) => p.key === manualForm.plan)), "dd/MM/yyyy")}</p>
+              </div>
               <div>
                 <Label className="text-xs mb-1 block">Créditos iniciais</Label>
                 <div className="flex items-center gap-3">
@@ -1196,7 +1224,7 @@ export default function ManageStudents() {
                       return {
                         ...d,
                         plan_start_date: start,
-                        plan_end_date: addDaysISO(start, getDurationDays(selectedPlan)),
+                        plan_end_date: planEndDate(start, selectedPlan),
                         student: { ...d.student, plan: v, credits: selectedPlan?.credits || 4 },
                       };
                     });
@@ -1227,7 +1255,7 @@ export default function ManageStudents() {
                 <Input type="date" value={editDialog.plan_start_date} onChange={(e) => setEditDialog((d) => {
                   const start = e.target.value;
                   const p = plans.find((pl) => pl.key === d.student.plan);
-                  return { ...d, plan_start_date: start, plan_end_date: start ? addDaysISO(start, getDurationDays(p)) : d.plan_end_date };
+                  return { ...d, plan_start_date: start, plan_end_date: start ? planEndDate(start, p) : d.plan_end_date };
                 })} className="mobile-native-field h-8 text-sm w-full block" />
                 <p className="text-[11px] text-muted-foreground mt-1">A validade é calculada automaticamente pela duração do plano.</p>
               </div>
@@ -1244,7 +1272,7 @@ export default function ManageStudents() {
                   <Button type="button" size="sm" variant="ghost" className="h-8 text-xs rounded-full"
                     onClick={() => setEditDialog((d) => {
                       const p = plans.find((pl) => pl.key === d.student.plan);
-                      return { ...d, plan_end_date: addDaysISO(d.plan_start_date || new Date().toISOString().slice(0, 10), getDurationDays(p)) };
+                      return { ...d, plan_end_date: planEndDate(d.plan_start_date || format(new Date(), "yyyy-MM-dd"), p) };
                     })}>
                     Recalcular pelo plano ({durationLabel(getDurationDays(plans.find((pl) => pl.key === editDialog.student.plan)))})
                   </Button>

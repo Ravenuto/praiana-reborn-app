@@ -38,6 +38,24 @@ export function addDaysISO(start, days) {
   return base.toISOString().slice(0, 10);
 }
 
+// Planos padrão vencem no mesmo dia do mês; durações personalizadas continuam em dias.
+export function planEndDate(start, plan) {
+  const days = getDurationDays(plan);
+  const months = { 30: 1, 90: 3, 180: 6, 365: 12 }[days];
+  if (!months) return addDaysISO(start, days);
+  const match = String(start || "").slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return "";
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const base = new Date(Date.UTC(year, month - 1, day));
+  if (base.getUTCFullYear() !== year || base.getUTCMonth() !== month - 1 || base.getUTCDate() !== day) return "";
+  const target = new Date(Date.UTC(year, month - 1 + months, 1));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay));
+  return target.toISOString().slice(0, 10);
+}
+
 // Dias restantes até a data de validade (pode ser negativo)
 export function daysLeft(endDate) {
   if (!endDate) return null;
