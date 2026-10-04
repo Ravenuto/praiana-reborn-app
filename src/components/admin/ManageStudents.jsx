@@ -146,6 +146,7 @@ export default function ManageStudents() {
           amount_cents: Math.round(totalReceived * 100), installments: getInstallments(selectedPlan), plan_key: selectedPlan.key,
         }, { onConflict: "student_id,kind,month" });
         if (allocationError) toast.error("Aluna cadastrada, mas o valor não entrou no controle mensal. Confira na aba Controle mensal.");
+        else queryClient.invalidateQueries({ queryKey: ["financialForecastEntries"] });
       }
 
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
@@ -321,6 +322,7 @@ export default function ManageStudents() {
             amount_cents: amountCents, installments: getInstallments(selectedPlan), plan_key: selectedPlan.key,
           }, { onConflict: "student_id,kind,month" });
           if (error) toast.error("Plano alterado, mas o valor não entrou no controle mensal.");
+          else queryClient.invalidateQueries({ queryKey: ["financialForecastEntries"] });
         }
       }
     }
@@ -568,6 +570,7 @@ export default function ManageStudents() {
         amount_cents: amountCents, installments: getInstallments(selectedPlan), plan_key: selectedPlan.key,
       }, { onConflict: "student_id,kind,month" });
       if (error) toast.error("Plano alterado, mas o valor não entrou no controle mensal.");
+      else queryClient.invalidateQueries({ queryKey: ["financialForecastEntries"] });
     }
     queryClient.invalidateQueries({ queryKey: ["allUsers"] });
     queryClient.invalidateQueries({ queryKey: ["userCredits"] });

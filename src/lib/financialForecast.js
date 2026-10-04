@@ -17,8 +17,9 @@ export function money(cents) {
 export function forecastForMonth(students, plans, entries, month) {
   const planByKey = new Map(plans.map((plan) => [plan.key, plan]));
   const rows = [];
+  const allocations = entries.filter((entry) => entry.kind === "allocation");
   for (const student of students) {
-    if (student.role === "admin" || student.role === "teacher" || student.is_teacher) continue;
+    if (student.role === "admin" || student.role === "teacher" || student.is_admin || student.is_teacher) continue;
     const plan = planByKey.get(student.plan);
     if (!plan) continue;
     const start = monthKey(student.plan_start_date || student.created_date);
@@ -26,30 +27,32 @@ export function forecastForMonth(students, plans, entries, month) {
     const installments = getInstallments(plan);
     if (installments === 1) {
       const inactiveFrom = monthKey(student.financial_inactive_from || student.data?.financial_inactive_from);
-      if (student.is_active === false && (!inactiveFrom || month >= inactiveFrom)) continue;
+      if (student.is_active === false && (!inactiveFrom || month > inactiveFrom)) continue;
       const override = entries.find((entry) => entry.student_id === student.id && entry.kind === "monthly_override" && monthKey(entry.month) === month);
       rows.push({ student, plan, kind: "monthly", cents: override?.amount_cents ?? Math.round(Number(plan.price_value || 0) * 100), override });
       continue;
     }
-    const allocation = entries.find((entry) => entry.student_id === student.id && entry.kind === "allocation" && monthKey(entry.month) === start && entry.plan_key === plan.key);
+    // Older plans without an entered total use the catalogue price until their total is confirmed.
+    // Once an allocation exists, it is the source of truth even after a plan change.
+    if (allocations.some((entry) => entry.student_id === student.id)) continue;
     const offset = (Number(month.slice(0, 4)) - Number(start.slice(0, 4))) * 12 + Number(month.slice(5, 7)) - Number(start.slice(5, 7));
-    if (offset < 0 || offset >= (allocation?.installments || installments)) continue;
-    const count = allocation?.installments || installments;
-    const total = allocation?.amount_cents ?? Math.round(Number(plan.price_value || 0) * 100);
+    if (offset < 0 || offset >= installments) continue;
+    const count = installments;
+    const total = Math.round(Number(plan.price_value || 0) * 100);
     const base = Math.floor(total / count);
-    rows.push({ student, plan, kind: "allocation", cents: base + (offset === count - 1 ? total - base * count : 0), total, count, offset, allocation, start });
+    rows.push({ student, plan, kind: "allocation", cents: base + (offset === count - 1 ? total - base * count : 0), total, count, offset, allocation: null, start });
   }
-  for (const allocation of entries.filter((entry) => entry.kind === "allocation")) {
+  for (const allocation of allocations) {
     const start = monthKey(allocation.month);
     const student = students.find((item) => item.id === allocation.student_id);
-    if (!student || student.role === "admin" || student.role === "teacher" || student.is_teacher) continue;
+    if (!student || student.role === "admin" || student.role === "teacher" || student.is_admin || student.is_teacher) continue;
     if (rows.some((row) => row.kind === "allocation" && row.student.id === student.id && row.start === start)) continue;
     const offset = (Number(month.slice(0, 4)) - Number(start.slice(0, 4))) * 12 + Number(month.slice(5, 7)) - Number(start.slice(5, 7));
     if (offset < 0 || offset >= allocation.installments) continue;
     const count = allocation.installments;
     const total = allocation.amount_cents;
     const base = Math.floor(total / count);
-    rows.push({ student, plan: planByKey.get(allocation.plan_key) || { key: allocation.plan_key, label: allocation.plan_key }, kind: "allocation", cents: base + (offset === count - 1 ? total - base * count : 0), total, count, offset, allocation, start });
+    rows.push({ student, plan: planByKey.get(allocation.plan_key) || { key: allocation.plan_key, label: allocation.plan_key || "Plano" }, kind: "allocation", cents: base + (offset === count - 1 ? total - base * count : 0), total, count, offset, allocation, start });
   }
-  return rows.sort((a, b) => (a.student.full_name || a.student.email || "").localeCompare(b.student.full_name || b.student.email || "", "pt-BR"));
+  return rows.sort((a, b) => (a.student.full_name || a.student.email || "").localeCompare(b.student.full_name || b.student.email || "", "pt-BR") || (a.start || "").localeCompare(b.start || ""));
 }

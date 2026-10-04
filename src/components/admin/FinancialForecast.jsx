@@ -74,12 +74,12 @@ export default function FinancialForecast() {
       </div>
       <div className="border-y border-border py-5">
         <p className="text-xs uppercase text-muted-foreground">Retirada planejada em {monthLabel(month)}</p>
-        <p className="font-heading text-3xl font-semibold text-primary mt-1">{money(total)}</p>
+        <p className="font-heading text-3xl font-semibold text-primary mt-1">{loadingStudents || loadingPlans || loadingEntries ? "—" : money(total)}</p>
       </div>
       {loadingStudents || loadingPlans || loadingEntries ? <p className="text-sm text-muted-foreground">Carregando…</p> : studentsError || plansError || entriesError ? <p className="text-sm text-destructive">Não foi possível carregar o controle mensal.</p> : rows.length === 0 ? <p className="text-sm text-muted-foreground py-6">Nenhuma retirada prevista para este mês.</p> : (
         <div className="divide-y divide-border border-y border-border">
           {rows.map((row) => (
-            <div key={row.student.id} className="grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-2 sm:gap-4 items-center py-4">
+            <div key={`${row.student.id}-${row.kind}-${row.start || month}`} className="grid grid-cols-[minmax(0,1fr)_auto_auto] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-2 sm:gap-4 items-center py-4">
               <div className="min-w-0"><p className="font-medium truncate">{row.student.full_name || row.student.email}</p><p className="text-xs text-muted-foreground truncate sm:hidden">{row.plan.label}</p></div>
               <p className="hidden sm:block text-sm text-muted-foreground truncate">{row.plan.label}</p>
               <div className="text-right"><p className="font-semibold tabular-nums whitespace-nowrap">{money(row.cents)}</p><p className="text-xs text-muted-foreground whitespace-nowrap">{row.kind === "allocation" ? `${row.offset + 1} de ${row.count}${row.allocation ? "" : " · confirmar total"}` : row.override ? "Valor ajustado" : "Mensal"}</p></div>
