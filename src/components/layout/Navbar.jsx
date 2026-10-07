@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { useRoles } from "@/lib/roles";
 import { base44 } from "@/api/base44Client";
-import { useUnreadCount } from "@/hooks/useNotifications";
+import { useUnreadCount, useNotificationBellLink } from "@/hooks/useNotifications";
 import {
   LogOut, Calendar, Bookmark, CreditCard, User, ShieldCheck, Settings, Info, Bell, ClipboardCheck,
 } from "lucide-react";
@@ -26,6 +26,7 @@ export default function Navbar() {
   const location = useLocation();
   const { showAdminTab, showTeacherTab } = useRoles();
   const unreadCount = useUnreadCount(user?.email);
+  const bellLink = useNotificationBellLink();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -116,8 +117,7 @@ export default function Navbar() {
         {/* Right actions */}
         <div className="flex items-center gap-1.5 shrink-0">
           <Link
-            to="/notificacoes"
-            aria-label="Notificações"
+            {...bellLink}
             className="relative h-9 w-9 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
           >
             <Bell className="h-4 w-4" />
