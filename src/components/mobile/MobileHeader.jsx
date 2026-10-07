@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Bell } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
-import { useUnreadCount } from "@/hooks/useNotifications";
+import { useUnreadCount, useNotificationBellLink } from "@/hooks/useNotifications";
 
 const SUB_TITLES = {
   "/aulas": "Agenda",
@@ -24,10 +24,10 @@ function titleFor(pathname) {
 function BellLink() {
   const { user } = useAuth();
   const count = useUnreadCount(user?.email);
+  const bellLink = useNotificationBellLink();
   return (
     <Link
-      to="/notificacoes"
-      aria-label="Notificações"
+      {...bellLink}
       className="relative h-10 w-10 shrink-0 rounded-full bg-primary/10 text-primary grid place-items-center hover:bg-primary/15 transition-colors"
     >
       <Bell className="h-4 w-4" />

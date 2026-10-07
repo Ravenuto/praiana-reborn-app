@@ -1,6 +1,24 @@
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { ADMIN_NOTIF_TYPES, getAdminNotifPrefs } from "@/lib/adminNotifPrefs";
+
+export function useNotificationBellLink() {
+  const location = useLocation();
+  const isOpen = location.pathname === "/notificacoes";
+  const previous = location.state?.notificationReturnTo;
+  const returnTo = typeof previous === "string" && previous.startsWith("/") && !previous.startsWith("//") && previous.split(/[?#]/)[0] !== "/notificacoes"
+    ? previous
+    : "/";
+
+  return {
+    to: isOpen ? returnTo : "/notificacoes",
+    state: isOpen ? null : { notificationReturnTo: `${location.pathname}${location.search}${location.hash}` },
+    replace: isOpen,
+    "aria-label": isOpen ? "Voltar à página anterior" : "Notificações",
+    title: isOpen ? "Voltar à página anterior" : "Notificações",
+  };
+}
 
 export function useUnreadCount(userEmail) {
   const { data = [] } = useQuery({
