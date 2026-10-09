@@ -68,6 +68,15 @@ export default function SessionCard({
                 </span>
               )}
             </div>
+            {sessionWaitlist.length > 0 && (
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground break-words">
+                <span className="font-semibold text-foreground">Fila de espera: </span>
+                {[...sessionWaitlist]
+                  .sort((a, b) => a.position - b.position)
+                  .map((w) => w.student_name || "Aluna")
+                  .join(", ")}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
