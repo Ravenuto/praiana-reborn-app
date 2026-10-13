@@ -316,6 +316,7 @@ export default function ManageStudents() {
             ...cleanData,
             plan,
             credits,
+            _reset_plan_credits: true,
             plan_start_date: startISO,
             plan_end_date: planEndDate(startISO, selectedPlan),
           }
@@ -567,7 +568,7 @@ export default function ManageStudents() {
         ...(student.data || {}),
         full_name: editDialog.full_name,
         plan: student.plan,
-        credits: student.credits,
+        ...(planChanged ? { credits: student.credits, _reset_plan_credits: true } : {}),
         phone: editDialog.phone,
         birth_date: editDialog.birth_date,
         notes: editDialog.notes,

@@ -8,3 +8,6 @@
 - Change recipient notification read/deletion state through an authenticated recipient-checked server function because studio-created records may not be owned by the student receiving them.
 - Persist modality display positions on ClassType records and share their sorting helper between Admin and Sobre because both views must show the same order.
 - Share notification bell navigation between mobile and desktop headers and keep the return URL in navigation state so reopening and closing notifications restores the originating page.
+
+- Handle booking debit/refund atomically in database triggers, never client profile writes, because separate saves and stale snapshots lose credits.
+- When resetting plan credits, deduct existing non-cancelled bookings within the renewed plan dates; ordinary profile edits must not resend a cached credit balance.

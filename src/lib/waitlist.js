@@ -23,17 +23,6 @@ export async function promoteFromWaitlist({ session_id, session_date, session_ti
       status: "confirmada",
     });
 
-    // Try to deduct one credit from the promoted user
-    try {
-      const [u] = await base44.entities.User.filter({ email: next.student_email }, "-created_date", 1);
-      if (u && u.role !== "admin") {
-        const data = u.data || {};
-        const credits = Math.max(0, (data.credits ?? u.credits ?? 0) - 1);
-        const cleanData = Object.fromEntries(Object.entries(data).filter(([k]) => k !== "data"));
-        await base44.entities.User.update(u.id, { data: { ...cleanData, credits } });
-      }
-    } catch { /* noop */ }
-
     // Notify the promoted student
     try {
       await base44.entities.Notification.create({
