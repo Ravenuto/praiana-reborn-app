@@ -98,6 +98,7 @@ export default function PaymentHistoryDialog({ student, onClose }) {
           data: {
             ...(student.data || {}),
             credits: planCredits,
+            _reset_plan_credits: true,
             plan: form.plan_name,
             plan_start_date: form.payment_date,
             plan_end_date: planEndDate(form.payment_date, planObj),
@@ -118,6 +119,8 @@ export default function PaymentHistoryDialog({ student, onClose }) {
       }
       queryClient.invalidateQueries({ queryKey: ["paymentHistory", student.id] });
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["userCredits"] });
+      queryClient.invalidateQueries({ queryKey: ["myProfile"] });
       setAdding(false);
       setEditingId(null);
       resetForm();

@@ -8,6 +8,20 @@
       "when": 1791120520284,
       "tag": "0000_create_admin_financial_forecast",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791918435023,
+      "tag": "0001_atomic_booking_credits",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791918544598,
+      "tag": "0002_avoid_credit_reset_on_date_edits",
+      "breakpoints": true
     }
   ]
 }

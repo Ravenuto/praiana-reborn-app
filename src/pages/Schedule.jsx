@@ -251,11 +251,7 @@ export default function Schedule() {
         status: "confirmada"
       });
 
-      // Debitar crédito
-      if (latestUser?.id && user?.role !== "admin") {
-        const cleanData = Object.fromEntries(Object.entries(latestUser.data || {}).filter(([k]) => k !== 'data'));
-        await base44.entities.User.update(latestUser.id, { data: { ...cleanData, credits: currentCredits - 1 } });
-      }
+      // The database debits within the booking transaction.
 
       // Update bookings list with actual booking
       queryClient.setQueryData(
@@ -325,11 +321,7 @@ export default function Schedule() {
       // Actually cancel the booking
       await base44.entities.Booking.update(booking.id, { status: "cancelada" });
       
-      // Devolver crédito
-      if (latestUser?.id && user?.role !== "admin") {
-        const cleanData = Object.fromEntries(Object.entries(latestUser.data || {}).filter(([k]) => k !== 'data'));
-        await base44.entities.User.update(latestUser.id, { data: { ...cleanData, credits: currentCredits + 1 } });
-      }
+      // The database refunds within the cancellation transaction.
 
       // Promove próxima da fila de espera (se houver)
       await promoteFromWaitlist({

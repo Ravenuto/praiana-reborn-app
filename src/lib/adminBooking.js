@@ -51,36 +51,12 @@ export async function addManualBooking({ session, date, student, guestName, gues
     credit_debited: creditDebited,
     status: "confirmada",
   });
-  if (creditDebited && student) {
-    try {
-      const latest = await base44.entities.User.get(student.id);
-      await base44.entities.User.update(student.id, {
-        data: { ...(latest?.data || {}), credits: getCredits(latest) - 1 },
-      });
-    } catch (error) {
-      await base44.entities.Booking.update(booking.id, { status: "cancelada" });
-      throw error;
-    }
-  }
   return booking;
 }
 
 export async function removeManualBooking(booking) {
   if (!active(booking)) throw new Error("Esta participante já foi retirada.");
   await base44.entities.Booking.update(booking.id, { status: "cancelada" });
-  // Older registered bookings did not store credit_debited; they followed the same credit rule.
-  const guest =
-    booking.guest_type ||
-    booking.student_email?.endsWith("@participante.invalid") ||
-    booking.student_email?.startsWith("avulsa-");
-  if (!guest && booking.credit_debited !== false && booking.student_email) {
-    const [student] = await base44.entities.User.filter({ email: booking.student_email });
-    if (student && student.role !== "admin") {
-      await base44.entities.User.update(student.id, {
-        data: { ...(student.data || {}), credits: getCredits(student) + 1 },
-      });
-    }
-  }
   await promoteFromWaitlist({
     session_id: booking.session_id,
     session_date: booking.session_date,
