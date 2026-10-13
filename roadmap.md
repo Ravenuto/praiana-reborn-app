@@ -15,5 +15,5 @@
 - [x] Explicar e validar número e caractere especial na criação de senha.
 - [x] Exibir modalidades só com nome e descrição, sem imagens.
 - [x] Melhorar os cartões de modalidades em Sobre e permitir reordená-las no Admin.
-- [ ] Investigar saldos de Geisa, Victoria e Kelly sem repetir o ajuste manual da Geisa.
-- [ ] Tornar o desconto/devolução de crédito inseparável da reserva e testar concorrência.
+- [x] Investigar saldos de Geisa, Victoria e Kelly sem repetir o ajuste manual da Geisa.
+- [x] Tornar o desconto/devolução de crédito inseparável da reserva e testar concorrência.
