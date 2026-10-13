@@ -279,7 +279,7 @@ export default function ManageStudents() {
     try {
       await base44.entities.User.update(staffEdit.id, {
         full_name: name,
-        data: { ...(staffEdit.data || {}), full_name: name },
+        data: { full_name: name },
       });
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["teachersList"] });
@@ -367,7 +367,7 @@ export default function ManageStudents() {
     const newStatus = student.is_active === false ? true : false;
     await base44.entities.User.update(student.id, {
       is_active: newStatus,
-      data: { ...(student.data || {}), financial_inactive_from: newStatus ? null : new Date().toISOString().slice(0, 7) }
+      data: { financial_inactive_from: newStatus ? null : new Date().toISOString().slice(0, 7) }
     });
     queryClient.invalidateQueries({ queryKey: ["allUsers"] });
     toast.success(newStatus ? "Aluna ativada" : "Aluna desativada");
@@ -412,7 +412,7 @@ export default function ManageStudents() {
     try {
       await base44.entities.User.update(student.id, {
         ...pauseFields,
-        data: { ...data, ...pauseFields },
+        data: { ...pauseFields },
       });
       try {
         await base44.entities.Notification.create({
@@ -452,7 +452,7 @@ export default function ManageStudents() {
     try {
       await base44.entities.User.update(student.id, {
         ...pauseFields,
-        data: { ...data, ...pauseFields },
+        data: { ...pauseFields },
       });
 
       // Cancela reservas futuras e libera as vagas (fila de espera)
@@ -565,7 +565,6 @@ export default function ManageStudents() {
       plan_start_date: editDialog.plan_start_date || null,
       plan_end_date: editDialog.plan_end_date || null,
       data: {
-        ...(student.data || {}),
         full_name: editDialog.full_name,
         plan: student.plan,
         ...(planChanged ? { credits: student.credits, _reset_plan_credits: true } : {}),
