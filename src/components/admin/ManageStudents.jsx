@@ -467,8 +467,7 @@ export default function ManageStudents() {
           await promoteFromWaitlist({
             session_id: b.session_id,
             session_date: b.session_date,
-            session_time: b.session_time,
-            class_type_name: b.class_type_name,
+            cancelled_booking_id: b.id,
           });
         }
       } catch { /* noop */ }

@@ -180,6 +180,7 @@ export default function Schedule() {
     queryClient.invalidateQueries({ queryKey: ["myBookings"] });
     queryClient.invalidateQueries({ queryKey: ["myWaitlist"] });
     queryClient.invalidateQueries({ queryKey: ["allWaitlist"] });
+    queryClient.invalidateQueries({ queryKey: ["adminSessionWaitlist"] });
     queryClient.invalidateQueries({ queryKey: ["userCredits"] }); // sincroniza CreditBanner e Profile
     queryClient.invalidateQueries({ queryKey: ["myProfile"] });
   };
@@ -327,8 +328,7 @@ export default function Schedule() {
       await promoteFromWaitlist({
         session_id: session.id,
         session_date: selectedDate,
-        session_time: session.time,
-        class_type_name: session.class_type_name,
+        cancelled_booking_id: booking.id,
       });
 
       invalidate();

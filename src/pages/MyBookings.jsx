@@ -66,8 +66,7 @@ export default function MyBookings() {
       await promoteFromWaitlist({
         session_id: booking.session_id,
         session_date: booking.session_date,
-        session_time: booking.session_time,
-        class_type_name: booking.class_type_name,
+        cancelled_booking_id: booking.id,
       });
       queryClient.invalidateQueries({ queryKey: ["myAllBookings"] });
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
