@@ -17,3 +17,6 @@
 - [x] Melhorar os cartões de modalidades em Sobre e permitir reordená-las no Admin.
 - [x] Investigar saldos de Geisa, Victoria e Kelly sem repetir o ajuste manual da Geisa.
 - [x] Tornar o desconto/devolução de crédito inseparável da reserva e testar concorrência.
+- [ ] Reservar um crédito ao entrar na fila, transferi-lo sem novo débito ao confirmar e devolvê-lo ao sair.
+- [ ] Enviar e-mail com modalidade, dia e horário quando uma aluna da fila for confirmada.
+- [ ] Permitir que a administração retire alunas da fila e devolva o crédito reservado.

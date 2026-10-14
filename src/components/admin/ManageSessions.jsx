@@ -73,6 +73,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
   const [guestType, setGuestType] = useState("experimental");
   const [rosterBusy, setRosterBusy] = useState(false);
   const [removeTarget, setRemoveTarget] = useState(null);
+  const [waitlistRemoveTarget, setWaitlistRemoveTarget] = useState(null);
 
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [weekAnchor, setWeekAnchor] = useState(new Date());
@@ -127,6 +128,11 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     queryFn: () => base44.entities.Booking.filter({ session_date: selectedDate }, "-created_date"),
   });
 
+  const { data: waitlist = [] } = useQuery({
+    queryKey: ["adminSessionWaitlist", selectedDate],
+    queryFn: () => base44.entities.WaitlistEntry.filter({ session_date: selectedDate }, "position", 500),
+  });
+
   const selectedDayKey = useMemo(() => DAY_NAMES[new Date(selectedDate + "T12:00:00").getDay()], [selectedDate]);
 
   const filteredSessions = useMemo(() => {
@@ -150,6 +156,23 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
   }, [bookings]);
 
   const roster = useMemo(() => bookings.filter((b) => b.session_id === rosterSession?.id && b.status !== "cancelada"), [bookings, rosterSession]);
+  const rosterWaitlist = useMemo(() => waitlist.filter((entry) => entry.session_id === rosterSession?.id).sort((a, b) => (a.position || 0) - (b.position || 0)), [waitlist, rosterSession]);
+
+  const handleRemoveWaitlist = async () => {
+    if (!waitlistRemoveTarget) return;
+    setRosterBusy(true);
+    try {
+      await base44.entities.WaitlistEntry.delete(waitlistRemoveTarget.id);
+      invalidateManualBookings(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["adminSessionWaitlist"] });
+      toast.success("Aluna retirada da fila e crédito devolvido.");
+      setWaitlistRemoveTarget(null);
+    } catch (error) {
+      toast.error(error?.message || "Não foi possível retirar da fila.");
+    } finally {
+      setRosterBusy(false);
+    }
+  };
 
   const handleAddParticipant = async () => {
     const student = participantMode === "registered" ? activeStudents.find((s) => s.id === studentId) : null;
@@ -508,6 +531,24 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
               </div>
             ))}
           </div>
+          {rosterWaitlist.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold">Fila de espera ({rosterWaitlist.length})</p>
+              <div className="divide-y divide-border border-y border-border">
+                {rosterWaitlist.map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-between gap-2 py-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium break-words">#{entry.position} · {entry.student_name || entry.student_email}</p>
+                      <p className="text-xs text-muted-foreground">Crédito reservado</p>
+                    </div>
+                    <Button size="icon" variant="ghost" aria-label={`Retirar ${entry.student_name || "aluna"} da fila`} title="Retirar da fila" disabled={rosterBusy} onClick={() => setWaitlistRemoveTarget(entry)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="space-y-3">
             <p className="text-sm font-semibold">Adicionar participante</p>
             <div className="grid grid-cols-2 gap-2">
@@ -541,6 +582,13 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>Retirar da aula?</DialogTitle><DialogDescription>{removeTarget?.student_name} sairá desta aula. Se houver fila de espera, a próxima aluna entrará automaticamente. O crédito será devolvido quando aplicável.</DialogDescription></DialogHeader>
           <div className="flex justify-end gap-2"><Button variant="outline" disabled={rosterBusy} onClick={() => setRemoveTarget(null)}>Voltar</Button><Button variant="destructive" disabled={rosterBusy} onClick={handleRemoveParticipant}>{rosterBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Retirar"}</Button></div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!waitlistRemoveTarget} onOpenChange={(value) => { if (!value && !rosterBusy) setWaitlistRemoveTarget(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Retirar da fila?</DialogTitle><DialogDescription>{waitlistRemoveTarget?.student_name || "A aluna"} sairá da fila de espera e o crédito reservado será devolvido imediatamente.</DialogDescription></DialogHeader>
+          <div className="flex justify-end gap-2"><Button variant="outline" disabled={rosterBusy} onClick={() => setWaitlistRemoveTarget(null)}>Voltar</Button><Button variant="destructive" disabled={rosterBusy} onClick={handleRemoveWaitlist}>{rosterBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Retirar da fila"}</Button></div>
         </DialogContent>
       </Dialog>
 

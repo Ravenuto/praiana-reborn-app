@@ -360,7 +360,12 @@ export default function Schedule() {
     }
     setLoadingSession(session.id);
     try {
-      const allWaiting = await base44.entities.WaitlistEntry.filter({ session_id: session.id, session_date: selectedDate });
+      const [latestUser] = await base44.entities.User.filter({ email: user?.email }, "-created_date", 1);
+      const currentCredits = getCredits(latestUser);
+      if (user?.role !== "admin" && currentCredits < 1) {
+        toast.error("Você não tem créditos disponíveis para entrar na fila de espera.", { duration: 5000 });
+        return;
+      }
       await base44.entities.WaitlistEntry.create({
         session_id: session.id,
         session_date: selectedDate,
@@ -368,14 +373,14 @@ export default function Schedule() {
         class_type_name: session.class_type_name,
         student_name: user?.full_name || "",
         student_email: user?.email,
-        position: allWaiting.length + 1
       });
       invalidate();
-      toast.success("Você entrou na fila de espera!");
-    } catch {
-      toast.error("Erro ao entrar na fila");
+      toast.success(`Você entrou na fila de espera! O crédito ficou reservado. Restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
+    } catch (error) {
+      toast.error(error?.message || "Erro ao entrar na fila");
+    } finally {
+      setLoadingSession(null);
     }
-    setLoadingSession(null);
   };
 
   const handleLeaveWaitlist = async (session) => {
@@ -385,9 +390,9 @@ export default function Schedule() {
     try {
       await base44.entities.WaitlistEntry.delete(entry.id);
       invalidate();
-      toast.success("Você saiu da fila de espera");
-    } catch {
-      toast.error("Erro ao sair da fila");
+      toast.success("Você saiu da fila de espera e o crédito foi devolvido.");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao sair da fila");
     }
     setLoadingSession(null);
   };

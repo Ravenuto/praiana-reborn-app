@@ -1,6 +1,42 @@
 import { createServerFn } from '@tanstack/react-start';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 
+type WaitlistPromotionEmailInput = {
+  bookingId: string;
+};
+
+export const sendWaitlistPromotionEmail = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: WaitlistPromotionEmailInput) => {
+    if (!input?.bookingId) throw new Error('Reserva inválida.');
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    const { data: booking, error } = await context.supabase.from('app_records')
+      .select('id, data')
+      .eq('id', data.bookingId)
+      .eq('collection', 'Booking')
+      .maybeSingle();
+    const details = booking?.data as Record<string, unknown> | undefined;
+    if (error || !booking) throw new Error('Reserva não encontrada.');
+    const studentEmail = String(details?.student_email || '');
+    const classType = String(details?.class_type_name || 'Aula');
+    const sessionDate = String(details?.session_date || '');
+    const sessionTime = String(details?.session_time || '');
+    if (!studentEmail || !sessionDate || !sessionTime || !details?.from_waitlist_entry_id) throw new Error('Reserva da fila inválida.');
+    const { sendTemplateEmail } = await import('@/lib/email-templates/send-email');
+    return sendTemplateEmail('waitlist-promoted', studentEmail, {
+      templateData: {
+        studentName: String(details?.student_name || 'Aluna'),
+        classType,
+        classDate: new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', timeZone: 'UTC' }).format(new Date(`${sessionDate}T12:00:00Z`)),
+        classTime: sessionTime,
+        appUrl: 'https://praianapoledance-app.com.br/minhas-reservas',
+      },
+      idempotencyKey: `waitlist-promoted-${data.bookingId}`,
+    });
+  });
+
 // Notifications are often created by the studio, so their record owner is not the recipient.
 // Verify the recipient before changing only their notification state.
 export const updateMyNotifications = createServerFn({ method: 'POST' })

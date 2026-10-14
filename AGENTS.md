@@ -11,3 +11,4 @@
 
 - Handle booking debit/refund atomically in database triggers, never client profile writes, because separate saves and stale snapshots lose credits.
 - When resetting plan credits, deduct existing non-cancelled bookings within the renewed plan dates; ordinary profile edits must not resend a cached credit balance.
+- Reserve waitlist credits atomically in database triggers and promote through one database function so queue exits refund once and promotions never debit twice.
