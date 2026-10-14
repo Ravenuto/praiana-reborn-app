@@ -172,6 +172,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      promote_waitlist: {
+        Args: { _session_date: string; _session_id: string }
+        Returns: {
+          booking_id: string
+          class_type_name: string
+          session_date: string
+          session_time: string
+          student_email: string
+          student_name: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "teacher" | "student"

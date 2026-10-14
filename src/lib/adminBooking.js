@@ -77,6 +77,7 @@ export function invalidateManualBookings(queryClient) {
     "myProfile",
     "allWaitlist",
     "myWaitlist",
+    "adminSessionWaitlist",
   ]) {
     queryClient.invalidateQueries({ queryKey: [key] });
   }

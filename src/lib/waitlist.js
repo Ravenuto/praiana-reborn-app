@@ -1,4 +1,6 @@
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/integrations/supabase/client";
+import { sendWaitlistPromotionEmail } from "@/lib/notifications.functions";
 
 /**
  * When a booking is cancelled, promote the first person in the waitlist
@@ -7,45 +9,25 @@ import { base44 } from "@/api/base44Client";
  */
 export async function promoteFromWaitlist({ session_id, session_date, session_time, class_type_name }) {
   try {
-    const entries = await base44.entities.WaitlistEntry.filter({ session_id, session_date });
-    if (!entries.length) return null;
-    const sorted = [...entries].sort((a, b) => (a.position || 0) - (b.position || 0));
-    const next = sorted[0];
-
-    // Create the confirmed booking
-    await base44.entities.Booking.create({
-      session_id,
-      session_date,
-      session_time: session_time || next.session_time,
-      class_type_name: class_type_name || next.class_type_name,
-      student_email: next.student_email,
-      student_name: next.student_name,
-      status: "confirmada",
+    const { data, error } = await supabase.rpc("promote_waitlist", {
+      _session_id: session_id,
+      _session_date: session_date,
     });
-
-    // Notify the promoted student
+    if (error) throw error;
+    const promoted = data?.[0];
+    if (!promoted) return null;
     try {
-      await base44.entities.Notification.create({
-        user_email: next.student_email,
-        type: "waitlist_promoted",
-        title: "Vaga liberada! 🎉",
-        message: `Você foi confirmada em ${class_type_name || next.class_type_name} no dia ${session_date} às ${session_time || next.session_time}.`,
-        link: "/minhas-reservas",
-        read: false,
+      await sendWaitlistPromotionEmail({
+        data: {
+          bookingId: promoted.booking_id,
+        },
       });
-    } catch { /* noop */ }
-
-    // Remove promoted entry and reindex remaining positions
-    await base44.entities.WaitlistEntry.delete(next.id);
-    const remaining = sorted.slice(1);
-    for (let i = 0; i < remaining.length; i++) {
-      const r = remaining[i];
-      if ((r.position || 0) !== i + 1) {
-        await base44.entities.WaitlistEntry.update(r.id, { position: i + 1 });
-      }
+    } catch (emailError) {
+      console.error("Não foi possível enviar o e-mail da fila de espera.", emailError);
     }
-    return next;
-  } catch {
+    return promoted;
+  } catch (error) {
+    console.error("Não foi possível promover a fila de espera.", error);
     return null;
   }
 }
