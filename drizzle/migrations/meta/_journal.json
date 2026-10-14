@@ -36,6 +36,13 @@
       "when": 1791990875434,
       "tag": "0004_secure_waitlist_promotion",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792021593175,
+      "tag": "0005_renew_plan_full_purchased_credits",
+      "breakpoints": true
     }
   ]
 }

@@ -20,3 +20,4 @@
 - [x] Reservar um crédito ao entrar na fila, transferi-lo sem novo débito ao confirmar e devolvê-lo ao sair.
 - [x] Enviar e-mail com modalidade, dia e horário quando uma aluna da fila for confirmada.
 - [x] Permitir que a administração retire alunas da fila e devolva o crédito reservado.
+- [ ] Aplicar e testar renovação com todos os créditos comprados sem descontar reservas anteriores.
