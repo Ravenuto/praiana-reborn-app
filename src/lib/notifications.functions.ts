@@ -15,7 +15,7 @@ export const sendWaitlistPromotionEmail = createServerFn({ method: 'POST' })
     const { data: auth, error: authError } = await context.supabase.auth.getUser();
     if (authError || auth.user?.id !== context.userId) throw new Error('Acesso não autorizado.');
     const { data: booking, error } = await context.supabase.from('app_records')
-      .select('id, data')
+      .select('id, owner_id, data')
       .eq('id', data.bookingId)
       .eq('collection', 'Booking')
       .maybeSingle();
@@ -28,7 +28,15 @@ export const sendWaitlistPromotionEmail = createServerFn({ method: 'POST' })
     if (!studentEmail || !sessionDate || !sessionTime || !details?.from_waitlist_entry_id) throw new Error('Reserva da fila inválida.');
     const { data: isStaff } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
     const { data: isTeacher } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'teacher' });
-    if (!isStaff && !isTeacher && String(booking.owner_id || '') !== context.userId) throw new Error('Acesso não autorizado.');
+    if (!isStaff && !isTeacher) {
+      const sourceBookingId = String(details?.promotion_source_booking_id || '');
+      const { data: source } = await context.supabase.from('app_records')
+        .select('owner_id')
+        .eq('id', sourceBookingId)
+        .eq('collection', 'Booking')
+        .maybeSingle();
+      if (!source || source.owner_id !== context.userId) throw new Error('Acesso não autorizado.');
+    }
     const { sendTemplateEmail } = await import('@/lib/email-templates/send-email');
     return sendTemplateEmail('waitlist-promoted', studentEmail, {
       templateData: {
