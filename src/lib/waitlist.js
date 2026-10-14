@@ -1,4 +1,3 @@
-import { base44 } from "@/api/base44Client";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWaitlistPromotionEmail } from "@/lib/notifications.functions";
 
@@ -7,11 +6,12 @@ import { sendWaitlistPromotionEmail } from "@/lib/notifications.functions";
  * for that session/date into a confirmed booking and notify them.
  * Returns the promoted entry, if any.
  */
-export async function promoteFromWaitlist({ session_id, session_date, session_time, class_type_name }) {
+export async function promoteFromWaitlist({ session_id, session_date, cancelled_booking_id }) {
   try {
     const { data, error } = await supabase.rpc("promote_waitlist", {
       _session_id: session_id,
       _session_date: session_date,
+      _cancelled_booking_id: cancelled_booking_id,
     });
     if (error) throw error;
     const promoted = data?.[0];
