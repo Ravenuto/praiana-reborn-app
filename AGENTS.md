@@ -10,5 +10,5 @@
 - Share notification bell navigation between mobile and desktop headers and keep the return URL in navigation state so reopening and closing notifications restores the originating page.
 
 - Handle booking debit/refund atomically in database triggers, never client profile writes, because separate saves and stale snapshots lose credits.
-- When resetting plan credits, deduct existing non-cancelled bookings within the renewed plan dates; ordinary profile edits must not resend a cached credit balance.
+- Apply purchased cycle credit resets through the profile guard without recounting existing reservations; ordinary profile edits must not resend a cached credit balance, keeping renewal separate from atomic booking debits.
 - Reserve waitlist credits atomically in database triggers and promote through one database function so queue exits refund once and promotions never debit twice.
