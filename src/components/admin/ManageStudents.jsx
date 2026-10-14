@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Pause, Play } from "lucide-react";
+import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Pause, Play, RefreshCw } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
+import RenewPlanDialog from "@/components/admin/RenewPlanDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { addDaysISO, getDurationDays, daysLeft, durationLabel, getInstallments, planEndDate } from "@/lib/planDuration";
@@ -54,6 +55,7 @@ export default function ManageStudents() {
   const [staffEdit, setStaffEdit] = useState(null);
   const [savingStaff, setSavingStaff] = useState(false);
   const [pausingId, setPausingId] = useState(null);
+  const [renewTarget, setRenewTarget] = useState(null);
   const [pauseTarget, setPauseTarget] = useState(null);
   const [pauseStart, setPauseStart] = useState("");
   const [pauseUntil, setPauseUntil] = useState("");
@@ -717,6 +719,14 @@ export default function ManageStudents() {
                       </SelectContent>
                     </Select>
                     <Button
+                      size="sm"
+                      className="h-8 text-xs gap-1"
+                      onClick={() => setRenewTarget(student)}
+                      disabled={student.is_invited}
+                    >
+                      <RefreshCw className="h-3 w-3" /> Renovar
+                    </Button>
+                    <Button
                       variant="outline"
                       size="sm"
                       className="h-8 text-xs gap-1"
@@ -1155,6 +1165,9 @@ export default function ManageStudents() {
       )}
 
       {/* Dialog histórico de pagamentos */}
+      {renewTarget && (
+        <RenewPlanDialog student={renewTarget} plans={plans} onClose={() => setRenewTarget(null)} />
+      )}
       {paymentDialog && (
         <PaymentHistoryDialog student={paymentDialog} onClose={() => setPaymentDialog(null)} />
       )}
