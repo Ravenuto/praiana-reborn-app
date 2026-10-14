@@ -45,5 +45,8 @@ BEGIN
   UPDATE public.app_records SET data=data||'{"status":"cancelada"}' WHERE id='credit-test-new-cycle';
   SELECT (data->>'credits')::integer INTO amount FROM public.profiles WHERE id=current_setting('test.student_id')::uuid;
   IF amount<>4 THEN RAISE EXCEPTION 'Cancellation after renewal must return one credit, got %',amount; END IF;
+  UPDATE public.profiles SET data=data||'{"credits":8,"plan":"renewal-test-other-plan","_reset_plan_credits":true}' WHERE id=current_setting('test.student_id')::uuid;
+  SELECT (data->>'credits')::integer INTO amount FROM public.profiles WHERE id=current_setting('test.student_id')::uuid;
+  IF amount<>8 THEN RAISE EXCEPTION 'Changing to an eight-class plan must grant all eight purchased credits, got %',amount; END IF;
 END $$;
 ROLLBACK;
