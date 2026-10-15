@@ -165,6 +165,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      expire_waitlist_holds: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -199,6 +200,10 @@ export type Database = {
               student_name: string
             }[]
           }
+      waitlist_close_at: {
+        Args: { _date: string; _time: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "teacher" | "student"
