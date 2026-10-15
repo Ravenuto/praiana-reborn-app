@@ -85,3 +85,39 @@ export const updateMyNotifications = createServerFn({ method: 'POST' })
     }
     return { ok: true };
   });
+// Renewal email: only administrators can trigger it, and details are read from the saved profile.
+export const sendPlanRenewedEmail = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { studentId: string }) => {
+    if (!input?.studentId || typeof input.studentId !== 'string') throw new Error('Aluna inválida.');
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc('has_role', { _user_id: context.userId, _role: 'admin' });
+    if (!isAdmin) throw new Error('Acesso não autorizado.');
+    const { data: profile, error } = await context.supabase.from('profiles')
+      .select('id, email, full_name, data').eq('id', data.studentId).maybeSingle();
+    if (error || !profile?.email) throw new Error('Aluna não encontrada.');
+    const details = (profile.data || {}) as Record<string, unknown>;
+    const planKey = String(details.plan || '');
+    const { data: planRows } = await context.supabase.from('app_records')
+      .select('data').eq('collection', 'StudioPlan').filter('data->>key', 'eq', planKey).limit(1);
+    const planLabel = String((planRows?.[0]?.data as { label?: string })?.label || planKey.replace(/_/g, ' '));
+    const br = (iso: unknown) => {
+      const s = String(iso || '').slice(0, 10);
+      return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s.split('-').reverse().join('/') : '';
+    };
+    const start = String(details.plan_start_date || '').slice(0, 10);
+    const { sendTemplateEmail } = await import('@/lib/email-templates/send-email');
+    return sendTemplateEmail('plan-renewed', profile.email, {
+      templateData: {
+        studentName: (profile.full_name || 'Aluna').trim().split(' ')[0],
+        planName: planLabel,
+        renewedOn: br(start),
+        credits: Number(details.credits ?? 0),
+        validUntil: br(details.plan_end_date),
+        appUrl: 'https://praianapoledance-app.com.br/agenda',
+      },
+      idempotencyKey: `plan-renewed-${profile.id}-${start}-${planKey}`,
+    });
+  });

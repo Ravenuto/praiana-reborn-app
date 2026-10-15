@@ -43,6 +43,13 @@
       "when": 1792021593175,
       "tag": "0005_renew_plan_full_purchased_credits",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792064674231,
+      "tag": "0006_expire_closed_waitlist_holds",
+      "breakpoints": true
     }
   ]
 }

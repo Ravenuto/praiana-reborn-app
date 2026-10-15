@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { planEndDate, getInstallments } from "@/lib/planDuration";
 import { formatSafe } from "@/lib/dates";
+import { sendPlanRenewedEmail } from "@/lib/notifications.functions";
 
 export default function RenewPlanDialog({ student, plans, onClose }) {
   const queryClient = useQueryClient();
@@ -84,7 +85,13 @@ export default function RenewPlanDialog({ student, plans, onClose }) {
           read: false,
         });
       } catch { /* noop */ }
-      ["allUsers", "paymentHistory", "financialForecastEntries", "userCredits", "myProfile"].forEach((k) =>
+      try {
+        await sendPlanRenewedEmail({ data: { studentId: fresh.id } });
+      } catch (e) {
+        console.error("E-mail de renovação não enviado", e);
+        toast.error("Plano renovado, mas o e-mail não pôde ser enviado.");
+      }
+      ["allUsers", "paymentHistory", "myPaymentHistory", "financialForecastEntries", "userCredits", "myProfile"].forEach((k) =>
         queryClient.invalidateQueries({ queryKey: [k] }));
       toast.success(`Plano renovado! ${credits} créditos liberados.`);
       onClose();

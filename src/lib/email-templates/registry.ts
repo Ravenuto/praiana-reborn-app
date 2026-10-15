@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { template as waitlistPromotedTemplate } from './waitlist-promoted'
+import { template as planRenewedTemplate } from './plan-renewed'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -20,4 +21,5 @@ export interface TemplateEntry {
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-promoted': waitlistPromotedTemplate,
+  'plan-renewed': planRenewedTemplate,
 }

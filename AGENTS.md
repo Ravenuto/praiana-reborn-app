@@ -12,3 +12,4 @@
 - Handle booking debit/refund atomically in database triggers, never client profile writes, because separate saves and stale snapshots lose credits.
 - Apply purchased cycle credit resets through the profile guard without recounting existing reservations; ordinary profile edits must not resend a cached credit balance, keeping renewal separate from atomic booking debits.
 - Reserve waitlist credits atomically in database triggers and promote through one database function so queue exits refund once and promotions never debit twice.
+- Release queued waitlist credits when a class closes (booking lead time) through one database function, run on schedule load plus an hourly backstop, because queued students must never lose a credit for a class they could not enter.
