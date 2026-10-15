@@ -84,8 +84,8 @@ export default function ManageStudents() {
   );
 
   const students = users.filter((u) => u.role !== "admin" && u.role !== "teacher" && u.is_teacher !== true);
-  const admins = users.filter((u) => u.role === "admin" || u.is_admin === true);
-  const teachers = users.filter((u) => u.role === "teacher" || u.is_teacher === true);
+  const admins = users.filter((u) => u.role === "admin" || u.is_admin === true).sort((a, b) => (a.full_name || a.email || "").trim().localeCompare((b.full_name || b.email || "").trim(), "pt-BR", { sensitivity: "base" }));
+  const teachers = users.filter((u) => u.role === "teacher" || u.is_teacher === true).sort((a, b) => (a.full_name || a.email || "").trim().localeCompare((b.full_name || b.email || "").trim(), "pt-BR", { sensitivity: "base" }));
 
   const filtered = students.filter((s) => {
     const q = search.toLowerCase();
