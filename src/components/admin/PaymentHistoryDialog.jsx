@@ -118,6 +118,7 @@ export default function PaymentHistoryDialog({ student, onClose }) {
         toast.success(`Pagamento registrado! ${planCredits} créditos adicionados.`);
       }
       queryClient.invalidateQueries({ queryKey: ["paymentHistory", student.id] });
+      queryClient.invalidateQueries({ queryKey: ["myPaymentHistory"] });
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["userCredits"] });
       queryClient.invalidateQueries({ queryKey: ["myProfile"] });
@@ -144,8 +145,10 @@ export default function PaymentHistoryDialog({ student, onClose }) {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Excluir este lançamento do histórico? Ele também sai do app da aluna.")) return;
     await base44.entities.PaymentHistory.delete(id);
     queryClient.invalidateQueries({ queryKey: ["paymentHistory", student.id] });
+    queryClient.invalidateQueries({ queryKey: ["myPaymentHistory"] });
     toast.success("Pagamento removido");
   };
 
