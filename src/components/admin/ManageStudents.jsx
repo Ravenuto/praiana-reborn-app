@@ -98,7 +98,9 @@ export default function ManageStudents() {
       (filterStatus === "ativas" && s.is_active !== false) ||
       (filterStatus === "inativas" && s.is_active === false);
     return matchSearch && matchStatus;
-  });
+  }).sort((a, b) =>
+    (a.full_name || a.email || "").trim().localeCompare((b.full_name || b.email || "").trim(), "pt-BR", { sensitivity: "base" })
+  );
 
   const handleSaveManual = async () => {
     if (!manualForm.name || !manualForm.email) return toast.error("Nome e email são obrigatórios");

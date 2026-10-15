@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, startOfMonth, endOfMonth, isSameMonth, startOfWeek, endOfWeek, isSameDay, addMonths, subMonths } from "date-fns";
@@ -127,7 +128,14 @@ export default function Schedule() {
 
   const { data: allWaitlist = [] } = useQuery({
     queryKey: ["allWaitlist", selectedDate],
-    queryFn: () => base44.entities.WaitlistEntry.filter({ session_date: selectedDate }, "position", 100)
+    queryFn: async () => {
+      // Libera filas de turmas já fechadas e devolve o crédito reservado.
+      try {
+        const { data: released } = await supabase.rpc("expire_waitlist_holds");
+        if (released > 0) queryClient.invalidateQueries({ queryKey: ["userCredits"] });
+      } catch { /* backstop horário no banco */ }
+      return base44.entities.WaitlistEntry.filter({ session_date: selectedDate }, "position", 100);
+    }
   });
 
   const { data: myBookings = [] } = useQuery({
