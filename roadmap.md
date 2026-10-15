@@ -21,3 +21,7 @@
 - [x] Enviar e-mail com modalidade, dia e horário quando uma aluna da fila for confirmada.
 - [x] Permitir que a administração retire alunas da fila e devolva o crédito reservado.
 - [x] Aplicar e testar renovação com todos os créditos comprados sem descontar reservas anteriores.
+- [ ] Listar cadastros de alunas em ordem alfabética.
+- [ ] Enviar e-mail de renovação com data, plano, créditos e validade.
+- [ ] Corrigir lançamentos do histórico e refletir no app da aluna.
+- [ ] Devolver automaticamente o crédito da fila quando a turma fechar (antecedência de marcação) ou a aula passar; bloquear entrada na fila após o fechamento.
