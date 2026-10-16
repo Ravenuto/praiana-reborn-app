@@ -28,6 +28,7 @@ import {
 import { getStudioSettings, DEFAULTS as SETTINGS_DEFAULTS } from "@/lib/studioSettings";
 import { fillPlaceholders } from "@/lib/siteContent";
 import praianaLogo from "@/assets/praiana-logo.png.asset.json";
+import { RichText, wrapSelection } from "@/lib/richText";
 
 /* ---------------- Prévia por bloco ---------------- */
 
@@ -179,14 +180,10 @@ function SectionPreview({ preview, v, numbers, blocks }) {
           {(blocks || []).map((b, i) => (
             <div key={b.id || i} className="rounded-lg bg-muted/50 p-2.5">
               <p className="font-medium text-foreground">{b.title}</p>
-              {String(b.text || "")
-                .split("\n")
-                .filter((t) => t.trim())
-                .map((t, j) => (
-                  <p key={j} className="text-muted-foreground">
-                    {fillPlaceholders(t, numbers)}
-                  </p>
-                ))}
+              <RichText
+                text={fillPlaceholders(String(b.text || ""), numbers)}
+                className="text-muted-foreground"
+              />
             </div>
           ))}
         </div>
@@ -485,7 +482,8 @@ export default function ManageSiteContent() {
               <div>
                 <p className="text-sm font-medium">Regras</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  Acrescente, edite ou retire regras. Cada linha do texto vira um item da lista.
+                  Acrescente, edite ou retire regras. O texto aparece exatamente como você digitar.
+                  Selecione uma palavra e toque em B (negrito), I (itálico) ou U (sublinhado).
                   Você pode usar {"{horas_marcar}"}, {"{horas_cancelar}"} e{" "}
                   {"{minutos_tolerancia}"} para inserir os números da aba Regras.
                 </p>
@@ -533,8 +531,34 @@ export default function ManageSiteContent() {
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
+                  <div className="flex gap-1">
+                    {[
+                      ["**", "B", "font-bold", "Negrito"],
+                      ["*", "I", "italic", "Itálico"],
+                      ["__", "U", "underline", "Sublinhado"],
+                    ].map(([m, label, cls, title]) => (
+                      <button
+                        key={m}
+                        type="button"
+                        title={title}
+                        aria-label={title}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() =>
+                          wrapSelection(
+                            document.getElementById(`rule-text-${i}`),
+                            m,
+                            (t) => updateBlock(i, { text: t }),
+                          )
+                        }
+                        className={`h-8 w-8 grid place-items-center rounded-lg bg-muted text-foreground text-sm ${cls}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                   <Textarea
-                    rows={3}
+                    id={`rule-text-${i}`}
+                    rows={6}
                     value={b.text}
                     onChange={(e) => updateBlock(i, { text: e.target.value })}
                     placeholder="Texto da regra"

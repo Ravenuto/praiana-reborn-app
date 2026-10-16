@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BookOpen, Loader2 } from "lucide-react";
 import { getStudioSettings } from "@/lib/studioSettings";
 import { useSiteContent, fillPlaceholders, getRuleBlocks } from "@/lib/siteContent";
+import { RichText } from "@/lib/richText";
 
 export default function StudioRules() {
   const c = useSiteContent();
@@ -27,12 +28,9 @@ export default function StudioRules() {
   const blocks = getRuleBlocks(c)
     .map((b) => ({
       title: b.title,
-      items: String(b.text || "")
-        .split("\n")
-        .map((t) => fillPlaceholders(t, numbers).trim())
-        .filter(Boolean),
+      text: fillPlaceholders(String(b.text || ""), numbers).replace(/^\s*\n|\n\s*$/g, ""),
     }))
-    .filter((b) => b.items.length > 0 || String(b.title || "").trim());
+    .filter((b) => b.text.trim() || String(b.title || "").trim());
 
   if (blocks.length === 0) return null;
 
@@ -46,15 +44,7 @@ export default function StudioRules() {
         {blocks.map((block, i) => (
           <div key={i} className="bg-muted/50 rounded-xl p-4 space-y-2">
             <p className="font-medium text-foreground">{block.title}</p>
-            {block.items.length > 1 ? (
-              <ul className="space-y-1.5 list-disc list-inside">
-                {block.items.map((t, j) => (
-                  <li key={j}>{t}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>{block.items[0]}</p>
-            )}
+            {block.text && <RichText text={block.text} />}
           </div>
         ))}
       </div>
