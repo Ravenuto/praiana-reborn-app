@@ -40,7 +40,16 @@ export default function AcceptInvitation() {
       if (tokenHash && (type === "invite" || type === "recovery")) {
         const { error: tokenError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
         if (tokenError) {
-          if (active) setStatus("invalid");
+          // O token pode já ter sido consumido (ex.: antivírus do e-mail).
+          // Se já existe uma sessão válida, deixamos a aluna criar a senha mesmo assim.
+          const { data: existing } = await supabase.auth.getSession();
+          if (!active) return;
+          if (existing?.session) {
+            window.history.replaceState(null, "", window.location.pathname);
+            setStatus("ready");
+          } else {
+            setStatus("invalid");
+          }
           return;
         }
       }

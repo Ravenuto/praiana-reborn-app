@@ -15,6 +15,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import SetPassword from '@/pages/SetPassword';
 import AcceptInvitation from '@/pages/AcceptInvitation';
+import LinkPortal from '@/pages/LinkPortal';
 import TeacherDashboard from '@/pages/teacher/TeacherDashboard';
 import AppLayout from '@/components/layout/AppLayout';
 import Home from '@/pages/Home';
@@ -39,7 +40,7 @@ const AnimatedRoute = ({ children }) => (
   </motion.div>
 );
 
-const HIDDEN_BOTTOM_TABS = ["/login", "/forgot-password", "/reset-password", "/definir-senha", "/criar-senha"];
+const HIDDEN_BOTTOM_TABS = ["/login", "/forgot-password", "/reset-password", "/definir-senha", "/criar-senha", "/abrir-link"];
 
 const AuthenticatedApp = () => {
   const location = useLocation();
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/criar-senha" element={<AcceptInvitation />} />
+          <Route path="/abrir-link" element={<LinkPortal />} />
           <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
             <Route path="/definir-senha" element={<SetPassword />} />
             <Route element={<AppLayout />}>
