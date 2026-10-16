@@ -15,6 +15,13 @@ const ROOT_DOMAIN = "praianapoledance-app.com.br"
 const FROM_DOMAIN = SENDER_DOMAIN
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
+// One-time email links (invite, recovery, signup) are wrapped in a public
+// portal page so mail scanners (Outlook/Hotmail SafeLinks) don't consume the
+// single-use token before the student clicks. The portal only navigates to
+// the real URL after a human tap.
+const portalUrl = (url: string) =>
+  `${SITE_URL}/abrir-link?u=${Buffer.from(url, 'utf8').toString('base64url')}`
+
 // The SDK handler owns verification, dispatch, and retry semantics; this file
 // owns only the email decisions: subjects, templates, and per-type props.
 export const Route = createFileRoute("/lovable/email/auth/webhook")({
