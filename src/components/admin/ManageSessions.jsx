@@ -141,6 +141,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
         if (s.is_recurring) {
           if (s.day_of_week !== selectedDayKey || s.is_active === false) return false;
           if (s.cancelled_dates && s.cancelled_dates.includes(selectedDate)) return false;
+          if (s.end_date && selectedDate >= s.end_date) return false;
           return true;
         }
         return s.date === selectedDate && s.is_active !== false;
