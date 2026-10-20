@@ -306,18 +306,28 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     toast.success("Aula cancelada para este dia");
   };
 
+  // Encerra a grade a partir da data escolhida: passado e semanas anteriores ficam intactos
   const handleDeleteAll = async () => {
+    const s = deleteTarget;
+    const endDate = selectedDate;
+    await base44.entities.ClassSession.update(s.id, { end_date: endDate });
+    // Cancela reservas da data escolhida em diante (o banco devolve o crédito)
+    const bookings = await base44.entities.Booking.filter({ session_id: s.id });
+    for (const b of bookings) {
+      if (b.session_date && b.session_date >= endDate && ["confirmada", "fila_espera", "waitlist"].includes(b.status)) {
+        await base44.entities.Booking.update(b.id, { status: "cancelada" });
+      }
+    }
     notifyAllStudents({
       type: "schedule_change",
       title: "Horário removido da grade",
-      message: `${deleteTarget.class_type_name || "Aula"} de ${deleteTarget.day_of_week || ""} às ${deleteTarget.time || ""} não acontecerá mais.`,
+      message: `${s.class_type_name || "Aula"} de ${s.day_of_week || ""} às ${s.time || ""} não acontecerá mais a partir de ${format(new Date(endDate + "T12:00:00"), "dd/MM/yyyy")}.`,
       link: "/agenda",
     });
-    await base44.entities.ClassSession.delete(deleteTarget.id);
     queryClient.invalidateQueries({ queryKey: ["allSessions"] });
     queryClient.invalidateQueries({ queryKey: ["sessions"] });
     setDeleteTarget(null);
-    toast.success("Horário excluído da grade");
+    toast.success("Horário encerrado a partir desta data");
   };
 
   // Mini calendário (igual ao Schedule)
