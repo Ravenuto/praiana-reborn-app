@@ -113,7 +113,7 @@ export default function Schedule() {
       base44.entities.ClassSession.filter({ date: selectedDate, is_active: true, is_recurring: false })]
       );
       // Filtrar cancelled_dates
-      return [...recurring.filter((s) => !s.cancelled_dates?.includes(selectedDate)), ...oneOff];
+      return [...recurring.filter((s) => !s.cancelled_dates?.includes(selectedDate) && !(s.end_date && selectedDate >= s.end_date)), ...oneOff];
     },
     enabled: !isHoliday
   });

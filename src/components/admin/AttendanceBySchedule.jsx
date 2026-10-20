@@ -67,6 +67,7 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
       const all = await base44.entities.ClassSession.filter({ day_of_week: selectedDayKey, is_active: true });
       return all.filter(s => {
         if (s.cancelled_dates && s.cancelled_dates.includes(selectedDate)) return false;
+        if (s.end_date && selectedDate >= s.end_date) return false;
         return true;
       });
     },
