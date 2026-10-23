@@ -16,7 +16,13 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
         const { sendTemplateEmail } = await import('@/lib/email-templates/send-email');
 
         // Verify the caller with a server-only token stored in a locked table.
-        const { data: tokenRow } = await supabaseAdmin.from('cron_tokens').select('token').eq('key', 'email_backstop').maybeSingle();
+        // cron_tokens stays out of the generated Database types on purpose (infra table).
+        const tokens = supabaseAdmin.from('cron_tokens' as never) as unknown as {
+          select: (cols: string) => {
+            eq: (col: string, val: string) => { maybeSingle: () => Promise<{ data: { token: string } | null }> };
+          };
+        };
+        const { data: tokenRow } = await tokens.select('token').eq('key', 'email_backstop').maybeSingle();
         const expected = String(tokenRow?.token || '');
         const received = request.headers.get('x-cron-token') || '';
         const a = Buffer.from(expected);
