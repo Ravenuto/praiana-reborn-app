@@ -144,6 +144,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
           if (s.day_of_week !== selectedDayKey || s.is_active === false) return false;
           if (s.cancelled_dates && s.cancelled_dates.includes(selectedDate)) return false;
           if (s.end_date && selectedDate >= s.end_date) return false;
+          if (s.start_date && selectedDate < s.start_date) return false;
           return true;
         }
         return s.date === selectedDate && s.is_active !== false;
@@ -270,6 +271,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       notes: s.notes || "",
       session_type: s.is_recurring === false ? "once" : "weekly",
       specific_date: s.date || "",
+      start_date: s.start_date || "",
       override_notes: s.override_notes || "",
     });
     setEditingId(s.id);
@@ -652,7 +654,8 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
             </div>
 
             {form.session_type === "weekly" ? (
-              <div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
                 <Label>Dia da Semana *</Label>
                 <Select value={form.day_of_week} onValueChange={(v) => setForm({ ...form, day_of_week: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -662,6 +665,11 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                     ))}
                   </SelectContent>
                 </Select>
+                </div>
+                <div className="min-w-0">
+                  <Label>Data de início</Label>
+                  <Input type="date" value={form.start_date || ""} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="mobile-native-field h-8 w-full block" />
+                </div>
               </div>
             ) : (
               <div className="min-w-0">
