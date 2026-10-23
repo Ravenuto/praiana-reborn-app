@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { updateMyNotifications } from "@/lib/notifications.functions";
+import NotificationPreferences from "@/components/settings/NotificationPreferences";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TYPE_CONFIG = {
   new_post: { icon: ImageIcon, color: "text-blue-500 bg-blue-50 dark:bg-blue-950" },
@@ -96,7 +98,10 @@ export default function Notifications() {
         )}
       </div>
 
-      <div className="space-y-2">
+      <Tabs defaultValue="history">
+      <TabsList className="mb-4"><TabsTrigger value="history">Recebidas</TabsTrigger><TabsTrigger value="preferences">Preferências</TabsTrigger></TabsList>
+      <TabsContent value="preferences"><NotificationPreferences /></TabsContent>
+      <TabsContent value="history"><div className="space-y-2">
         {isLoading ? (
           Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)
         ) : notifications.length === 0 ? (
@@ -150,6 +155,7 @@ export default function Notifications() {
           </AnimatePresence>
         )}
       </div>
+      </TabsContent></Tabs>
     </div>
   );
 }
