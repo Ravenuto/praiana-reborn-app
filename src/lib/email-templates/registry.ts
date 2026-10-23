@@ -4,6 +4,8 @@ import { template as planRenewedTemplate } from './plan-renewed'
 import { template as waitlistEnteredTemplate } from './waitlist-entered'
 import { template as waitlistClosedTemplate } from './waitlist-closed'
 import { template as classCancelledTemplate } from './class-cancelled'
+import { template as classReminderTemplate } from './class-reminder'
+import { template as planExpiringTemplate } from './plan-expiring'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -28,4 +30,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-entered': waitlistEnteredTemplate,
   'waitlist-closed': waitlistClosedTemplate,
   'class-cancelled': classCancelledTemplate,
+  'class-reminder': classReminderTemplate,
+  'plan-expiring': planExpiringTemplate,
 }
