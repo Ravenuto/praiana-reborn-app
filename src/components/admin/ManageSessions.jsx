@@ -15,6 +15,7 @@ import { notifyAllStudents, notifyBookedStudents } from "@/hooks/useNotification
 import { addManualBooking, removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
 import { getCredits } from "@/utils";
 import { cancelStudioParticipant } from "@/lib/notifications.functions";
+import { isCancelledOccurrence } from "@/lib/studentNotifPrefs";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -279,7 +280,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     for (const collection of ["Booking", "WaitlistEntry"]) {
       const records = await base44.entities[collection].filter({ session_id: session.id });
       for (const record of records) {
-        if (!record.session_date || (onlyDate ? record.session_date !== fromDate : record.session_date < fromDate) || record.status === "cancelada") continue;
+        if (!isCancelledOccurrence(record.session_date, fromDate, onlyDate, record.status)) continue;
         const result = await cancelStudioParticipant({ data: { recordId: record.id, collection } });
         if (result.reason === "delivery_failed") toast.error("Crédito devolvido, mas um e-mail não pôde ser enviado.");
       }
