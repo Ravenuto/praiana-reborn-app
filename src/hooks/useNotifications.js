@@ -2,6 +2,13 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { ADMIN_NOTIF_TYPES, getAdminNotifPrefs } from "@/lib/adminNotifPrefs";
+import { notificationChannels } from "@/lib/studentNotifPrefs";
+import { getMyNotificationPreferences } from "@/lib/studentNotifPrefs.functions";
+
+export function useStudentNotificationChannels(userEmail) {
+  const { data } = useQuery({ queryKey: ["studentNotificationPreferences", userEmail], queryFn: () => getMyNotificationPreferences(), enabled: !!userEmail, staleTime: 0 });
+  return notificationChannels(data);
+}
 
 export function useNotificationBellLink() {
   const location = useLocation();
@@ -21,13 +28,14 @@ export function useNotificationBellLink() {
 }
 
 export function useUnreadCount(userEmail) {
+  const channels = useStudentNotificationChannels(userEmail);
   const { data = [] } = useQuery({
     queryKey: ["notifCount", userEmail],
     queryFn: () => base44.entities.Notification.filter({ user_email: userEmail, read: false }, "-created_date", 50),
     enabled: !!userEmail,
     refetchInterval: 30000, // atualiza a cada 30s
   });
-  return data.length;
+  return channels.app ? data.length : 0;
 }
 
 export async function createNotification({ user_email, type, title, message, link, actor_name }) {
@@ -35,6 +43,7 @@ export async function createNotification({ user_email, type, title, message, lin
   try {
     const users = await base44.entities.User.filter({ email: user_email });
     const target = users?.[0];
+    if (target && !target.is_admin && target.role !== "admin" && !notificationChannels(target.data?.notification_delivery).app) return;
     if (target && (target.is_admin || target.role === "admin")) {
       const prefs = await getAdminNotifPrefs();
       // Só aplica filtro para os tipos configuráveis no admin

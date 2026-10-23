@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMyNotificationPreferences, saveMyNotificationPreferences } from '@/lib/studentNotifPrefs.functions';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,13 +10,14 @@ import { toast } from 'sonner';
 
 export default function NotificationPreferences() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [mode, setMode] = useState('both');
   const [saving, setSaving] = useState(false);
   const { data, isLoading, isError } = useQuery({ queryKey: ['studentNotificationPreferences', user?.id], queryFn: () => getMyNotificationPreferences(), enabled: !!user?.id });
   useEffect(() => { if (data) setMode(data); }, [data]);
   const save = async () => {
     setSaving(true);
-    try { await saveMyNotificationPreferences({ data: { mode } }); toast.success('Preferências salvas!'); }
+    try { await saveMyNotificationPreferences({ data: { mode } }); await queryClient.invalidateQueries({ queryKey: ['studentNotificationPreferences'] }); toast.success('Preferências salvas!'); }
     catch { toast.error('Não foi possível salvar suas preferências.'); }
     finally { setSaving(false); }
   };

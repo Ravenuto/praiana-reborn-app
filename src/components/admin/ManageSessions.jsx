@@ -14,6 +14,7 @@ import DaySelector, { DAYS } from "@/components/schedule/DaySelector";
 import { notifyAllStudents, notifyBookedStudents } from "@/hooks/useNotifications";
 import { addManualBooking, removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
 import { getCredits } from "@/utils";
+import { cancelStudioParticipant } from "@/lib/notifications.functions";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -274,16 +275,28 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     setOpen(true);
   };
 
-  const handleDelete = (session) => {
+  const cancelParticipants = async (session, fromDate, onlyDate = false) => {
+    for (const collection of ["Booking", "WaitlistEntry"]) {
+      const records = await base44.entities[collection].filter({ session_id: session.id });
+      for (const record of records) {
+        if (!record.session_date || (onlyDate ? record.session_date !== fromDate : record.session_date < fromDate) || record.status === "cancelada") continue;
+        const result = await cancelStudioParticipant({ data: { recordId: record.id, collection } });
+        if (result.reason === "delivery_failed") toast.error("Crédito devolvido, mas um e-mail não pôde ser enviado.");
+      }
+    }
+    invalidateManualBookings(queryClient);
+  };
+
+  const handleDelete = async (session) => {
     if (session.is_recurring) {
       setDeleteTarget(session);
     } else {
       if (!confirm("Excluir esta aula única?")) return;
-      base44.entities.ClassSession.delete(session.id).then(() => {
+      await cancelParticipants(session, session.date || selectedDate, true);
+      await base44.entities.ClassSession.delete(session.id);
         queryClient.invalidateQueries({ queryKey: ["allSessions"] });
         queryClient.invalidateQueries({ queryKey: ["sessions"] });
         toast.success("Aula excluída");
-      });
     }
   };
 
@@ -292,14 +305,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     const s = deleteTarget;
     const cancelled = s.cancelled_dates ? [...s.cancelled_dates, selectedDate] : [selectedDate];
     await base44.entities.ClassSession.update(s.id, { cancelled_dates: cancelled });
-    notifyBookedStudents({
-      session_id: s.id,
-      date: selectedDate,
-      type: "schedule_change",
-      title: "Aula cancelada",
-      message: `${s.class_type_name || "Aula"} de ${selectedDate} às ${s.time} foi cancelada.`,
-      link: "/agenda",
-    });
+    await cancelParticipants(s, selectedDate, true);
     queryClient.invalidateQueries({ queryKey: ["allSessions"] });
     queryClient.invalidateQueries({ queryKey: ["sessions"] });
     setDeleteTarget(null);
@@ -312,12 +318,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     const endDate = selectedDate;
     await base44.entities.ClassSession.update(s.id, { end_date: endDate });
     // Cancela reservas da data escolhida em diante (o banco devolve o crédito)
-    const bookings = await base44.entities.Booking.filter({ session_id: s.id });
-    for (const b of bookings) {
-      if (b.session_date && b.session_date >= endDate && ["confirmada", "fila_espera", "waitlist"].includes(b.status)) {
-        await base44.entities.Booking.update(b.id, { status: "cancelada" });
-      }
-    }
+    await cancelParticipants(s, endDate);
     notifyAllStudents({
       type: "schedule_change",
       title: "Horário removido da grade",
