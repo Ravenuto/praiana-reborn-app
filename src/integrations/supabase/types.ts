@@ -44,6 +44,21 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_tokens: {
+        Row: {
+          key: string
+          token: string
+        }
+        Insert: {
+          key: string
+          token: string
+        }
+        Update: {
+          key?: string
+          token?: string
+        }
+        Relationships: []
+      }
       financial_forecast_entries: {
         Row: {
           amount_cents: number

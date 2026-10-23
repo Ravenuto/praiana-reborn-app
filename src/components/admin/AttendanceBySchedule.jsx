@@ -68,6 +68,7 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
       return all.filter(s => {
         if (s.cancelled_dates && s.cancelled_dates.includes(selectedDate)) return false;
         if (s.end_date && selectedDate >= s.end_date) return false;
+        if (s.start_date && selectedDate < s.start_date) return false;
         return true;
       });
     },
