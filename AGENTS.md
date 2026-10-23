@@ -12,6 +12,7 @@
 - Handle booking debit/refund atomically in database triggers, never client profile writes, because separate saves and stale snapshots lose credits.
 - Apply purchased cycle credit resets through the profile guard without recounting existing reservations; ordinary profile edits must not resend a cached credit balance, keeping renewal separate from atomic booking debits.
 - Reserve waitlist credits atomically in database triggers and promote through one database function so queue exits refund once and promotions never debit twice.
-- Release queued waitlist credits when a class closes (booking lead time) through one database function, run on schedule load plus an hourly backstop, because queued students must never lose a credit for a class they could not enter.
+- Release queued waitlist credits when a class closes (booking lead time) through one database function, run on schedule load plus an hourly scheduled job, because queued students must never lose a credit for a class they could not enter.
+- Scheduled notices run through one hourly job calling the public email-backstop route guarded by a database-only token; class reminders go out from 07:00 studio time until class start, and the plan-expiry notice fires 7 days before plan_end_date, because sends must be server-side, idempotent and never triggered from the browser.
 - Store student delivery preferences in profile data and read them before event-specific emails; preference saves omit credit fields so concurrent booking debits remain authoritative.
 - Studio class cancellation refunds bookings and waitlist holds before sending fixed-template notices through authenticated staff-only actions; ordinary student cancellations do not send these emails.

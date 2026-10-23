@@ -29,5 +29,5 @@
 - [x] Preferências na área da aluna: e-mail, app ou ambos; gravação e releitura verificadas no navegador.
 - [x] Aviso de cancelamento de turma pelo estúdio, após devolução de créditos das reservas e fila.
 - [x] Testar regras de preferências e datas de cancelamento; conferir tela em computador e celular.
-- [ ] E-mail de encerramento da fila e lembretes automáticos de aula/vencimento: modelos prontos, envio bloqueado pela falta de um serviço compatível de agendamento por destinatária; não criar cron/filas de e-mail manualmente.
-- [ ] Confirmar entrega real de e-mail e fluxo com conta de aluna: ainda não enviados e-mails reais; preferências verificadas com a conta autenticada da solicitante.
+- [x] E-mail de encerramento da fila e lembretes automáticos: rotina horária criada (fila encerrada com crédito devolvido, lembrete da aula do dia a partir das 7h, aviso de plano 7 dias antes do vencimento); testada com e sem chave; envios começam ao publicar.
+- [ ] Confirmar entrega real de e-mail e fluxo com conta de aluna: aguardando a primeira aula reservada após publicar para confirmar o lembrete na caixa de entrada; preferências já verificadas com a conta autenticada da solicitante.
