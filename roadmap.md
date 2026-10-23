@@ -25,3 +25,9 @@
 - [x] Enviar e-mail de renovação com data, plano, créditos e validade.
 - [x] Corrigir lançamentos do histórico e refletir no app da aluna.
 - [x] Devolver automaticamente o crédito da fila quando a turma fechar (antecedência de marcação) ou a aula passar; bloquear entrada na fila após o fechamento.
+- [x] Avisos de entrada e promoção na fila, respeitando a opção de envio por e-mail.
+- [x] Preferências na área da aluna: e-mail, app ou ambos; gravação e releitura verificadas no navegador.
+- [x] Aviso de cancelamento de turma pelo estúdio, após devolução de créditos das reservas e fila.
+- [x] Testar regras de preferências e datas de cancelamento; conferir tela em computador e celular.
+- [ ] E-mail de encerramento da fila e lembretes automáticos de aula/vencimento: modelos prontos, envio bloqueado pela falta de um serviço compatível de agendamento por destinatária; não criar cron/filas de e-mail manualmente.
+- [ ] Confirmar entrega real de e-mail e fluxo com conta de aluna: ainda não enviados e-mails reais; preferências verificadas com a conta autenticada da solicitante.

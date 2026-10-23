@@ -35,15 +35,15 @@ const WaitlistPromotedEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Text style={brand}>STUDIO <span style={accent}>PRAIANA</span> POLE DANCE</Text>
-        <Heading style={h1}>Sua vaga foi confirmada!</Heading>
-        <Text style={text}>Oi, {studentName}. Uma vaga foi liberada e você entrou na aula:</Text>
+        <Heading style={h1}>Sua vaga foi confirmada! 🎉</Heading>
+        <Text style={text}>Oi, {studentName}! Uma vaga abriu e você acabou de entrar na aula:</Text>
         <Section style={details}>
           <Text style={detail}><strong>Modalidade:</strong> {classType}</Text>
           <Text style={detail}><strong>Dia:</strong> {classDate}</Text>
           <Text style={detail}><strong>Horário:</strong> {classTime}</Text>
         </Section>
         <Button style={button} href={appUrl}>Ver minhas aulas no app</Button>
-        <Text style={footer}>Esta mensagem confirma uma reserva que você aguardava na fila de espera.</Text>
+        <Text style={footer}>Sua vaga já está garantida e a presença confirmada na lista da professora. Te esperamos no estúdio!</Text>
       </Container>
     </Body>
   </Html>
@@ -51,7 +51,7 @@ const WaitlistPromotedEmail = ({
 
 export const template = {
   component: WaitlistPromotedEmail,
-  subject: (data) => `Vaga confirmada: ${data.classType || 'aula'} | Studio Praiana Pole Dance`,
+  subject: (data) => `Vaga confirmada: ${data.classType || 'aula'} | Studio Praiana`,
   displayName: 'Confirmação da fila de espera',
   previewData: {
     studentName: 'Monique',

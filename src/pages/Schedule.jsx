@@ -21,6 +21,7 @@ import SectionHeader from "@/components/shared/SectionHeader";
 import { promoteFromWaitlist } from "@/lib/waitlist";
 import { parseDateSafe } from "@/lib/dates";
 import { useRoles } from "@/lib/roles";
+import { notifyWaitlistEntered } from "@/lib/notifications.functions";
 
 function formatSafe(value, pattern, options) {
   const d = parseDateSafe(value);
@@ -374,7 +375,7 @@ export default function Schedule() {
         toast.error("Você não tem créditos disponíveis para entrar na fila de espera.", { duration: 5000 });
         return;
       }
-      await base44.entities.WaitlistEntry.create({
+      const entry = await base44.entities.WaitlistEntry.create({
         session_id: session.id,
         session_date: selectedDate,
         session_time: session.time,
@@ -384,6 +385,8 @@ export default function Schedule() {
       });
       invalidate();
       toast.success(`Você entrou na fila de espera! O crédito ficou reservado. Restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
+      try { await notifyWaitlistEntered({ data: { entryId: entry.id } }); }
+      catch { toast.error("Você está na fila, mas o aviso não pôde ser enviado."); }
     } catch (error) {
       toast.error(error?.message || "Erro ao entrar na fila");
     } finally {

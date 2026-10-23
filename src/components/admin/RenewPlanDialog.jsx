@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { planEndDate, getInstallments } from "@/lib/planDuration";
 import { formatSafe } from "@/lib/dates";
 import { sendPlanRenewedEmail } from "@/lib/notifications.functions";
+import { createNotification } from "@/hooks/useNotifications";
 
 export default function RenewPlanDialog({ student, plans, onClose }) {
   const queryClient = useQueryClient();
@@ -76,7 +77,7 @@ export default function RenewPlanDialog({ student, plans, onClose }) {
         if (error) toast.error("Plano renovado, mas o valor não entrou no controle mensal.");
       }
       try {
-        await base44.entities.Notification.create({
+        await createNotification({
           user_email: student.email,
           type: "credits_added",
           title: "Pagamento confirmado 💙",

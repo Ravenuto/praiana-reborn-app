@@ -3,6 +3,7 @@ import ChangePassword from "@/components/settings/ChangePassword";
 import SectionHeader from "@/components/shared/SectionHeader";
 import { useTheme } from "@/lib/ThemeContext";
 import { Sun, Moon } from "lucide-react";
+import NotificationPreferences from "@/components/settings/NotificationPreferences";
 
 export default function Settings() {
   const { theme, toggle } = useTheme();
@@ -46,7 +47,7 @@ export default function Settings() {
 
       {/* Trocar senha */}
       <ChangePassword />
-
+      <NotificationPreferences />
 
     </div>
   );
