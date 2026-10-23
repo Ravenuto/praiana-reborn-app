@@ -1,30 +1,38 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { timingSafeEqual } from 'node:crypto'
 import { notificationChannels, isDeliverableStudent } from '@/lib/studentNotifPrefs'
 import { todayInBahia, bahiaClock, addDaysIso, brDateLabel, timeHasPassed } from '@/lib/cronDates'
 
-// Hourly backstop called by pg_cron with the project's server-only token.
-// Sends: waitlist-closure notices, same-day class reminders, plan-expiry notices.
+// Hourly backstop called by pg_cron. Sends: waitlist-closure notices,
+// same-day class reminders and plan-expiry notices.
+// The caller token lives only in the database (locked table); it is never
+// exposed to the browser and never hard-coded here.
 // Idempotent: every send carries an idempotency key and rows are marked after handling.
 export const Route = createFileRoute('/api/public/hooks/email-backstop')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env['PRAIANA_CRON_TOKEN'] || '';
-        const token = request.headers.get('x-cron-token') || '';
-        if (!expected || token !== expected) {
+        const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+        const { sendTemplateEmail } = await import('@/lib/email-templates/send-email');
+
+        // Verify the caller with a server-only token stored in a locked table.
+        const { data: tokenRow } = await supabaseAdmin.from('cron_tokens').select('token').eq('key', 'email_backstop').maybeSingle();
+        const expected = String(tokenRow?.token || '');
+        const received = request.headers.get('x-cron-token') || '';
+        const a = Buffer.from(expected);
+        const b = Buffer.from(received);
+        if (!expected || a.length !== b.length || !timingSafeEqual(a, b)) {
           return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-        const { sendTemplateEmail } = await import('@/lib/email-templates/send-email');
         const summary = { expired: 0, waitlistClosed: 0, classReminders: 0, planExpiring: 0, errors: 0 };
-        const profileCache = new Map<string, { email: string; data: Record<string, unknown> } | null>();
+        const profileCache = new Map<string, { id: string; email: string; data: Record<string, unknown> } | null>();
 
         const loadProfile = async (email: string) => {
           const key = email.toLowerCase();
           if (!profileCache.has(key)) {
-            const { data } = await supabaseAdmin.from('profiles').select('email, data').ilike('email', email).maybeSingle();
-            profileCache.set(key, data ? { email: String(data.email), data: (data.data || {}) as Record<string, unknown> } : null);
+            const { data } = await supabaseAdmin.from('profiles').select('id, email, data').ilike('email', email).maybeSingle();
+            profileCache.set(key, data ? { id: String(data.id), email: String(data.email), data: (data.data || {}) as Record<string, unknown> } : null);
           }
           return profileCache.get(key) || null;
         };
@@ -114,7 +122,7 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
                   await supabaseAdmin.from('app_records').upsert({
                     id: `class-reminder-${booking.id}`,
                     collection: 'Notification',
-                    owner_id: profile.id || undefined,
+                    owner_id: profile.id,
                     data: {
                       user_email: email, type: 'class_reminder',
                       title: 'Hoje é dia de aula!',
@@ -140,10 +148,10 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
         try {
           const target = addDaysIso(todayInBahia(), 7);
           const { data: profiles } = await supabaseAdmin.from('profiles')
-            .select('id, email, full_name, data')
+            .select('id, email, full_name, is_active, data')
             .filter("data->>'plan_end_date'", 'eq', target)
             .limit(100);
-          const planKeys = [...new Set((profiles || []).map((p) => String((p.data as Record<string, unknown>)?.plan || ''))).values()].filter(Boolean);
+          const planKeys = [...new Set((profiles || []).map((p) => String((p.data as Record<string, unknown>)?.plan || '')))].filter(Boolean);
           const planLabels = new Map<string, string>();
           if (planKeys.length) {
             const { data: plans } = await supabaseAdmin.from('app_records')
@@ -155,8 +163,8 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
           }
           for (const profile of profiles || []) {
             try {
-              const details = (profile.data || {}) as Record<string, unknown>;
               if (profile.is_active === false || !profile.email) continue;
+              const details = (profile.data || {}) as Record<string, unknown>;
               const endDate = String(details.plan_end_date || '').slice(0, 10);
               const planName = planLabels.get(String(details.plan || '')) || String(details.plan || 'Plano').replace(/_/g, ' ');
               const channels = notificationChannels(details.notification_delivery);
