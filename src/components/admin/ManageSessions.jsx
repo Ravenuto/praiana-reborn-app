@@ -403,7 +403,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       <div className="flex items-center justify-between mb-4">
          <h2 className="font-heading text-base font-semibold">{title}</h2>
          {canCreate && (
-           <Button size="sm" className="rounded-full gap-2 text-xs" onClick={() => { setForm(emptyForm); setEditingId(null); setOpen(true); }}>
+           <Button size="sm" className="rounded-full gap-2 text-xs" onClick={() => { setForm({ ...emptyForm, start_date: selectedDate }); setEditingId(null); setOpen(true); }}>
              <Plus className="h-4 w-4" /> Novo Horário
            </Button>
          )}
