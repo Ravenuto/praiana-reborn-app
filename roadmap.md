@@ -31,3 +31,4 @@
 - [x] Testar regras de preferências e datas de cancelamento; conferir tela em computador e celular.
 - [x] E-mail de encerramento da fila e lembretes automáticos: rotina horária criada (fila encerrada com crédito devolvido, lembrete da aula do dia a partir das 7h, aviso de plano 7 dias antes do vencimento); testada com e sem chave; envios começam ao publicar.
 - [ ] Confirmar entrega real de e-mail e fluxo com conta de aluna: aguardando a primeira aula reservada após publicar para confirmar o lembrete na caixa de entrada; preferências já verificadas com a conta autenticada da solicitante.
+- [x] Conferir exclusões em Presenças: regras por data e preservação do passado testadas; aula temporária apagada por Horários desapareceu de Presenças sem recarregar e continuou ausente após recarregar, sem alterar aulas reais.

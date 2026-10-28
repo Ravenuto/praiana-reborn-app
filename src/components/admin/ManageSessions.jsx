@@ -16,6 +16,7 @@ import { addManualBooking, removeManualBooking, invalidateManualBookings } from 
 import { getCredits } from "@/utils";
 import { cancelStudioParticipant } from "@/lib/notifications.functions";
 import { isCancelledOccurrence } from "@/lib/studentNotifPrefs";
+import { sessionOccursOnDate, invalidateSessionViews } from "@/lib/sessionVisibility";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -139,16 +140,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
 
   const filteredSessions = useMemo(() => {
     return sessions
-      .filter((s) => {
-        if (s.is_recurring) {
-          if (s.day_of_week !== selectedDayKey || s.is_active === false) return false;
-          if (s.cancelled_dates && s.cancelled_dates.includes(selectedDate)) return false;
-          if (s.end_date && selectedDate >= s.end_date) return false;
-          if (s.start_date && selectedDate < s.start_date) return false;
-          return true;
-        }
-        return s.date === selectedDate && s.is_active !== false;
-      })
+      .filter((s) => sessionOccursOnDate(s, selectedDate))
       .filter((s) => !instructorFilter || (s.instructor || "") === instructorFilter)
       .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
   }, [sessions, selectedDate, selectedDayKey, instructorFilter]);
@@ -249,8 +241,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
         });
         toast.success("Horário criado");
       }
-      queryClient.invalidateQueries({ queryKey: ["allSessions"] });
-      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      await invalidateSessionViews(queryClient);
       setOpen(false);
       setForm(emptyForm);
       setEditingId(null);
@@ -297,8 +288,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       if (!confirm("Excluir esta aula única?")) return;
       await cancelParticipants(session, session.date || selectedDate, true);
       await base44.entities.ClassSession.delete(session.id);
-        queryClient.invalidateQueries({ queryKey: ["allSessions"] });
-        queryClient.invalidateQueries({ queryKey: ["sessions"] });
+      await invalidateSessionViews(queryClient);
         toast.success("Aula excluída");
     }
   };
@@ -309,8 +299,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     const cancelled = s.cancelled_dates ? [...s.cancelled_dates, selectedDate] : [selectedDate];
     await base44.entities.ClassSession.update(s.id, { cancelled_dates: cancelled });
     await cancelParticipants(s, selectedDate, true);
-    queryClient.invalidateQueries({ queryKey: ["allSessions"] });
-    queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    await invalidateSessionViews(queryClient);
     setDeleteTarget(null);
     toast.success("Aula cancelada para este dia");
   };
@@ -328,8 +317,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       message: `${s.class_type_name || "Aula"} de ${s.day_of_week || ""} às ${s.time || ""} não acontecerá mais a partir de ${format(new Date(endDate + "T12:00:00"), "dd/MM/yyyy")}.`,
       link: "/agenda",
     });
-    queryClient.invalidateQueries({ queryKey: ["allSessions"] });
-    queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    await invalidateSessionViews(queryClient);
     setDeleteTarget(null);
     toast.success("Horário encerrado a partir desta data");
   };
