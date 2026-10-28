@@ -22,6 +22,7 @@ import { promoteFromWaitlist } from "@/lib/waitlist";
 import { parseDateSafe } from "@/lib/dates";
 import { useRoles } from "@/lib/roles";
 import { notifyWaitlistEntered } from "@/lib/notifications.functions";
+import { sessionOccursOnDate } from "@/lib/sessionVisibility";
 
 function formatSafe(value, pattern, options) {
   const d = parseDateSafe(value);
@@ -113,8 +114,7 @@ export default function Schedule() {
       base44.entities.ClassSession.filter({ day_of_week: selectedDay, is_active: true, is_recurring: true }),
       base44.entities.ClassSession.filter({ date: selectedDate, is_active: true, is_recurring: false })]
       );
-      // Filtrar cancelled_dates
-      return [...recurring.filter((s) => !s.cancelled_dates?.includes(selectedDate) && !(s.end_date && selectedDate >= s.end_date) && !(s.start_date && selectedDate < s.start_date)), ...oneOff];
+      return [...recurring, ...oneOff].filter((s) => sessionOccursOnDate(s, selectedDate));
     },
     enabled: !isHoliday
   });

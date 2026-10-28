@@ -14,6 +14,7 @@ import { Check, X, Clock, Users, ChevronDown, ChevronUp, UserPlus, Loader2, Chev
 import { toast } from "sonner";
 import { getCredits } from "@/utils";
 import { addManualBooking, removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
+import { sessionOccursOnDate } from "@/lib/sessionVisibility";
 
 const DAYS = [
   { key: "segunda", label: "Seg" }, { key: "terca", label: "Ter" },
@@ -62,15 +63,13 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
    }, [selectedDate]);
 
   const { data: sessions = [], isLoading: loadingSessions } = useQuery({
-    queryKey: ["adminSessions", selectedDayKey],
+    queryKey: ["adminSessions", selectedDate],
     queryFn: async () => {
-      const all = await base44.entities.ClassSession.filter({ day_of_week: selectedDayKey, is_active: true });
-      return all.filter(s => {
-        if (s.cancelled_dates && s.cancelled_dates.includes(selectedDate)) return false;
-        if (s.end_date && selectedDate >= s.end_date) return false;
-        if (s.start_date && selectedDate < s.start_date) return false;
-        return true;
-      });
+      const [recurring, oneOff] = await Promise.all([
+        base44.entities.ClassSession.filter({ day_of_week: selectedDayKey, is_active: true, is_recurring: true }),
+        base44.entities.ClassSession.filter({ date: selectedDate, is_active: true, is_recurring: false }),
+      ]);
+      return [...recurring, ...oneOff].filter(s => sessionOccursOnDate(s, selectedDate));
     },
   });
 

@@ -16,3 +16,4 @@
 - Scheduled notices run through one hourly job calling the public email-backstop route guarded by a database-only token; class reminders go out from 07:00 studio time until class start, and the plan-expiry notice fires 7 days before plan_end_date, because sends must be server-side, idempotent and never triggered from the browser.
 - Store student delivery preferences in profile data and read them before event-specific emails; preference saves omit credit fields so concurrent booking debits remain authoritative.
 - Studio class cancellation refunds bookings and waitlist holds before sending fixed-template notices through authenticated staff-only actions; ordinary student cancellations do not send these emails.
+- Share occurrence visibility and session-query invalidation between student schedule, admin schedule and attendance; attendance caches must include the exact date so deletions never leave stale or wrong-week classes.
