@@ -27,7 +27,7 @@ export function forecastForMonth(students, plans, entries, month) {
     const installments = getInstallments(plan);
     if (installments === 1) {
       const inactiveFrom = monthKey(student.financial_inactive_from || student.data?.financial_inactive_from);
-      if (student.is_active === false && (!inactiveFrom || month > inactiveFrom)) continue;
+      if (student.is_active === false && (!inactiveFrom || month >= inactiveFrom)) continue;
       const override = entries.find((entry) => entry.student_id === student.id && entry.kind === "monthly_override" && monthKey(entry.month) === month);
       rows.push({ student, plan, kind: "monthly", cents: override?.amount_cents ?? Math.round(Number(plan.price_value || 0) * 100), override });
       continue;
