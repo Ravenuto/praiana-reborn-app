@@ -50,6 +50,13 @@
       "when": 1792064674231,
       "tag": "0006_expire_closed_waitlist_holds",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793792837442,
+      "tag": "0007_waitlist_leave_and_credit_ledger",
+      "breakpoints": true
     }
   ]
 }
