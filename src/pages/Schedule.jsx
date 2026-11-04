@@ -399,9 +399,11 @@ export default function Schedule() {
     if (!entry) return;
     setLoadingSession(session.id);
     try {
-      await base44.entities.WaitlistEntry.delete(entry.id);
+      const { data: balance, error } = await supabase.rpc("leave_waitlist", { _entry_id: entry.id });
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["userCredits"] });
       invalidate();
-      toast.success("Você saiu da fila de espera e o crédito foi devolvido.");
+      toast.success(`Você saiu da fila de espera e o crédito foi devolvido. Créditos: ${balance ?? ""}`);
     } catch (error) {
       toast.error(error?.message || "Erro ao sair da fila");
     }
