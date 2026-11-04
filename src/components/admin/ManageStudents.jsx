@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Pause, Play, RefreshCw } from "lucide-react";
+import { UserPlus, Mail, Loader2, ShieldCheck, KeyRound, Sparkles, Plus, Minus, Trash2, Pencil, Search, ChevronDown, ChevronUp, DollarSign, Pause, Play, RefreshCw, History } from "lucide-react";
 import PaymentHistoryDialog from "@/components/admin/PaymentHistoryDialog";
 import RenewPlanDialog from "@/components/admin/RenewPlanDialog";
+import CreditHistoryDialog from "@/components/admin/CreditHistoryDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { addDaysISO, getDurationDays, daysLeft, durationLabel, getInstallments, planEndDate } from "@/lib/planDuration";
@@ -36,6 +37,7 @@ export default function ManageStudents() {
   const [manualForm, setManualForm] = useState(EMPTY_MANUAL);
   const [savingManual, setSavingManual] = useState(false);
   const [creditDialog, setCreditDialog] = useState(null);
+  const [creditHistory, setCreditHistory] = useState(null);
   const [creditValue, setCreditValue] = useState(0);
   const [savingCredit, setSavingCredit] = useState(false);
   const [editDialog, setEditDialog] = useState(null);
@@ -742,6 +744,16 @@ export default function ManageStudents() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      title="Histórico de créditos"
+                      onClick={() => setCreditHistory(student)}
+                      disabled={student.is_invited}
+                    >
+                      <History className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
                       title="Editar detalhes"
                       onClick={() => setEditDialog({ student, originalPlan: student.plan, full_name: student.full_name || "", phone: student.phone || "", birth_date: student.birth_date || "", notes: student.notes || "", plan_start_date: String(student.plan_start_date || "").slice(0, 10), plan_end_date: String(student.plan_end_date || "").slice(0, 10), daysToAdd: "" })}
                       disabled={student.is_invited}
@@ -1303,6 +1315,7 @@ export default function ManageStudents() {
           </DialogContent>
         </Dialog>
       )}
+      <CreditHistoryDialog student={creditHistory} onClose={() => setCreditHistory(null)} />
     </div>
   );
 }
