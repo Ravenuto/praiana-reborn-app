@@ -74,8 +74,10 @@ export default function Schedule() {
     const startStr = userData?.data?.plan_start_date || userData?.plan_start_date;
     const start = parseDateSafe(startStr);
     if (!start) return { min: null, max: null };
-    const end = addDays(start, 31); // 1 mês a partir do início do plano
-    return { min: format(start, "yyyy-MM-dd"), max: format(end, "yyyy-MM-dd") };
+    // Sempre respeita a validade real do plano (inclui extensões manuais)
+    const endStr = String(userData?.plan_end_date || userData?.data?.plan_end_date || "").slice(0, 10);
+    const max = /^\d{4}-\d{2}-\d{2}$/.test(endStr) ? endStr : format(addDays(start, 31), "yyyy-MM-dd");
+    return { min: format(start, "yyyy-MM-dd"), max };
   }, [userData, user]);
 
   const isPaused = (userData?.data?.plan_paused ?? userData?.plan_paused) === true && !isTeacher && user?.role !== "admin";
