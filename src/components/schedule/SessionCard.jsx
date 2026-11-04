@@ -1,3 +1,4 @@
+import { splitNotes } from "@/lib/sessionNotes";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,8 +60,9 @@ export default function SessionCard({
                 {isFull ? " — Lotada" : ` — ${spotsLeft} vaga${spotsLeft !== 1 ? "s" : ""}`}
               </span>
               <div className="flex flex-col gap-1">
-                {session.notes && <Badge className="bg-blue-600 text-white border-0 text-[10px]">{session.notes}</Badge>}
-                {session.session_overrides && session.session_overrides[sessionDate]?.notes && <Badge className="bg-blue-600 text-white border-0 text-[10px]">{session.session_overrides[sessionDate].notes}</Badge>}
+                {[...splitNotes(session.notes), ...splitNotes(session.session_overrides?.[sessionDate]?.notes)].map((n, i) => (
+                  <Badge key={i} className="bg-blue-600 text-white border-0 text-[10px]">{n}</Badge>
+                ))}
               </div>
               {locked && !past && (
                 <span className="flex items-center gap-1 text-amber-600">

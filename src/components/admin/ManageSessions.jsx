@@ -1,3 +1,5 @@
+import NotesListEditor from "@/components/admin/NotesListEditor";
+import { splitNotes } from "@/lib/sessionNotes";
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -484,12 +486,12 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                         {!s.is_recurring && (
                           <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Única</span>
                         )}
-                        {s.notes && (
-                            <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{s.notes}</span>
-                          )}
-                          {s.session_overrides && s.session_overrides[selectedDate] && (
-                            <span className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">📝 {s.session_overrides[selectedDate].notes}</span>
-                          )}
+                        {splitNotes(s.notes).map((n, i) => (
+                            <span key={`n${i}`} className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{n}</span>
+                          ))}
+                          {splitNotes(s.session_overrides?.[selectedDate]?.notes).map((n, i) => (
+                            <span key={`o${i}`} className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">📝 {n}</span>
+                          ))}
                        </div>
                     </div>
                   </div>
@@ -705,18 +707,13 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
 
             <div>
               <Label>Observações gerais</Label>
-              <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Ex: Nível intermediário" />
+              <NotesListEditor value={form.notes} onChange={(v) => setForm((f) => ({ ...f, notes: v }))} placeholder="Ex: Vir de salto" />
             </div>
 
             {form.session_type === "weekly" && (
               <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-3">
                 <p className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-2">📝 Observação específica (apenas para {formattedDate})</p>
-                <Input 
-                  value={form.override_notes} 
-                  onChange={(e) => setForm({ ...form, override_notes: e.target.value })} 
-                  placeholder="Ex: Com salto, Sem salto..." 
-                  className="h-8 text-sm"
-                />
+                <NotesListEditor value={form.override_notes} onChange={(v) => setForm((f) => ({ ...f, override_notes: v }))} placeholder="Ex: Com salto, Sem salto..." />
               </div>
             )}
 
