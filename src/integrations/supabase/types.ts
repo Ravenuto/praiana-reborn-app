@@ -44,6 +44,33 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_ledger: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          new_credits: number | null
+          old_credits: number | null
+          student_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          new_credits?: number | null
+          old_credits?: number | null
+          student_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          new_credits?: number | null
+          old_credits?: number | null
+          student_id?: string
+        }
+        Relationships: []
+      }
       cron_tokens: {
         Row: {
           key: string
@@ -188,6 +215,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      leave_waitlist: { Args: { _entry_id: string }; Returns: number }
       promote_waitlist:
         | {
             Args: { _session_date: string; _session_id: string }
