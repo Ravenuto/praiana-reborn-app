@@ -19,6 +19,7 @@ import { getCredits } from "@/utils";
 import { cancelStudioParticipant } from "@/lib/notifications.functions";
 import { isCancelledOccurrence } from "@/lib/studentNotifPrefs";
 import { sessionOccursOnDate, invalidateSessionViews } from "@/lib/sessionVisibility";
+import { supabase } from "@/integrations/supabase/client";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -160,7 +161,8 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     if (!waitlistRemoveTarget) return;
     setRosterBusy(true);
     try {
-      await base44.entities.WaitlistEntry.delete(waitlistRemoveTarget.id);
+      const { error: leaveError } = await supabase.rpc("leave_waitlist", { _entry_id: waitlistRemoveTarget.id });
+      if (leaveError) throw leaveError;
       invalidateManualBookings(queryClient);
       queryClient.invalidateQueries({ queryKey: ["adminSessionWaitlist"] });
       toast.success("Aluna retirada da fila e crédito devolvido.");
