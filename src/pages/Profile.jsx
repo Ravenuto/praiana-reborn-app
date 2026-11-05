@@ -224,8 +224,37 @@ export default function Profile() {
       )}
 
       {/* Datas do plano */}
+      {!isTeacher && (() => {
+        const startD = entityData?.plan_start_date || currentUser?.plan_start_date;
+        const endD = entityData?.plan_end_date || currentUser?.plan_end_date;
+        if (!startD && !endD) return null;
+        const left = endD ? daysLeft(endD) : null;
+        const expired = left != null && left < 0;
+        return (
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="rounded-xl border border-border bg-card p-4 text-center">
+              <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
+                <CalendarDays className="h-3 w-3" /> Início do plano
+              </p>
+              <p className="font-heading text-lg font-bold">{startD ? formatSafe(startD, "dd/MM/yyyy") : "—"}</p>
+            </div>
+            <div className={`rounded-xl border p-4 text-center ${expired ? "border-destructive bg-destructive/10" : "border-primary/40 bg-card"}`}>
+              <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
+                <CalendarDays className="h-3 w-3" /> Término do plano
+              </p>
+              <p className={`font-heading text-lg font-bold ${expired ? "text-destructive" : "text-primary"}`}>{endD ? formatSafe(endD, "dd/MM/yyyy") : "—"}</p>
+              {left != null && (
+                <p className={`text-xs mt-1 ${expired ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                  {expired ? "Plano vencido" : left === 0 ? "Vence hoje" : `Faltam ${left} dia${left === 1 ? "" : "s"}`}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="grid grid-cols-2 gap-3 mb-6">
-        {!isTeacher && entityData?.plan_start_date && (
+        {false && (
           <div className="rounded-xl border border-border bg-card p-4 text-center">
             <p className="text-xs text-muted-foreground mb-1 flex items-center justify-center gap-1">
               <CalendarDays className="h-3 w-3" /> Início do plano
@@ -248,13 +277,6 @@ export default function Profile() {
                 {lastPayment.payment_method === "pix" ? "PIX" : lastPayment.payment_method === "cartao_credito" ? "Cartão de crédito" : lastPayment.payment_method}
               </p>
             )}
-            {entityData?.plan_end_date ? (
-              <p className={`text-xs mt-1 ${(daysLeft(entityData.plan_end_date) ?? 0) < 0 ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
-                {(daysLeft(entityData.plan_end_date) ?? 0) < 0
-                  ? `Plano vencido em ${formatSafe(entityData.plan_end_date, "dd/MM/yyyy")}`
-                  : `Válido até ${formatSafe(entityData.plan_end_date, "dd/MM/yyyy")} · faltam ${daysLeft(entityData.plan_end_date)} dias`}
-              </p>
-            ) : null}
           </div>
         )}
       </div>
