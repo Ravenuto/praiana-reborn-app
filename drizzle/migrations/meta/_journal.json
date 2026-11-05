@@ -57,6 +57,13 @@
       "when": 1793792837442,
       "tag": "0007_waitlist_leave_and_credit_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793916029264,
+      "tag": "0008_fix_waitlist_expiry_refund",
+      "breakpoints": true
     }
   ]
 }
