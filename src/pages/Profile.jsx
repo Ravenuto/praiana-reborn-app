@@ -224,10 +224,9 @@ export default function Profile() {
       )}
 
       {/* Datas do plano */}
-      {!isTeacher && (() => {
+      {(() => {
         const startD = entityData?.plan_start_date || currentUser?.plan_start_date;
         const endD = entityData?.plan_end_date || currentUser?.plan_end_date;
-        if (!startD && !endD) return null;
         const left = endD ? daysLeft(endD) : null;
         const expired = left != null && left < 0;
         return (
