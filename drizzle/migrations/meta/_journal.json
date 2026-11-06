@@ -71,6 +71,13 @@
       "when": 1793987259206,
       "tag": "0009_plan_window_and_credit_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793987336686,
+      "tag": "0010_fix_waitlist_exit_refund_null_setting",
+      "breakpoints": true
     }
   ]
 }
