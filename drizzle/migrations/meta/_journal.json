@@ -64,6 +64,13 @@
       "when": 1793916029264,
       "tag": "0008_fix_waitlist_expiry_refund",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793987259206,
+      "tag": "0009_plan_window_and_credit_expiry",
+      "breakpoints": true
     }
   ]
 }
