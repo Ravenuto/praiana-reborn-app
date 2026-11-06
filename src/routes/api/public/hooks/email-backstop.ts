@@ -47,6 +47,8 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
         try {
           const { data: released } = await supabaseAdmin.rpc('expire_waitlist_holds');
           summary.expired = Number(released) || 0;
+          // Credits never roll over: zero leftovers after plan end / old-cycle carryover date.
+          await supabaseAdmin.rpc('expire_plan_credits');
         } catch {
           summary.errors += 1;
         }
