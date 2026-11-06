@@ -89,72 +89,11 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
           summary.errors += 1;
         }
 
-        // 2) Class reminders: confirmed bookings for today (studio time), sent from 07:00 before the class starts.
+        // 2) Plan expiring: notice 5 days before plan_end_date, with remaining credits.
         try {
-          const today = todayInBahia();
-          const nowClock = bahiaClock();
-          if (nowClock >= '07:00') {
-            const { data: bookings } = await supabaseAdmin.from('app_records')
-              .select('id, data')
-              .eq('collection', 'Booking')
-              .filter("data->>'status'", 'eq', 'confirmada')
-              .filter("data->>'session_date'", 'eq', today)
-              .limit(200);
-            for (const booking of bookings || []) {
-              const d = (booking.data || {}) as Record<string, unknown>;
-              if (d.class_reminder_sent === true) continue;
-              if (!isDeliverableStudent(d.student_email, d.guest_type) || timeHasPassed(d.session_time, nowClock)) {
-                await supabaseAdmin.from('app_records')
-                  .update({ data: { ...d, class_reminder_sent: true } })
-                  .eq('id', booking.id).eq('collection', 'Booking');
-                continue;
-              }
-              try {
-                const email = String(d.student_email || '');
-                const profile = await loadProfile(email);
-                const channels = profile ? notificationChannels(profile.data.notification_delivery) : { email: true, app: false };
-                if (channels.email) {
-                  await sendTemplateEmail('class-reminder', email, {
-                    templateData: {
-                      studentName: String(d.student_name || 'Aluna'),
-                      classType: String(d.class_type_name || 'Aula'),
-                      classDate: brDateLabel(d.session_date),
-                      classTime: String(d.session_time || ''),
-                    },
-                    idempotencyKey: `class-reminder-${booking.id}`,
-                  });
-                }
-                if (profile && channels.app) {
-                  await supabaseAdmin.from('app_records').upsert({
-                    id: `class-reminder-${booking.id}`,
-                    collection: 'Notification',
-                    owner_id: profile.id,
-                    data: {
-                      user_email: email, type: 'class_reminder',
-                      title: 'Hoje é dia de aula!',
-                      message: `${d.class_type_name} — ${brDateLabel(d.session_date)} às ${d.session_time}. Te esperamos no estúdio!`,
-                      link: '/minhas-reservas', read: false,
-                    },
-                  }, { onConflict: 'id', ignoreDuplicates: true });
-                }
-                await supabaseAdmin.from('app_records')
-                  .update({ data: { ...d, class_reminder_sent: true } })
-                  .eq('id', booking.id).eq('collection', 'Booking');
-                summary.classReminders += 1;
-              } catch {
-                summary.errors += 1;
-              }
-            }
-          }
-        } catch {
-          summary.errors += 1;
-        }
-
-        // 3) Plan expiring: notice 7 days before plan_end_date.
-        try {
-          const target = addDaysIso(todayInBahia(), 7);
+          const target = addDaysIso(todayInBahia(), 5);
           const { data: profiles } = await supabaseAdmin.from('profiles')
-            .select('id, email, full_name, is_active, data')
+            .select('id, email, full_name, is_active, credits_remaining, data')
             .filter("data->>'plan_end_date'", 'eq', target)
             .limit(100);
           const planKeys = [...new Set((profiles || []).map((p) => String((p.data as Record<string, unknown>)?.plan || '')))].filter(Boolean);
@@ -180,6 +119,7 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
                     studentName: (profile.full_name || 'Aluna').trim().split(' ')[0],
                     planName,
                     validUntil: brDateLabel(endDate),
+                    credits: Number(details.credits ?? profile.credits_remaining ?? 0),
                   },
                   idempotencyKey: `plan-expiring-${profile.id}-${endDate}`,
                 });
@@ -192,7 +132,7 @@ export const Route = createFileRoute('/api/public/hooks/email-backstop')({
                   data: {
                     user_email: profile.email, type: 'plan_expiring',
                     title: 'Seu plano está perto de vencer',
-                    message: `Seu plano ${planName} vence em ${brDateLabel(endDate)}. Fale com a Raissa para renovar!`,
+                    message: `Seu plano ${planName} vence em ${brDateLabel(endDate)}. Créditos não acumulam: use até essa data. Fale com o studio para renovar!`,
                     link: '/perfil', read: false,
                   },
                 }, { onConflict: 'id', ignoreDuplicates: true });
