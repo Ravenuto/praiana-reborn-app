@@ -135,7 +135,8 @@ export default function Schedule() {
       // Libera filas de turmas já fechadas e devolve o crédito reservado.
       try {
         const { data: released } = await supabase.rpc("expire_waitlist_holds");
-        if (released > 0) queryClient.invalidateQueries({ queryKey: ["userCredits"] });
+        const { data: expired } = await supabase.rpc("expire_plan_credits");
+        if (released > 0 || expired > 0) queryClient.invalidateQueries({ queryKey: ["userCredits"] });
       } catch { /* backstop horário no banco */ }
       return base44.entities.WaitlistEntry.filter({ session_date: selectedDate }, "position", 100);
     }
@@ -375,6 +376,10 @@ export default function Schedule() {
       const currentCredits = getCredits(latestUser);
       if (user?.role !== "admin" && currentCredits < 1) {
         toast.error("Você não tem créditos disponíveis para entrar na fila de espera.", { duration: 5000 });
+        return;
+      }
+      if (user?.role !== "admin" && !isDateAllowed(selectedDate)) {
+        toast.error("Esta data está fora do período do seu plano. Renove seu plano para continuar reservando!", { duration: 5000 });
         return;
       }
       const entry = await base44.entities.WaitlistEntry.create({
