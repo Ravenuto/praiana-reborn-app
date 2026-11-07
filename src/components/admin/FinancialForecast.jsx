@@ -15,6 +15,13 @@ const currentMonth = () => {
 };
 const monthLabel = (month) => new Date(`${month}-15T12:00:00`).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
+const formatEnd = (student) => {
+  const raw = String(student?.plan_end_date || student?.data?.plan_end_date || "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return "—";
+  const [y, m, d] = raw.split("-");
+  return `${d}/${m}/${y}`;
+};
+
 export default function FinancialForecast() {
   const queryClient = useQueryClient();
   const [month, setMonth] = useState(currentMonth);
@@ -80,7 +87,7 @@ export default function FinancialForecast() {
         <div className="divide-y divide-border border-y border-border">
           {rows.map((row) => (
             <div key={`${row.student.id}-${row.kind}-${row.start || month}`} className="grid grid-cols-[minmax(0,1fr)_auto_auto] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-2 sm:gap-4 items-center py-4">
-              <div className="min-w-0"><p className="font-medium truncate">{row.student.full_name || row.student.email}</p><p className="text-xs text-muted-foreground truncate sm:hidden">{row.plan.label}</p></div>
+              <div className="min-w-0"><p className="font-medium truncate">{row.student.full_name || row.student.email}</p><p className="text-xs text-muted-foreground truncate sm:hidden">{row.plan.label}</p><p className="text-xs text-muted-foreground truncate">Vencimento: {formatEnd(row.student)}</p></div>
               <p className="hidden sm:block text-sm text-muted-foreground truncate">{row.plan.label}</p>
               <div className="text-right"><p className="font-semibold tabular-nums whitespace-nowrap">{money(row.cents)}</p><p className="text-xs text-muted-foreground whitespace-nowrap">{row.kind === "allocation" ? `${row.offset + 1} de ${row.count}${row.allocation ? "" : " · confirmar total"}` : row.override ? "Valor ajustado" : "Mensal"}</p></div>
               <Button variant="ghost" size="icon" title={row.kind === "allocation" ? "Editar total recebido" : "Editar apenas este mês"} aria-label={`Editar valor de ${row.student.full_name || row.student.email}`} onClick={() => openEdit(row)}><Pencil className="h-4 w-4" /></Button>
