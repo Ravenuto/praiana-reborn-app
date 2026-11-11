@@ -8,13 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Clock, User, Users, ChevronLeft, ChevronRight, CalendarDays, PartyPopper } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Clock, User, Users, ChevronLeft, ChevronRight, CalendarDays, PartyPopper, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { format, addDays, startOfWeek, addMonths, subMonths, startOfMonth, endOfMonth, isSameMonth, isSameDay, endOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import DaySelector, { DAYS } from "@/components/schedule/DaySelector";
 import { notifyAllStudents, notifyBookedStudents } from "@/hooks/useNotifications";
-import { addManualBooking, removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
+import { addManualBooking, removeManualBooking, invalidateManualBookings, placeFromWaitlist } from "@/lib/adminBooking";
 import { getCredits } from "@/utils";
 import { cancelStudioParticipant } from "@/lib/notifications.functions";
 import { isCancelledOccurrence } from "@/lib/studentNotifPrefs";
@@ -169,6 +169,20 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       setWaitlistRemoveTarget(null);
     } catch (error) {
       toast.error(error?.message || "Não foi possível retirar da fila.");
+    } finally {
+      setRosterBusy(false);
+    }
+  };
+
+  const handlePlaceFromWaitlist = async (entry) => {
+    setRosterBusy(true);
+    try {
+      await placeFromWaitlist(entry);
+      invalidateManualBookings(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["adminSessionWaitlist"] });
+      toast.success(`${entry.student_name || "Aluna"} entrou na aula. O crédito reservado foi usado.`);
+    } catch (error) {
+      toast.error(error?.message || "Não foi possível colocar na aula.");
     } finally {
       setRosterBusy(false);
     }
@@ -548,9 +562,14 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                       <p className="text-sm font-medium break-words">#{entry.position} · {entry.student_name || entry.student_email}</p>
                       <p className="text-xs text-muted-foreground">Crédito reservado</p>
                     </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                    <Button size="sm" variant="outline" className="gap-1" disabled={rosterBusy} onClick={() => handlePlaceFromWaitlist(entry)} title="Colocar na aula">
+                      <UserPlus className="h-4 w-4" /> Colocar na aula
+                    </Button>
                     <Button size="icon" variant="ghost" aria-label={`Retirar ${entry.student_name || "aluna"} da fila`} title="Retirar da fila" disabled={rosterBusy} onClick={() => setWaitlistRemoveTarget(entry)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -578,7 +597,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                 <div className="space-y-1"><Label>Tipo</Label><Select value={guestType} onValueChange={setGuestType}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="experimental">Experimental</SelectItem><SelectItem value="avulsa">Avulsa</SelectItem></SelectContent></Select></div>
               </div>
             )}
-            <Button className="w-full gap-2" onClick={handleAddParticipant} disabled={rosterBusy || roster.length >= (Number(rosterSession?.max_students) || 8)}>
+            <Button className="w-full gap-2" onClick={handleAddParticipant} disabled={rosterBusy}>
               {rosterBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Adicionar à aula
             </Button>
           </div>

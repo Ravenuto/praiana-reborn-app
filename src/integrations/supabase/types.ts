@@ -207,6 +207,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_place_from_waitlist: {
+        Args: { _entry_id: string }
+        Returns: {
+          booking_id: string
+          class_type_name: string
+          session_date: string
+          session_time: string
+          student_email: string
+          student_name: string
+        }[]
+      }
       expire_plan_credits: { Args: never; Returns: number }
       expire_waitlist_holds: { Args: never; Returns: number }
       has_role: {

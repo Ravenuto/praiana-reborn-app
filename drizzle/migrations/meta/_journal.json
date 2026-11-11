@@ -78,6 +78,13 @@
       "when": 1793987336686,
       "tag": "0010_fix_waitlist_exit_refund_null_setting",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794439373988,
+      "tag": "0011_admin_over_capacity_and_place_from_waitlist",
+      "breakpoints": true
     }
   ]
 }

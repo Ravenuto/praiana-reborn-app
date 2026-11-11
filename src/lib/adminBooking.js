@@ -1,5 +1,7 @@
 import { base44 } from "@/api/base44Client";
 import { promoteFromWaitlist } from "@/lib/waitlist";
+import { supabase } from "@/integrations/supabase/client";
+import { sendWaitlistPromotionEmail } from "@/lib/notifications.functions";
 import { getCredits } from "@/utils";
 
 const active = (booking) => booking.status !== "cancelada";
@@ -10,8 +12,7 @@ export async function addManualBooking({ session, date, student, guestName, gues
     session_date: date,
   });
   const activeBookings = existing.filter(active);
-  if (activeBookings.length >= (Number(session.max_students) || 8))
-    throw new Error("Esta aula está lotada.");
+  // Admin may add participants beyond the class capacity (students cannot).
 
   let studentName;
   let studentEmail;
@@ -50,6 +51,7 @@ export async function addManualBooking({ session, date, student, guestName, gues
     guest_type: student ? null : guestType,
     credit_debited: creditDebited,
     status: "confirmada",
+    admin_over_capacity: true,
   });
   return booking;
 }
@@ -80,4 +82,16 @@ export function invalidateManualBookings(queryClient) {
   ]) {
     queryClient.invalidateQueries({ queryKey: [key] });
   }
+}
+
+/** Admin moves a waitlisted student into the class (even if full); the held credit becomes the class credit. */
+export async function placeFromWaitlist(entry) {
+  const { data, error } = await supabase.rpc("admin_place_from_waitlist", { _entry_id: entry.id });
+  if (error) throw error;
+  const placed = data?.[0];
+  if (placed?.booking_id) {
+    try { await sendWaitlistPromotionEmail({ data: { bookingId: placed.booking_id } }); }
+    catch (e) { console.error("Não foi possível enviar o e-mail da vaga.", e); }
+  }
+  return placed;
 }
