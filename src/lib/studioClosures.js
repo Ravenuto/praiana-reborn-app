@@ -3,7 +3,7 @@ import { format, parseISO, isValid } from "date-fns";
 export const CLOSURE_TYPES = {
   holiday: { label: "Feriado", emoji: "🎉", message: "Não teremos aula hoje. Bom descanso 💙" },
   recess: { label: "Recesso", emoji: "☕", message: "Estamos em recesso. Bom descanso 💙" },
-  vacation: { label: "Férias", emoji: "🌴", message: "Estúdio em férias coletivas. Aproveite o descanso! 💙" },
+  vacation: { label: "Férias", emoji: "🏝️", message: "Estúdio em férias coletivas. Aproveite o descanso! 💙" },
 };
 
 export function closureType(record) {
