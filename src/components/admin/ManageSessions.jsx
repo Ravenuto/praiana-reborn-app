@@ -20,6 +20,9 @@ import { cancelStudioParticipant } from "@/lib/notifications.functions";
 import { isCancelledOccurrence } from "@/lib/studentNotifPrefs";
 import { sessionOccursOnDate, invalidateSessionViews } from "@/lib/sessionVisibility";
 import { supabase } from "@/integrations/supabase/client";
+import { closuresOnDate, closureType } from "@/lib/studioClosures";
+import ClosureNotice from "@/components/schedule/ClosureNotice";
+import StudioClosureDialog from "@/components/admin/StudioClosureDialog";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -85,6 +88,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
   const [weekAnchor, setWeekAnchor] = useState(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [closureEditor, setClosureEditor] = useState(null);
 
   const { data: teachers = [] } = useQuery({
     queryKey: ["teachersList"],
@@ -111,23 +115,18 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
   });
 
   const { data: holidays = [] } = useQuery({
-    queryKey: ["holidays", selectedDate],
-    queryFn: () => base44.entities.Holiday.filter({ date: selectedDate }),
+    queryKey: ["holidays"],
+    queryFn: () => base44.entities.Holiday.list(),
+    staleTime: 0,
   });
 
-  const isHoliday = holidays.length > 0;
-  const holidayRecord = holidays[0] || null;
-
-  const toggleHoliday = async () => {
-    if (isHoliday) {
-      await base44.entities.Holiday.delete(holidayRecord.id);
-    } else {
-      await base44.entities.Holiday.create({ date: selectedDate, label: "Feriado" });
-    }
-    queryClient.invalidateQueries({ queryKey: ["holidays"] });
-    queryClient.invalidateQueries({ queryKey: ["sessions"] });
-    toast.success(isHoliday ? "Feriado removido — aulas liberadas!" : "Feriado ativado para este dia!");
-  };
+  const dayClosures = closuresOnDate(holidays, selectedDate);
+  const holidayRecord = dayClosures[0] || null;
+  const isHoliday = !!holidayRecord;
+  const refreshClosures = () => Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["holidays"] }),
+    queryClient.invalidateQueries({ queryKey: ["sessions"] }),
+  ]);
 
   const { data: bookings = [] } = useQuery({
     queryKey: ["bookings", selectedDate],
@@ -442,34 +441,20 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
         onWeekChange={(newAnchor) => setWeekAnchor(newAnchor)}
       />
 
-      {/* Botão feriado */}
-      <div className="mt-3">
-        <button
-          onClick={toggleHoliday}
-          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors ${
-            isHoliday
-              ? "bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-900/20 dark:border-amber-600 dark:text-amber-400"
-              : "bg-muted/30 border-border text-muted-foreground hover:border-amber-300 hover:text-amber-600"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <PartyPopper className="h-4 w-4" />
-            <span className="text-sm font-medium">{isHoliday ? "🎉 Feriado ativo — clique para desativar" : "Marcar como feriado"}</span>
-          </div>
-          <div className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${isHoliday ? "bg-amber-400" : "bg-muted"}`}>
-            <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${isHoliday ? "translate-x-4" : "translate-x-0"}`} />
-          </div>
-        </button>
-      </div>
+      {canCreate && <div className="mt-3 space-y-2">
+        <Button variant="outline" className="w-full gap-2" onClick={() => setClosureEditor({ record: null })}>
+          <PartyPopper className="h-4 w-4" /> Marcar feriado, recesso ou férias
+        </Button>
+        {dayClosures.map(record => <Button key={record.id} variant="secondary" className="w-full justify-between gap-2 h-auto py-3" onClick={() => setClosureEditor({ record })}>
+          <span className="text-left break-words">{closureType(record).emoji} {closureType(record).label} · {format(new Date((record.start_date || record.date) + "T12:00:00"), "dd/MM/yyyy")}{record.end_date && record.end_date !== (record.start_date || record.date) ? ` a ${format(new Date(record.end_date + "T12:00:00"), "dd/MM/yyyy")}` : ""}</span>
+          <Pencil className="h-4 w-4 shrink-0" />
+        </Button>)}
+      </div>}
 
       {/* Lista de aulas do dia */}
       <div className="mt-4 space-y-3">
         {isHoliday ? (
-          <div className="text-center py-12 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800">
-            <span className="text-4xl">🎉</span>
-            <p className="font-semibold text-amber-700 dark:text-amber-400 mt-3">Feriado</p>
-            <p className="text-xs text-amber-600/80 mt-1">As aulas deste dia estão ocultas para as alunas</p>
-          </div>
+          <ClosureNotice closure={holidayRecord} />
         ) : filteredSessions.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <CalendarDays className="h-8 w-8 mx-auto mb-3 opacity-30" />
@@ -530,6 +515,8 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
           })
         )}
       </div>
+
+      {closureEditor && <StudioClosureDialog date={selectedDate} record={closureEditor.record} onClose={() => setClosureEditor(null)} onSaved={refreshClosures} />}
 
       <Dialog open={!!rosterSession} onOpenChange={(value) => { if (!value && !rosterBusy) setRosterSession(null); }}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">

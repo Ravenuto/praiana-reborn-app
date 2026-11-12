@@ -23,6 +23,8 @@ import { parseDateSafe } from "@/lib/dates";
 import { useRoles } from "@/lib/roles";
 import { notifyWaitlistEntered } from "@/lib/notifications.functions";
 import { sessionOccursOnDate } from "@/lib/sessionVisibility";
+import { closuresOnDate } from "@/lib/studioClosures";
+import ClosureNotice from "@/components/schedule/ClosureNotice";
 
 function formatSafe(value, pattern, options) {
   const d = parseDateSafe(value);
@@ -102,12 +104,13 @@ export default function Schedule() {
   const bookingMinHours = parseInt(studioSettings?.booking_min_hours || "4", 10);
   const cancelMinHours = parseInt(studioSettings?.cancel_min_hours || "4", 10);
 
-  const { data: holidayData = [] } = useQuery({
-    queryKey: ["holidays", selectedDate],
-    queryFn: () => base44.entities.Holiday.filter({ date: selectedDate }),
+  const { data: holidayData = [], isLoading: loadingClosures } = useQuery({
+    queryKey: ["holidays"],
+    queryFn: () => base44.entities.Holiday.list(),
     staleTime: 0
   });
-  const isHoliday = holidayData.length > 0;
+  const holidayRecord = closuresOnDate(holidayData, selectedDate)[0] || null;
+  const isHoliday = !!holidayRecord;
 
   const { data: sessions = [], isLoading: loadingSessions } = useQuery({
     queryKey: ["sessions", selectedDay, selectedDate],
@@ -118,7 +121,7 @@ export default function Schedule() {
       );
       return [...recurring, ...oneOff].filter((s) => sessionOccursOnDate(s, selectedDate));
     },
-    enabled: !isHoliday
+    enabled: !loadingClosures && !isHoliday
   });
 
   const { data: bookings = [], isLoading: loadingBookings } = useQuery({
@@ -204,6 +207,13 @@ export default function Schedule() {
     }
     setLoadingSession(session.id);
     try {
+      const closures = await base44.entities.Holiday.list();
+      if (closuresOnDate(closures, selectedDate).length) {
+        await queryClient.invalidateQueries({ queryKey: ["holidays"] });
+        toast.error("O estúdio está fechado nesta data.");
+        setLoadingSession(null);
+        return;
+      }
       // Buscar créditos FRESCOS do banco antes de qualquer operação
       const [latestUser] = await base44.entities.User.filter({ email: user?.email }, "-created_date", 1);
       const currentCredits = getCredits(latestUser);
@@ -372,6 +382,12 @@ export default function Schedule() {
     }
     setLoadingSession(session.id);
     try {
+      const closures = await base44.entities.Holiday.list();
+      if (closuresOnDate(closures, selectedDate).length) {
+        await queryClient.invalidateQueries({ queryKey: ["holidays"] });
+        toast.error("O estúdio está fechado nesta data.");
+        return;
+      }
       const [latestUser] = await base44.entities.User.filter({ email: user?.email }, "-created_date", 1);
       const currentCredits = getCredits(latestUser);
       if (user?.role !== "admin" && currentCredits < 1) {
@@ -570,16 +586,9 @@ export default function Schedule() {
       
 
       <div className="space-y-3 mt-4">
-        {loadingSessions || loadingBookings ?
+        {isHoliday ? <ClosureNotice closure={holidayRecord} /> :
+        loadingClosures || loadingSessions || loadingBookings ?
         Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />) :
-        isHoliday ?
-        <div className="text-center py-16 rounded-2xl bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800">
-            <div className="flex justify-center mb-3">
-              <span className="text-6xl inline-block pr-5 pl-10">🎉</span>
-            </div>
-            <p className="font-heading font-bold text-amber-700 dark:text-amber-400 text-lg">Feriado!</p>
-            <p className="text-sm text-amber-600/80 mt-2">Não teremos aula hoje. Bom descanso 💙</p>
-          </div> :
         sortedSessions.length === 0 ?
         <div className="text-center py-16 text-muted-foreground">
             <CalendarDays className="h-10 w-10 mx-auto mb-4 opacity-30" />

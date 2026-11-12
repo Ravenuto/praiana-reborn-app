@@ -17,3 +17,4 @@
 - Store student delivery preferences in profile data and read them before event-specific emails; preference saves omit credit fields so concurrent booking debits remain authoritative.
 - Studio class cancellation refunds bookings and waitlist holds before sending fixed-template notices through authenticated staff-only actions; ordinary student cancellations do not send these emails.
 - Share occurrence visibility and session-query invalidation between student schedule, admin schedule and attendance; attendance caches must include the exact date so deletions never leave stale or wrong-week classes.
+- Store studio closures as single-day or inclusive-range Holiday records and share their date matching and notice between both schedules, preserving legacy holidays without touching profiles or bookings.
