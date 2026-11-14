@@ -255,6 +255,7 @@ export type Database = {
               student_name: string
             }[]
           }
+      session_is_free: { Args: { _session_id: string }; Returns: boolean }
       waitlist_close_at: {
         Args: { _date: string; _time: string }
         Returns: string

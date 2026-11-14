@@ -85,6 +85,13 @@
       "when": 1794439373988,
       "tag": "0011_admin_over_capacity_and_place_from_waitlist",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794672658908,
+      "tag": "0012_free_classes_no_credit",
+      "breakpoints": true
     }
   ]
 }

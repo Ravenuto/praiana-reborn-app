@@ -65,7 +65,7 @@ function DeleteRecurringDialog({ session, date, onCancel, onDeleteOne, onDeleteA
 const emptyForm = {
   class_type_id: "", class_type_name: "", day_of_week: "segunda",
   time: "09:00", instructor: "", max_students: 8, notes: "",
-  session_type: "weekly", specific_date: "", override_notes: "",
+  session_type: "weekly", specific_date: "", override_notes: "", is_free: false,
 };
 
 export default function ManageSessions({ instructorFilter = "", canCreate = true, title = "Horários de Aula" }) {
@@ -281,6 +281,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       specific_date: s.date || "",
       start_date: s.start_date || "",
       override_notes: s.override_notes || "",
+      is_free: s.is_free === true,
     });
     setEditingId(s.id);
     setOpen(true);
@@ -474,7 +475,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                       <Clock className="h-5 w-5 text-primary" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-xs">{s.class_type_name} · {s.time}</p>
+                      <p className="font-semibold text-xs">{s.class_type_name} · {s.time}{s.is_free && <span className="ml-1 text-primary">· 🎁 Gratuita</span>}</p>
                        {s.instructor && (
                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
                            <User className="h-3 w-3" /> {s.instructor}
@@ -686,6 +687,14 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                 <Input type="number" value={form.max_students} onChange={(e) => setForm({ ...form, max_students: parseInt(e.target.value) || 8 })} className="mobile-native-field h-8 w-full block" />
               </div>
             </div>
+
+            <label className="flex items-start gap-2 rounded-lg border border-border p-3 cursor-pointer">
+              <input type="checkbox" className="mt-0.5 h-4 w-4 accent-primary" checked={form.is_free === true} onChange={(e) => setForm({ ...form, is_free: e.target.checked })} />
+              <span className="text-sm">
+                <span className="font-medium">Aula gratuita</span>
+                <span className="block text-xs text-muted-foreground">Não desconta créditos. A aluna precisa estar com o plano ativo.</span>
+              </span>
+            </label>
 
             <div>
               <Label>Professora</Label>

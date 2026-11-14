@@ -59,6 +59,9 @@ export default function SessionCard({
                 <Users className="h-3 w-3" /> {bookingCount}/{session.max_students || 8}
                 {isFull ? " — Lotada" : ` — ${spotsLeft} vaga${spotsLeft !== 1 ? "s" : ""}`}
               </span>
+              {session.is_free && (
+                <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary text-[10px]">🎁 Gratuita · não usa crédito</Badge>
+              )}
               <div className="flex flex-col gap-1">
                 {[...splitNotes(session.notes), ...splitNotes(session.session_overrides?.[sessionDate]?.notes)].map((n, i) => (
                   <Badge key={i} className="bg-blue-600 text-white border-0 text-[10px]">{n}</Badge>

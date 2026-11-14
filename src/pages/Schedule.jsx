@@ -218,8 +218,9 @@ export default function Schedule() {
       const [latestUser] = await base44.entities.User.filter({ email: user?.email }, "-created_date", 1);
       const currentCredits = getCredits(latestUser);
 
+      const isFree = session.is_free === true;
       if (user?.role !== "admin") {
-        if (currentCredits <= 0) {
+        if (!isFree && currentCredits <= 0) {
           toast.error("Você não tem créditos disponíveis. Entre em contato para renovar seu plano.", { duration: 5000 });
           setLoadingSession(null);
           return;
@@ -260,7 +261,7 @@ export default function Schedule() {
       // Optimistic update: update user credits cache
       queryClient.setQueryData(
         ["userCredits", user?.email],
-        (prev) => prev ? { ...prev, data: { ...(prev.data || {}), credits: currentCredits - 1 } } : null
+        (prev) => prev ? { ...prev, data: { ...(prev.data || {}), credits: isFree ? currentCredits : currentCredits - 1 } } : null
       );
 
       // Then actually create the booking
@@ -283,7 +284,7 @@ export default function Schedule() {
       );
 
       invalidate();
-      toast.success(`Aula reservada! Créditos restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
+      toast.success(isFree ? "Aula gratuita reservada! Seus créditos continuam intactos. 🎁" : `Aula reservada! Créditos restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
       // Notificar admins com data em formato brasileiro
       const dataBR = formatSafe(selectedDate, "dd/MM/yyyy");
       const admins = await base44.entities.User.filter({ role: "admin" });
@@ -338,7 +339,7 @@ export default function Schedule() {
       // Optimistic update: update user credits cache
       queryClient.setQueryData(
         ["userCredits", user?.email],
-        (prev) => prev ? { ...prev, data: { ...(prev.data || {}), credits: currentCredits + 1 } } : null
+        (prev) => prev ? { ...prev, data: { ...(prev.data || {}), credits: (session.is_free || booking.credit_debited === false) ? currentCredits : currentCredits + 1 } } : null
       );
 
       // Actually cancel the booking
@@ -390,7 +391,7 @@ export default function Schedule() {
       }
       const [latestUser] = await base44.entities.User.filter({ email: user?.email }, "-created_date", 1);
       const currentCredits = getCredits(latestUser);
-      if (user?.role !== "admin" && currentCredits < 1) {
+      if (user?.role !== "admin" && !session.is_free && currentCredits < 1) {
         toast.error("Você não tem créditos disponíveis para entrar na fila de espera.", { duration: 5000 });
         return;
       }
@@ -407,7 +408,7 @@ export default function Schedule() {
         student_email: user?.email,
       });
       invalidate();
-      toast.success(`Você entrou na fila de espera! O crédito ficou reservado. Restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
+      toast.success(session.is_free ? "Você entrou na fila de espera! Aula gratuita: nenhum crédito foi usado." : `Você entrou na fila de espera! O crédito ficou reservado. Restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
       try { await notifyWaitlistEntered({ data: { entryId: entry.id } }); }
       catch { toast.error("Você está na fila, mas o aviso não pôde ser enviado."); }
     } catch (error) {
@@ -611,7 +612,7 @@ export default function Schedule() {
           onLeaveWaitlist={() => handleLeaveWaitlist(session)}
           isLoading={loadingSession === session.id}
           readOnly={isTeacher}
-          hasCredits={hasCredits}
+          hasCredits={hasCredits || session.is_free === true}
           bookingMinHours={bookingMinHours}
           cancelMinHours={cancelMinHours}
           paused={isPaused} />
