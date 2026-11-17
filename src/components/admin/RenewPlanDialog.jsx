@@ -22,14 +22,24 @@ export default function RenewPlanDialog({ student, plans, onClose }) {
   const [method, setMethod] = useState("pix");
   const [amount, setAmount] = useState(String(plans.find((p) => p.key === initialPlan)?.price_value ?? ""));
   const [saving, setSaving] = useState(false);
+  const [qty, setQty] = useState(1);
 
   const plan = plans.find((p) => p.key === planKey);
   const end = useMemo(() => (plan && start ? planEndDate(start, plan) : ""), [plan, start]);
   const installments = getInstallments(plan);
+  const isSingle = !!plan && /avuls/i.test(`${plan.key} ${plan.label}`);
+  const count = isSingle ? Math.max(1, qty) : 1;
+  const totalCredits = (plan?.credits ?? 0) * count;
 
   const changePlan = (key) => {
     setPlanKey(key);
+    setQty(1);
     setAmount(String(plans.find((p) => p.key === key)?.price_value ?? ""));
+  };
+  const changeQty = (n) => {
+    const q = Math.max(1, Math.min(50, n || 1));
+    setQty(q);
+    if (plan?.price_value != null) setAmount(String(plan.price_value * q));
   };
 
   const handleSave = async () => {
@@ -42,16 +52,16 @@ export default function RenewPlanDialog({ student, plans, onClose }) {
       const [fresh] = await base44.entities.User.filter({ email: student.email }, "-created_date", 1);
       if (!fresh) throw new Error("Aluna não encontrada");
       const cleanData = Object.fromEntries(Object.entries(fresh.data || {}).filter(([k]) => k !== "data"));
-      const credits = plan.credits ?? 0;
+      const credits = totalCredits;
       await base44.entities.PaymentHistory.create({
         user_id: fresh.id,
         user_email: student.email,
         user_name: student.full_name || student.email,
         plan_name: plan.key,
-        amount: plan.price_value ?? value,
+        amount: isSingle ? value : (plan.price_value ?? value),
         payment_date: start,
         payment_method: method,
-        notes: plan.key === student.plan ? "Renovação" : "Novo plano",
+        notes: (isSingle && count > 1 ? `${count} aulas avulsas · ` : "") + (plan.key === student.plan ? "Renovação" : "Novo plano"),
       });
       await base44.entities.User.update(fresh.id, {
         is_active: true,
@@ -115,6 +125,16 @@ export default function RenewPlanDialog({ student, plans, onClose }) {
               </SelectContent>
             </Select>
           </div>
+          {isSingle && (
+            <div>
+              <Label className="text-xs mb-1 block">Quantidade de aulas avulsas</Label>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => changeQty(count - 1)} disabled={count <= 1}>−</Button>
+                <Input type="number" min={1} value={count} onChange={(e) => changeQty(parseInt(e.target.value, 10))} className="w-20 text-center" />
+                <Button type="button" variant="outline" size="sm" onClick={() => changeQty(count + 1)}>+</Button>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div className="min-w-0">
               <Label className="text-xs mb-1 block">Início</Label>
@@ -142,7 +162,7 @@ export default function RenewPlanDialog({ student, plans, onClose }) {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Libera {plan?.credits ?? 0} créditos. A aluna vê o plano e o pagamento no perfil dela.
+            Libera {totalCredits} créditos. A aluna vê o plano e o pagamento no perfil dela.
             {installments > 1 ? ` O total entra no controle mensal em ${installments} retiradas.` : ""}
           </p>
           <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
