@@ -636,7 +636,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
 
       {/* Dialog criar/editar */}
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setForm(emptyForm); setEditingId(null); } }}>
-        <DialogContent>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-heading">{editingId ? "Editar" : "Novo"} Horário</DialogTitle>
           </DialogHeader>
