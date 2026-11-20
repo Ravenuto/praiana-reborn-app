@@ -1,5 +1,7 @@
 // Conta aulas dadas por professora: cada aula (horário + data) com pelo menos
 // 1 aluna confirmada ou presente conta como 1 aula. Sem professora = dona do estúdio.
+import { sessionForDate } from "./sessionHistory.js";
+
 export const DEFAULT_RATE_CENTS = 1500;
 const COUNTED = new Set(["confirmada", "presente"]);
 
@@ -11,7 +13,7 @@ export function computeClassesTaught({ bookings, sessions, month, today, ownerNa
     if (!date.startsWith(month) || date > today || !COUNTED.has(b.status)) continue;
     const key = `${b.session_id}|${date}`;
     if (!classes.has(key)) {
-      const s = sessionById.get(b.session_id) || {};
+      const s = sessionForDate(sessionById.get(b.session_id) || {}, date);
       classes.set(key, {
         key, date,
         time: s.time || b.session_time || "",

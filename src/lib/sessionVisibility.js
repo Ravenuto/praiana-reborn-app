@@ -11,7 +11,7 @@ export function sessionOccursOnDate(session, date) {
 }
 
 export function invalidateSessionViews(queryClient) {
-  return Promise.all(["allSessions", "sessions", "adminSessions"].map((key) =>
+  return Promise.all(["allSessions", "sessions", "adminSessions", "allSessionsTaught", "bookings", "adminBookingsAtt", "allBookingsTaught", "allWaitlist", "adminSessionWaitlist"].map((key) =>
     queryClient.invalidateQueries({ queryKey: [key] })
   ));
 }

@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { closuresOnDate, closureType } from "@/lib/studioClosures";
 import ClosureNotice from "@/components/schedule/ClosureNotice";
 import StudioClosureDialog from "@/components/admin/StudioClosureDialog";
+import { sessionForDate, recurringEditPatch } from "@/lib/sessionHistory";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -74,6 +75,8 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [editScope, setEditScope] = useState("from");
+  const [editFromDate, setEditFromDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null); // session a ser deletada
   const [rosterSession, setRosterSession] = useState(null);
@@ -143,6 +146,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
 
   const filteredSessions = useMemo(() => {
     return sessions
+      .map(s => sessionForDate(s, selectedDate))
       .filter((s) => sessionOccursOnDate(s, selectedDate))
       .filter((s) => !instructorFilter || instructorMatches(s.instructor, instructorFilter))
       .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
@@ -247,7 +251,16 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       }
       
       if (editingId) {
-        await base44.entities.ClassSession.update(editingId, data);
+        const original = sessions.find(s => s.id === editingId);
+        if (!original) throw new Error("Horário não encontrado.");
+        if (original.is_recurring && editScope === "from") {
+          if (!isRecurring) throw new Error("Para transformar toda a grade em aula única, selecione alterar todo o histórico.");
+          // Occurrence-specific notes stay attached to the day being edited.
+          data.session_overrides = { ...(sessionForDate(original, editFromDate).session_overrides || {}), ...(data.session_overrides || {}) };
+          await base44.entities.ClassSession.update(editingId, recurringEditPatch(original, data, editFromDate));
+        } else {
+          await base44.entities.ClassSession.update(editingId, { ...data, session_versions: [] });
+        }
         toast.success("Horário atualizado");
       } else {
         await base44.entities.ClassSession.create(data);
@@ -263,13 +276,15 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       setOpen(false);
       setForm(emptyForm);
       setEditingId(null);
-    } catch {
-      toast.error("Erro ao salvar");
+    } catch (error) {
+      toast.error(error?.message || "Erro ao salvar");
     }
     setSaving(false);
   };
 
   const handleEdit = (s) => {
+    setEditScope("from");
+    setEditFromDate(selectedDate);
     setForm({
       class_type_id: s.class_type_id || "",
       class_type_name: s.class_type_name || "",
@@ -283,6 +298,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       start_date: s.start_date || "",
       override_notes: s.override_notes || "",
       is_free: s.is_free === true,
+      session_overrides: s.session_overrides || {},
     });
     setEditingId(s.id);
     setOpen(true);
@@ -504,10 +520,10 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                         <Users className="h-4 w-4" /> Alunas
                       </Button>
                     )}
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(s)}>
+                    <Button variant="ghost" size="icon" aria-label={`Editar ${s.class_type_name} às ${s.time}`} onClick={() => handleEdit(s)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(s)}>
+                    <Button variant="ghost" size="icon" aria-label={`Excluir ${s.class_type_name} às ${s.time}`} onClick={() => handleDelete(s)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -625,6 +641,19 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
             <DialogTitle className="font-heading">{editingId ? "Editar" : "Novo"} Horário</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
+            {editingId && sessions.find(s => s.id === editingId)?.is_recurring && (
+              <div className="space-y-2">
+                <Label>Aplicar alterações</Label>
+                <Select value={editScope} onValueChange={setEditScope}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="from">Alterar a partir desta data</SelectItem>
+                    <SelectItem value="all">Alterar todo o histórico</SelectItem>
+                  </SelectContent>
+                </Select>
+                {editScope === "from" ? <div className="space-y-1"><Label htmlFor="edit-from-date">A partir de</Label><Input id="edit-from-date" type="date" value={editFromDate} onChange={e => setEditFromDate(e.target.value)} className="mobile-native-field w-full" /></div> : <p className="text-sm text-destructive">Atenção: esta opção também altera as aulas passadas e a professora no histórico de presenças.</p>}
+              </div>
+            )}
             <div>
               <Label>Tipo de Aula *</Label>
               <div className="mt-1.5 grid grid-cols-2 gap-2">
@@ -668,7 +697,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
                 </div>
                 <div className="min-w-0">
                   <Label>Data de início</Label>
-                  <Input type="date" value={form.start_date || ""} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="mobile-native-field h-8 w-full block" />
+                  <Input type="date" disabled={!!editingId && editScope === "from"} value={form.start_date || ""} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="mobile-native-field h-8 w-full block" />
                 </div>
               </div>
             ) : (

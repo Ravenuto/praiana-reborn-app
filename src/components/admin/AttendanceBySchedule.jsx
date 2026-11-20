@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { getCredits } from "@/utils";
 import { addManualBooking, removeManualBooking, invalidateManualBookings } from "@/lib/adminBooking";
 import { sessionOccursOnDate } from "@/lib/sessionVisibility";
+import { sessionForDate } from "@/lib/sessionHistory";
 
 const DAYS = [
   { key: "segunda", label: "Seg" }, { key: "terca", label: "Ter" },
@@ -66,11 +67,8 @@ export default function AttendanceBySchedule({ initialDate = "", instructorFilte
   const { data: sessions = [], isLoading: loadingSessions } = useQuery({
     queryKey: ["adminSessions", selectedDate],
     queryFn: async () => {
-      const [recurring, oneOff] = await Promise.all([
-        base44.entities.ClassSession.filter({ day_of_week: selectedDayKey, is_active: true, is_recurring: true }),
-        base44.entities.ClassSession.filter({ date: selectedDate, is_active: true, is_recurring: false }),
-      ]);
-      return [...recurring, ...oneOff].filter(s => sessionOccursOnDate(s, selectedDate));
+      const all = await base44.entities.ClassSession.list();
+      return all.map(s => sessionForDate(s, selectedDate)).filter(s => sessionOccursOnDate(s, selectedDate));
     },
   });
 

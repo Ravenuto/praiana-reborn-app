@@ -19,3 +19,4 @@
 - Share occurrence visibility and session-query invalidation between student schedule, admin schedule and attendance; attendance caches must include the exact date so deletions never leave stale or wrong-week classes.
 - Store studio closures as single-day or inclusive-range Holiday records and share their date matching and notice between both schedules, preserving legacy holidays without touching profiles or bookings.
 - Teachers book their own studio classes free of credit and plan checks only after the student booking window closes, enforced by the booking trigger (no charge for teacher role) and the shared schedule, because teacher access is a free benefit for leftover spots.
+- Keep date-effective recurring edits in session_versions on the stable ClassSession record and resolve them through sessionForDate in all schedules, attendance and classes-taught totals; stable IDs preserve bookings and credit flags without transfers.

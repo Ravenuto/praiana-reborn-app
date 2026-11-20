@@ -23,6 +23,7 @@ import { parseDateSafe } from "@/lib/dates";
 import { useRoles } from "@/lib/roles";
 import { notifyWaitlistEntered } from "@/lib/notifications.functions";
 import { sessionOccursOnDate } from "@/lib/sessionVisibility";
+import { sessionForDate } from "@/lib/sessionHistory";
 import { closuresOnDate } from "@/lib/studioClosures";
 import ClosureNotice from "@/components/schedule/ClosureNotice";
 
@@ -115,11 +116,8 @@ export default function Schedule() {
   const { data: sessions = [], isLoading: loadingSessions } = useQuery({
     queryKey: ["sessions", selectedDay, selectedDate],
     queryFn: async () => {
-      const [recurring, oneOff] = await Promise.all([
-      base44.entities.ClassSession.filter({ day_of_week: selectedDay, is_active: true, is_recurring: true }),
-      base44.entities.ClassSession.filter({ date: selectedDate, is_active: true, is_recurring: false })]
-      );
-      return [...recurring, ...oneOff].filter((s) => sessionOccursOnDate(s, selectedDate));
+      const all = await base44.entities.ClassSession.list();
+      return all.map(s => sessionForDate(s, selectedDate)).filter((s) => sessionOccursOnDate(s, selectedDate));
     },
     enabled: !loadingClosures && !isHoliday
   });
