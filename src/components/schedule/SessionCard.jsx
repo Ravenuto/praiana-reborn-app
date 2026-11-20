@@ -23,7 +23,7 @@ function isPast(sessionDate, sessionTime) {
 export default function SessionCard({
   session, sessionDate, bookingCount, sessionBookings = [], sessionWaitlist = [],
   isBooked, waitlistPosition, onBook, onCancel, onJoinWaitlist, onLeaveWaitlist, isLoading,
-  hasCredits = true, bookingMinHours = 4, cancelMinHours = 4, readOnly = false, paused = false,
+  hasCredits = true, bookingMinHours = 4, cancelMinHours = 4, readOnly = false, paused = false, teacherMode = false,
 }) {
   const [expanded, setExpanded] = useState(false);
   const spotsLeft = (session.max_students || 8) - bookingCount;
@@ -67,7 +67,7 @@ export default function SessionCard({
                   <Badge key={i} className="bg-blue-600 text-white border-0 text-[10px]">{n}</Badge>
                 ))}
               </div>
-              {locked && !past && (
+              {locked && !past && !teacherMode && (
                 <span className="flex items-center gap-1 text-amber-600">
                   <AlertCircle className="h-3 w-3" /> Fora do horário de marcação
                 </span>
@@ -91,6 +91,16 @@ export default function SessionCard({
               </span>
             ) : past ? (
               <span className="text-xs text-muted-foreground">Encerrada</span>
+            ) : teacherMode && !isBooked ? (
+              isFull ? (
+                <span className="text-xs text-muted-foreground">Turma cheia</span>
+              ) : !locked ? (
+                <span className="text-[11px] text-muted-foreground text-right max-w-[9rem]">Vaga para professora libera {bookingMinHours}h antes da aula</span>
+              ) : (
+                <Button size="sm" onClick={onBook} disabled={isLoading} className="rounded-full px-5 text-sm h-8">
+                  {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Reservar"}
+                </Button>
+              )
             ) : isBooked ? (
               <>
                 <Badge className="bg-primary/10 text-primary border-0 gap-1 text-xs">
@@ -100,7 +110,7 @@ export default function SessionCard({
                   variant="outline"
                   size="sm"
                   onClick={onCancel}
-                  disabled={isLoading || cancelLocked}
+                  disabled={isLoading || (cancelLocked && !teacherMode)}
                   className="rounded-full text-xs h-8"
                   title={cancelLocked ? `Cancelamento não permitido com menos de ${cancelMinHours}h` : ""}
                 >

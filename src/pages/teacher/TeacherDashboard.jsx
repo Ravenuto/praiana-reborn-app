@@ -50,7 +50,7 @@ export default function TeacherDashboard() {
       </div>
 
       {activeTab === "attendance" ? (
-        <AttendanceBySchedule />
+        <AttendanceBySchedule instructorFilter={isAdmin ? "" : myName} />
       ) : (
         <ManageSessions
           instructorFilter={isAdmin && !isTeacher ? "" : myName}

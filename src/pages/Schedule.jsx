@@ -86,7 +86,7 @@ export default function Schedule() {
   const pausedAt = userData?.data?.plan_paused_at || userData?.plan_paused_at || null;
 
   const isDateAllowed = (dateStr) => {
-    if (!planDates.min && !planDates.max) return true;
+    if (isTeacher || (!planDates.min && !planDates.max)) return true;
     if (planDates.min && dateStr < planDates.min) return false;
     if (planDates.max && dateStr > planDates.max) return false;
     return true;
@@ -201,7 +201,7 @@ export default function Schedule() {
   };
 
   const handleBook = async (session) => {
-    if (isPaused) {
+    if (isPaused && !isTeacher) {
       toast.error("Seu plano está pausado. Fale com o estúdio para reativar.", { duration: 5000 });
       return;
     }
@@ -218,8 +218,24 @@ export default function Schedule() {
       const [latestUser] = await base44.entities.User.filter({ email: user?.email }, "-created_date", 1);
       const currentCredits = getCredits(latestUser);
 
-      const isFree = session.is_free === true;
-      if (user?.role !== "admin") {
+      const isFree = session.is_free === true || isTeacher;
+      if (isTeacher) {
+        // Professora: acesso livre e gratuito, só depois que a marcação das alunas fecha.
+        const studioSettings = await getStudioSettings();
+        const minHours = parseInt(studioSettings.booking_min_hours || "4", 10);
+        const [h, m] = (session.time || "00:00").split(":").map(Number);
+        const diffMs = new Date(`${selectedDate}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`) - new Date();
+        if (diffMs > minHours * 60 * 60 * 1000) {
+          toast.error(`Vaga para professora libera ${minHours}h antes da aula.`, { duration: 5000 });
+          setLoadingSession(null);
+          return;
+        }
+        if (diffMs <= 0) {
+          toast.error("Esta aula já começou.");
+          setLoadingSession(null);
+          return;
+        }
+      } else if (user?.role !== "admin") {
         if (!isFree && currentCredits <= 0) {
           toast.error("Você não tem créditos disponíveis. Entre em contato para renovar seu plano.", { duration: 5000 });
           setLoadingSession(null);
@@ -284,7 +300,7 @@ export default function Schedule() {
       );
 
       invalidate();
-      toast.success(isFree ? "Aula gratuita reservada! Seus créditos continuam intactos. 🎁" : `Aula reservada! Créditos restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
+      toast.success(isTeacher ? "Vaga reservada! 💙" : isFree ? "Aula gratuita reservada! Seus créditos continuam intactos. 🎁" : `Aula reservada! Créditos restantes: ${user?.role !== "admin" ? currentCredits - 1 : "∞"}`);
       // Notificar admins com data em formato brasileiro
       const dataBR = formatSafe(selectedDate, "dd/MM/yyyy");
       const admins = await base44.entities.User.filter({ role: "admin" });
@@ -315,7 +331,7 @@ export default function Schedule() {
     const [h, m] = (session.time || "00:00").split(":").map(Number);
     const classDateTime = new Date(`${selectedDate}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`);
     const diffMs = classDateTime - new Date();
-    if (diffMs <= cancelMinHours * 60 * 60 * 1000 && diffMs > 0) {
+    if (!isTeacher && diffMs <= cancelMinHours * 60 * 60 * 1000 && diffMs > 0) {
       toast.error(`Cancelamento não permitido: faltam menos de ${cancelMinHours} hora${cancelMinHours !== 1 ? "s" : ""} para a aula.`, { duration: 5000 });
       return;
     }
@@ -543,7 +559,7 @@ export default function Schedule() {
           eyebrow="Sua semana"
           title="Agendar Aulas"
           goldWord="Aulas"
-          subtitle={isTeacher ? "Veja as aulas do dia e as alunas inscritas." : "Selecione o dia e reserve sua vaga."}
+          subtitle={isTeacher ? "Acompanhe as turmas e reserve vagas que sobrarem depois que a marcação fechar." : "Selecione o dia e reserve sua vaga."}
         />
 
 
@@ -611,8 +627,8 @@ export default function Schedule() {
           onJoinWaitlist={() => handleJoinWaitlist(session)}
           onLeaveWaitlist={() => handleLeaveWaitlist(session)}
           isLoading={loadingSession === session.id}
-          readOnly={isTeacher}
-          hasCredits={hasCredits || session.is_free === true}
+          teacherMode={isTeacher}
+          hasCredits={isTeacher || hasCredits || session.is_free === true}
           bookingMinHours={bookingMinHours}
           cancelMinHours={cancelMinHours}
           paused={isPaused} />

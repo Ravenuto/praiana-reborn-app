@@ -92,6 +92,13 @@
       "when": 1794672658908,
       "tag": "0012_free_classes_no_credit",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795142982475,
+      "tag": "0013_teacher_free_bookings",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { instructorMatches } from "@/lib/instructorMatch";
 import NotesListEditor from "@/components/admin/NotesListEditor";
 import { splitNotes } from "@/lib/sessionNotes";
 import React, { useState, useMemo } from "react";
@@ -143,7 +144,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
   const filteredSessions = useMemo(() => {
     return sessions
       .filter((s) => sessionOccursOnDate(s, selectedDate))
-      .filter((s) => !instructorFilter || (s.instructor || "") === instructorFilter)
+      .filter((s) => !instructorFilter || instructorMatches(s.instructor, instructorFilter))
       .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
   }, [sessions, selectedDate, selectedDayKey, instructorFilter]);
 

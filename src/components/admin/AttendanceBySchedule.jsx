@@ -1,3 +1,4 @@
+import { instructorMatches } from "@/lib/instructorMatch";
 import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -45,7 +46,7 @@ const statusOptions = [
   { value: "cancelada", label: "Cancelar (remover)", cls: "bg-muted text-muted-foreground" },
 ];
 
-export default function AttendanceBySchedule({ initialDate = "" }) {
+export default function AttendanceBySchedule({ initialDate = "", instructorFilter = "" }) {
    const queryClient = useQueryClient();
    const [expandedSession, setExpandedSession] = useState(null);
    const [weekAnchor, setWeekAnchor] = useState(() => {
@@ -84,7 +85,7 @@ export default function AttendanceBySchedule({ initialDate = "" }) {
     queryFn: () => base44.entities.User.filter({ is_active: true }, "full_name", 200),
   });
 
-  const sortedSessions = useMemo(() => [...sessions].sort((a, b) => (a.time || "").localeCompare(b.time || "")), [sessions]);
+  const sortedSessions = useMemo(() => sessions.filter((s) => !instructorFilter || instructorMatches(s.instructor, instructorFilter)).sort((a, b) => (a.time || "").localeCompare(b.time || "")), [sessions, instructorFilter]);
 
   const bookingsBySession = useMemo(() => {
     const map = {};
