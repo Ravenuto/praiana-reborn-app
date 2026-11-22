@@ -20,3 +20,22 @@ export function recurringEditPatch(session, changes, from) {
     ].sort((a, b) => a.from.localeCompare(b.from)),
   };
 }
+
+export function occurrenceNotes(session, date) {
+  return sessionForDate(session, date).session_overrides?.[date]?.notes || "";
+}
+
+// Write an explicit empty note too, so no later version can revive a removed note.
+export function occurrenceNotesPatch(session, date, notes) {
+  const update = (overrides = {}) => ({
+    ...overrides,
+    [date]: { ...overrides[date], notes },
+  });
+  return {
+    session_overrides: update(session.session_overrides),
+    session_versions: (session.session_versions || []).map(version => ({
+      ...version,
+      data: { ...version.data, session_overrides: update(version.data.session_overrides) },
+    })),
+  };
+}

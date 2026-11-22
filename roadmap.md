@@ -35,3 +35,5 @@
 - [x] Testar salvamento, releitura e remoção de um fechamento temporário na agenda no computador e celular.
 - [x] Restaurar Sexy Pole de Raissa antes de 10/11 e Lorena a partir de 10/11 sem mexer nas reservas ou créditos.
 - [x] Proteger edição recorrente por data; testar gravação/releitura, presenças reais e contagem por professora.
+- [x] Retirar somente o recado Teste de 26/11 às 18h, preservando reservas e créditos.
+- [x] Corrigir e testar leitura, alteração e remoção de recados específicos por dia.

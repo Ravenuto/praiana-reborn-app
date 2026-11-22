@@ -24,7 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { closuresOnDate, closureType } from "@/lib/studioClosures";
 import ClosureNotice from "@/components/schedule/ClosureNotice";
 import StudioClosureDialog from "@/components/admin/StudioClosureDialog";
-import { sessionForDate, recurringEditPatch } from "@/lib/sessionHistory";
+import { sessionForDate, recurringEditPatch, occurrenceNotes, occurrenceNotesPatch } from "@/lib/sessionHistory";
 
 const DAY_NAMES = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 
@@ -237,32 +237,28 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
     setSaving(true);
     try {
       const isRecurring = form.session_type !== "once";
-      const data = { ...form, is_active: true, is_recurring: isRecurring };
+      const { override_notes, session_overrides, ...fields } = form;
+      const data = { ...fields, is_active: true, is_recurring: isRecurring };
       if (!isRecurring) {
         data.day_of_week = DAY_NAMES[new Date(form.specific_date + "T12:00:00").getDay()];
         data.date = form.specific_date;
       }
       
-      // Se for recorrente e tiver override_notes, cria um registro de override
-      if (isRecurring && form.override_notes) {
-        const overrideKey = `${editingId || "new"}_${selectedDate}`;
-        data.session_overrides = data.session_overrides || {};
-        data.session_overrides[selectedDate] = { notes: form.override_notes };
-      }
-      
       if (editingId) {
         const original = sessions.find(s => s.id === editingId);
         if (!original) throw new Error("Horário não encontrado.");
+        let patch;
         if (original.is_recurring && editScope === "from") {
           if (!isRecurring) throw new Error("Para transformar toda a grade em aula única, selecione alterar todo o histórico.");
-          // Occurrence-specific notes stay attached to the day being edited.
-          data.session_overrides = { ...(sessionForDate(original, editFromDate).session_overrides || {}), ...(data.session_overrides || {}) };
-          await base44.entities.ClassSession.update(editingId, recurringEditPatch(original, data, editFromDate));
+          patch = recurringEditPatch(original, data, editFromDate);
         } else {
-          await base44.entities.ClassSession.update(editingId, { ...data, session_versions: [] });
+          patch = { ...data, session_overrides, session_versions: [] };
         }
+        if (isRecurring) patch = { ...patch, ...occurrenceNotesPatch({ ...original, ...patch }, selectedDate, override_notes) };
+        await base44.entities.ClassSession.update(editingId, patch);
         toast.success("Horário atualizado");
       } else {
+        if (isRecurring && override_notes) data.session_overrides = { [selectedDate]: { notes: override_notes } };
         await base44.entities.ClassSession.create(data);
         notifyAllStudents({
           type: "schedule_change",
@@ -296,7 +292,7 @@ export default function ManageSessions({ instructorFilter = "", canCreate = true
       session_type: s.is_recurring === false ? "once" : "weekly",
       specific_date: s.date || "",
       start_date: s.start_date || "",
-      override_notes: s.override_notes || "",
+      override_notes: occurrenceNotes(s, selectedDate),
       is_free: s.is_free === true,
       session_overrides: s.session_overrides || {},
     });

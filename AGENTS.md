@@ -20,3 +20,4 @@
 - Store studio closures as single-day or inclusive-range Holiday records and share their date matching and notice between both schedules, preserving legacy holidays without touching profiles or bookings.
 - Teachers book their own studio classes free of credit and plan checks only after the student booking window closes, enforced by the booking trigger (no charge for teacher role) and the shared schedule, because teacher access is a free benefit for leftover spots.
 - Keep date-effective recurring edits in session_versions on the stable ClassSession record and resolve them through sessionForDate in all schedules, attendance and classes-taught totals; stable IDs preserve bookings and credit flags without transfers.
+- Read occurrence notes from the selected date and persist their edits or empty removals across session override maps; dated versions must not revive removed notes or move them to the recurring edit's start date.
