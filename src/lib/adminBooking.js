@@ -30,8 +30,8 @@ export async function addManualBooking({ session, date, student, guestName, gues
     const latest = await base44.entities.User.get(student.id);
     if (!latest || !latest.is_active) throw new Error("Aluna não encontrada ou inativa.");
     if (latest.role !== "admin") {
-      if (getCredits(latest) < 1) throw new Error("Esta aluna não tem créditos disponíveis.");
-      creditDebited = true;
+      // Admin may add a student with 0 credits: she joins free and keeps balance 0.
+      creditDebited = getCredits(latest) >= 1;
     }
   } else {
     studentName = guestName?.trim();
@@ -52,6 +52,7 @@ export async function addManualBooking({ session, date, student, guestName, gues
     credit_debited: creditDebited,
     status: "confirmada",
     admin_over_capacity: true,
+    admin_zero_credit: Boolean(student) && !creditDebited,
   });
   return booking;
 }

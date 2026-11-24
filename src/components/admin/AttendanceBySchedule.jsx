@@ -331,7 +331,7 @@ export default function AttendanceBySchedule({ initialDate = "", instructorFilte
                     return st ? (
                       <p className="text-xs text-muted-foreground mt-1">
                         Créditos atuais: <strong>{credits}</strong>
-                        {credits === 0 && <span className="text-destructive ml-1">(sem créditos)</span>}
+                        {credits === 0 && <span className="text-destructive ml-1">(sem créditos — entra sem cobrar, saldo fica 0)</span>}
                       </p>
                     ) : null;
                   })()}
