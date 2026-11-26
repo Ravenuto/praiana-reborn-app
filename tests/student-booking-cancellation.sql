@@ -7,7 +7,7 @@ FROM public.profiles p WHERE NOT public.has_role(p.id,'admin') AND NOT public.ha
 SELECT set_config('test.other', p.id::text, true), set_config('test.other_email', p.email, true)
 FROM public.profiles p WHERE NOT public.has_role(p.id,'admin') AND NOT public.has_role(p.id,'teacher') AND p.id<>current_setting('test.student')::uuid ORDER BY p.id LIMIT 1;
 UPDATE public.profiles SET is_active=true,plan_start_date=now()-interval '1 day',plan_end_date='2100-01-01',
-data=data||'{"credits":4,"_reset_plan_credits":true,"plan_paused":false}'::jsonb
+data=(data-'carryover_credits'-'carryover_expires'-'carryover_base')||'{"credits":4,"plan_paused":false}'::jsonb
 WHERE id IN (current_setting('test.student')::uuid,current_setting('test.other')::uuid);
 SELECT set_config('request.jwt.claim.sub',current_setting('test.admin'),true);
 INSERT INTO public.app_records(id,collection,owner_id,data) VALUES
@@ -21,7 +21,7 @@ INSERT INTO public.app_records(id,collection,owner_id,data) VALUES
 ('cancellation-test-near','Booking',current_setting('test.admin')::uuid,jsonb_build_object('student_email',current_setting('test.email'),'session_id','cancellation-test-near-session','session_date',to_char((now()+interval '2 hours') AT TIME ZONE 'America/Sao_Paulo','YYYY-MM-DD'),'status','confirmada'));
 -- Start the no-credit fixture at exactly zero; admin insertion must remain free.
 SELECT set_config('request.jwt.claim.sub','',true);
-UPDATE public.profiles SET data=data||'{"credits":0,"_reset_plan_credits":true,"plan":"cancellation-test-reset"}'::jsonb WHERE id=current_setting('test.student')::uuid;
+UPDATE public.profiles SET data=data||'{"credits":0}'::jsonb WHERE id=current_setting('test.student')::uuid;
 SELECT set_config('request.jwt.claim.sub',current_setting('test.admin'),true);
 INSERT INTO public.app_records(id,collection,owner_id,data) VALUES
 ('cancellation-test-zero','Booking',current_setting('test.admin')::uuid,jsonb_build_object('student_email',current_setting('test.email'),'session_id','cancellation-test-normal-session','session_date','2099-01-03','status','confirmada','admin_zero_credit',true));

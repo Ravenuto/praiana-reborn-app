@@ -37,5 +37,5 @@
 - [x] Proteger edição recorrente por data; testar gravação/releitura, presenças reais e contagem por professora.
 - [x] Retirar somente o recado Teste de 26/11 às 18h, preservando reservas e créditos.
 - [x] Corrigir e testar leitura, alteração e remoção de recados específicos por dia.
-- [ ] Permitir cancelamento da própria reserva criada pelo admin, protegendo prazo, identidade e devolução única de crédito.
-- [ ] Testar cancelamento e releitura sem alterar reservas ou saldos de alunas reais.
+- [x] Permitir cancelamento da própria reserva criada pelo admin, protegendo prazo, identidade e devolução única de crédito.
+- [x] Testar cancelamento e releitura sem alterar reservas ou saldos de alunas reais.
