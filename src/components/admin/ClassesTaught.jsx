@@ -22,6 +22,7 @@ export default function ClassesTaught({ onlyTeacherId = null }) {
   const [value, setValue] = useState("");
   const month = format(anchor, "yyyy-MM");
   const today = format(new Date(), "yyyy-MM-dd");
+  const nowTime = format(new Date(), "HH:mm");
 
   const { data: users = [] } = useQuery({ queryKey: ["allUsers"], queryFn: () => base44.entities.User.list() });
   const { data: sessions = [] } = useQuery({ queryKey: ["allSessionsTaught"], queryFn: () => base44.entities.ClassSession.list() });
@@ -46,8 +47,8 @@ export default function ClassesTaught({ onlyTeacherId = null }) {
   }, [users, owner, onlyTeacherId]);
 
   const byTeacher = useMemo(
-    () => computeClassesTaught({ bookings, sessions, month, today, ownerName }),
-    [bookings, sessions, month, today, ownerName],
+    () => computeClassesTaught({ bookings, sessions, month, today, nowTime, ownerName }),
+    [bookings, sessions, month, today, nowTime, ownerName],
   );
 
   const rows = teachers.map((t) => {

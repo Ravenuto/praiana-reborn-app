@@ -22,3 +22,4 @@
 - Keep date-effective recurring edits in session_versions on the stable ClassSession record and resolve them through sessionForDate in all schedules, attendance and classes-taught totals; stable IDs preserve bookings and credit flags without transfers.
 - Read occurrence notes from the selected date and persist their edits or empty removals across session override maps; dated versions must not revive removed notes or move them to the recurring edit's start date.
 - Authorize student booking cancellation by the authenticated recipient, not the record creator; a pre-credit trigger permits only status cancellation within the studio deadline so admin-created bookings remain cancellable without exposing other edits.
+- Count a class as taught only after it ends (start + duration, default 60 min) and only with at least one confirmed or present student, grouped by calendar month, because teachers are paid monthly for classes that happened.

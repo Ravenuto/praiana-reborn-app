@@ -13,7 +13,17 @@ export function rateFor(teacherId, ownerId, rates) {
 }
 const COUNTED = new Set(["confirmada", "presente"]);
 
-export function computeClassesTaught({ bookings, sessions, month, today, ownerName }) {
+// Aula só conta depois de terminar (início + duração, padrão 60 min).
+export function classEnded(date, time, today, nowTime, minutes = 60) {
+  if (date < today) return true;
+  if (date > today || !nowTime) return false;
+  const [h, m] = (time || "00:00").split(":").map(Number);
+  const end = h * 60 + (m || 0) + minutes;
+  const [nh, nm] = nowTime.split(":").map(Number);
+  return nh * 60 + nm >= end;
+}
+
+export function computeClassesTaught({ bookings, sessions, month, today, nowTime, ownerName }) {
   const sessionById = new Map(sessions.map((s) => [s.id, s]));
   const classes = new Map();
   for (const b of bookings) {
@@ -22,6 +32,8 @@ export function computeClassesTaught({ bookings, sessions, month, today, ownerNa
     const key = `${b.session_id}|${date}`;
     if (!classes.has(key)) {
       const s = sessionForDate(sessionById.get(b.session_id) || {}, date);
+      const time = s.time || b.session_time || "";
+      if (!classEnded(date, time, today, nowTime, Number(s.duration_minutes) || 60)) continue;
       classes.set(key, {
         key, date,
         time: s.time || b.session_time || "",
