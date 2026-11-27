@@ -3,6 +3,14 @@
 import { sessionForDate } from "./sessionHistory.js";
 
 export const DEFAULT_RATE_CENTS = 1500;
+export const DEFAULT_TEACHER_RATE_CENTS = 4000;
+
+// Dona do estúdio: R$15; demais professoras: R$40, salvo valor cadastrado.
+export function rateFor(teacherId, ownerId, rates) {
+  const saved = rates.find((r) => r.student_id === teacherId)?.amount_cents;
+  if (saved != null) return saved;
+  return teacherId === ownerId ? DEFAULT_RATE_CENTS : DEFAULT_TEACHER_RATE_CENTS;
+}
 const COUNTED = new Set(["confirmada", "presente"]);
 
 export function computeClassesTaught({ bookings, sessions, month, today, ownerName }) {

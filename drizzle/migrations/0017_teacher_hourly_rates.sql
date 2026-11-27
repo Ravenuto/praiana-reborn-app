@@ -1,0 +1,3 @@
+ALTER TABLE public.financial_forecast_entries DROP CONSTRAINT financial_forecast_entries_kind_check;
+ALTER TABLE public.financial_forecast_entries ADD CONSTRAINT financial_forecast_entries_kind_check CHECK (kind IN ('allocation','monthly_override','teacher_rate'));
+CREATE POLICY "Teachers read own class rate" ON public.financial_forecast_entries FOR SELECT TO authenticated USING (kind = 'teacher_rate' AND student_id = auth.uid());

@@ -9,12 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { computeClassesTaught, DEFAULT_RATE_CENTS } from "@/lib/classesTaught";
+import { computeClassesTaught, rateFor } from "@/lib/classesTaught";
 
 const RATE_MONTH = "2000-01-01";
 const money = (c) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-export default function ClassesTaught() {
+export default function ClassesTaught({ onlyTeacherId = null }) {
   const qc = useQueryClient();
   const [anchor, setAnchor] = useState(new Date());
   const [open, setOpen] = useState(null);
@@ -27,9 +27,11 @@ export default function ClassesTaught() {
   const { data: sessions = [] } = useQuery({ queryKey: ["allSessionsTaught"], queryFn: () => base44.entities.ClassSession.list() });
   const { data: bookings = [] } = useQuery({ queryKey: ["allBookingsTaught"], queryFn: () => base44.entities.Booking.list() });
   const { data: rates = [] } = useQuery({
-    queryKey: ["teacherRates"],
+    queryKey: ["teacherRates", onlyTeacherId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("financial_forecast_entries").select("*").eq("kind", "teacher_rate");
+      let q = supabase.from("financial_forecast_entries").select("*").eq("kind", "teacher_rate");
+      if (onlyTeacherId) q = q.eq("student_id", onlyTeacherId);
+      const { data, error } = await q;
       if (error) throw error;
       return data || [];
     },
@@ -40,8 +42,8 @@ export default function ClassesTaught() {
   const teachers = useMemo(() => {
     const list = users.filter((u) => u.role === "teacher" || u.is_teacher === true);
     if (owner && !list.some((t) => t.id === owner.id)) list.unshift(owner);
-    return list;
-  }, [users, owner]);
+    return onlyTeacherId ? list.filter((t) => t.id === onlyTeacherId) : list;
+  }, [users, owner, onlyTeacherId]);
 
   const byTeacher = useMemo(
     () => computeClassesTaught({ bookings, sessions, month, today, ownerName }),
@@ -51,7 +53,7 @@ export default function ClassesTaught() {
   const rows = teachers.map((t) => {
     const name = t.full_name || t.email;
     const classes = byTeacher[name] || [];
-    const rate = rates.find((r) => r.student_id === t.id)?.amount_cents ?? DEFAULT_RATE_CENTS;
+    const rate = rateFor(t.id, owner?.id, rates);
     return { t, name, classes, rate };
   });
   const total = rows.reduce((s, r) => s + r.classes.length, 0);
@@ -88,7 +90,7 @@ export default function ClassesTaught() {
               <p className="text-xs text-muted-foreground">{classes.length} aulas × {money(rate)}</p>
             </button>
             <p className="font-semibold tabular-nums">{money(classes.length * rate)}</p>
-            <Button variant="ghost" size="icon" aria-label={`Editar valor por aula de ${name}`} onClick={() => { setEditing(t); setValue((rate / 100).toFixed(2)); }}><Pencil className="h-4 w-4" /></Button>
+            {!onlyTeacherId && <Button variant="ghost" size="icon" aria-label={`Editar valor por aula de ${name}`} onClick={() => { setEditing(t); setValue((rate / 100).toFixed(2)); }}><Pencil className="h-4 w-4" /></Button>}
             <Button variant="ghost" size="icon" aria-label="Ver aulas" onClick={() => setOpen(open === t.id ? null : t.id)}>{open === t.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</Button>
           </div>
           {open === t.id && (

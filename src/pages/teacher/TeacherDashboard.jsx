@@ -3,12 +3,12 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { isTeacherUser, isAdminUser } from "@/lib/roles";
 import AttendanceBySchedule from "@/components/admin/AttendanceBySchedule";
-import ManageSessions from "@/components/admin/ManageSessions";
-import { ClipboardCheck, CalendarDays } from "lucide-react";
+import ClassesTaught from "@/components/admin/ClassesTaught";
+import { ClipboardCheck, Wallet } from "lucide-react";
 
 const TABS = [
   { key: "attendance", label: "Presenças", icon: ClipboardCheck },
-  { key: "agenda", label: "Minha agenda", icon: CalendarDays },
+  { key: "taught", label: "Aulas dadas", icon: Wallet },
 ];
 
 export default function TeacherDashboard() {
@@ -28,7 +28,7 @@ export default function TeacherDashboard() {
       <div className="mb-6">
         <h1 className="font-heading text-lg font-semibold">Área da Professora</h1>
         <p className="mt-1 text-muted-foreground text-xs">
-          Marque presenças e gerencie as aulas em que você está cadastrada.
+          Marque presenças e confira as aulas que você deu no mês.
         </p>
       </div>
 
@@ -52,11 +52,7 @@ export default function TeacherDashboard() {
       {activeTab === "attendance" ? (
         <AttendanceBySchedule instructorFilter={isAdmin ? "" : myName} />
       ) : (
-        <ManageSessions
-          instructorFilter={isAdmin && !isTeacher ? "" : myName}
-          canCreate={false}
-          title="Minhas aulas"
-        />
+        <ClassesTaught onlyTeacherId={isAdmin ? null : user?.id} />
       )}
     </div>
   );

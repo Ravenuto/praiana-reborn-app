@@ -120,6 +120,13 @@
       "when": 1795714363934,
       "tag": "0016_student_cancel_admin_created_booking",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795781342827,
+      "tag": "0017_teacher_hourly_rates",
+      "breakpoints": true
     }
   ]
 }

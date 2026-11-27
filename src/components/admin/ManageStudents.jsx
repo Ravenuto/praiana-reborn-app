@@ -51,7 +51,7 @@ export default function ManageStudents() {
   const [adminForm, setAdminForm] = useState({ name: "", email: "" });
   const [savingAdmin, setSavingAdmin] = useState(false);
   const [teacherDialog, setTeacherDialog] = useState(false);
-  const [teacherForm, setTeacherForm] = useState({ name: "", email: "" });
+  const [teacherForm, setTeacherForm] = useState({ name: "", email: "", rate: "40,00" });
   const [savingTeacher, setSavingTeacher] = useState(false);
   const [sendingLinkId, setSendingLinkId] = useState(null);
   const [staffEdit, setStaffEdit] = useState(null);
@@ -232,9 +232,12 @@ export default function ManageStudents() {
   const handleAddTeacher = async () => {
     const email = (teacherForm.email || "").trim().toLowerCase();
     if (!teacherForm.name || !email.includes("@")) return toast.error("Nome e email válidos são obrigatórios");
+    const rateCents = Math.round(Number(String(teacherForm.rate || "40").replace(",", ".")) * 100);
+    if (!Number.isFinite(rateCents) || rateCents < 0) return toast.error("Valor da hora/aula inválido");
     setSavingTeacher(true);
     try {
       const existing = await base44.entities.User.filter({ email });
+      let teacherId = existing[0]?.id;
       if (existing.length > 0) {
         await base44.entities.User.update(existing[0].id, { role: "teacher", is_teacher: true, is_active: true });
         toast.success("Acesso de professora concedido.");
@@ -248,9 +251,18 @@ export default function ManageStudents() {
           must_change_password: true,
           data: { full_name: teacherForm.name },
         });
+        teacherId = created.id;
         toast.success(`Professora cadastrada. Convite solicitado para ${created.email}.`);
       }
-      setTeacherForm({ name: "", email: "" });
+      if (teacherId) {
+        const { error: rateError } = await supabase.from("financial_forecast_entries").upsert(
+          { student_id: teacherId, kind: "teacher_rate", month: "2000-01-01", amount_cents: rateCents, installments: 1, plan_key: "" },
+          { onConflict: "student_id,kind,month" },
+        );
+        if (rateError) toast.error("Professora salva, mas o valor da hora/aula não foi gravado.");
+        queryClient.invalidateQueries({ queryKey: ["teacherRates"] });
+      }
+      setTeacherForm({ name: "", email: "", rate: "40,00" });
       setTeacherDialog(false);
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["teachersList"] });
@@ -1037,6 +1049,16 @@ export default function ManageStudents() {
                 value={teacherForm.email}
                 onChange={(e) => setTeacherForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="email@exemplo.com"
+                className="w-full min-w-0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Valor da hora/aula (R$)</Label>
+              <Input
+                inputMode="decimal"
+                value={teacherForm.rate}
+                onChange={(e) => setTeacherForm((f) => ({ ...f, rate: e.target.value }))}
+                placeholder="40,00"
                 className="w-full min-w-0"
               />
             </div>
