@@ -20,6 +20,8 @@ import { ptBR } from "date-fns/locale";
 import { addDaysISO, getDurationDays, daysLeft, durationLabel, getInstallments, planEndDate } from "@/lib/planDuration";
 import { pausedDays, pauseToday, daysBetweenISO } from "@/lib/planPause";
 import { promoteFromWaitlist } from "@/lib/waitlist";
+import { rateFor } from "@/lib/classesTaught";
+const brl = (c) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const safeFormat = (value, fmt, opts) => {
   if (!value) return "—";
@@ -80,6 +82,17 @@ export default function ManageStudents() {
       return normalUsers;
     },
   });
+
+  const { data: teacherRates = [] } = useQuery({
+    queryKey: ["teacherRates", null],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("financial_forecast_entries").select("*").eq("kind", "teacher_rate");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+  const ownerId = users.find((u) => (u.email || "").toLowerCase() === ADMIN_EMAIL)?.id;
+  const teacherRate = (t) => rateFor(t.id, ownerId, teacherRates);
 
   const planInfo = Object.fromEntries(
     plans.map((p) => [p.key, { label: p.label, credits: p.credits }])
@@ -295,16 +308,32 @@ export default function ManageStudents() {
     if (!name) return toast.error("Informe o nome");
     setSavingStaff(true);
     try {
+      let rateCents = null;
+      if (staffEdit.rate != null) {
+        rateCents = Math.round(Number(String(staffEdit.rate).replace(",", ".")) * 100);
+        if (!String(staffEdit.rate).trim() || !Number.isFinite(rateCents) || rateCents < 0) {
+          setSavingStaff(false);
+          return toast.error("Valor da hora/aula inválido");
+        }
+      }
       await base44.entities.User.update(staffEdit.id, {
         full_name: name,
         data: { full_name: name },
       });
+      if (rateCents !== null) {
+        const { error: rateError } = await supabase.from("financial_forecast_entries").upsert(
+          { student_id: staffEdit.id, kind: "teacher_rate", month: "2000-01-01", amount_cents: rateCents, installments: 1, plan_key: "" },
+          { onConflict: "student_id,kind,month" },
+        );
+        if (rateError) throw rateError;
+        queryClient.invalidateQueries({ queryKey: ["teacherRates"] });
+      }
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       queryClient.invalidateQueries({ queryKey: ["teachersList"] });
       setStaffEdit(null);
-      toast.success("Nome atualizado.");
+      toast.success(rateCents !== null ? "Dados da professora atualizados." : "Nome atualizado.");
     } catch {
-      toast.error("Erro ao salvar nome");
+      toast.error("Erro ao salvar");
     }
     setSavingStaff(false);
   };
@@ -1009,9 +1038,10 @@ export default function ManageStudents() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{t.email}</p>
+                  <p className="text-xs font-medium text-primary mt-0.5">{brl(teacherRate(t))} / aula</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Editar nome" onClick={() => setStaffEdit({ ...t, full_name: t.full_name || "" })}>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Editar professora" onClick={() => setStaffEdit({ ...t, full_name: t.full_name || "", rate: (teacherRate(t) / 100).toFixed(2).replace(".", ",") })}>
                     <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Enviar link para redefinir senha" onClick={() => handleResetPassword(t)}>
@@ -1072,7 +1102,7 @@ export default function ManageStudents() {
       <Dialog open={!!staffEdit} onOpenChange={(o) => !o && setStaffEdit(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar nome</DialogTitle>
+            <DialogTitle>{staffEdit?.rate != null ? "Editar professora" : "Editar nome"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
@@ -1085,6 +1115,18 @@ export default function ManageStudents() {
               />
             </div>
             <p className="text-xs text-muted-foreground">{staffEdit?.email}</p>
+            {staffEdit?.rate != null && (
+              <div className="space-y-1.5">
+                <Label>Valor da hora/aula (R$)</Label>
+                <Input
+                  inputMode="decimal"
+                  value={staffEdit.rate}
+                  onChange={(e) => setStaffEdit((d) => ({ ...d, rate: e.target.value }))}
+                  placeholder="40,00"
+                  className="w-full min-w-0"
+                />
+              </div>
+            )}
             <Button className="w-full" onClick={handleSaveStaff} disabled={savingStaff}>
               {savingStaff ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
             </Button>
